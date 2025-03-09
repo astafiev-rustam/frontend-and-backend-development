@@ -9,124 +9,201 @@
 
 ---
 
-### **Практическое занятие 11: Реализация корзины**
-
-#### **Введение**
-На прошлом занятии мы добавили фильтрацию, сортировку и поиск товаров, а также улучшили интерфейс с помощью анимаций. Сегодня мы реализуем функциональность корзины, которая позволит пользователям добавлять товары в корзину, удалять их и видеть общую стоимость.
+Привет! Давайте доработаем приложение из третьего занятия, добавив переключение между светлой и темной темой с сохранением состояния, локальное кэширование корзины и улучшение интерфейса. Вот полный текст практического занятия №4.
 
 ---
 
-#### **Шаг 1: Создание слайса для корзины**
-Для начала мы создадим новый слайс для управления состоянием корзины. Этот слайс будет содержать список товаров в корзине и общую стоимость.
+### **Практическое занятие 4: Завершение разработки приложения**
 
-Создадим файл `src/features/cartSlice.js`. В этом файле определим начальное состояние корзины и создадим редьюсеры для добавления и удаления товаров.
+#### **Введение**
+На прошлом занятии мы реализовали функциональность корзины, включая добавление и удаление товаров, а также отображение общей стоимости. Сегодня мы завершим разработку приложения, добавив:
+1. Переключение между светлой и темной темой с сохранением состояния.
+2. Локальное кэширование корзины.
+3. Улучшение интерфейса и адаптивность.
 
-```javascript
-import { createSlice } from '@reduxjs/toolkit';
+---
 
-const cartSlice = createSlice({
-  name: 'cart',
-  initialState: {
-    items: [],
-    total: 0,
-  },
-  reducers: {
-    addToCart: (state, action) => {
-      const existingItem = state.items.find((item) => item.id === action.payload.id);
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        state.items.push({ ...action.payload, quantity: 1 });
-      }
-      state.total += action.payload.price;
+### **Шаг 1: Переключение между светлой и темной темой**
+
+#### **1.1. Создание контекста для темы**
+Создадим файл `src/context/ThemeContext.jsx` для управления темой:
+
+```jsx
+import React, { createContext, useState, useEffect } from 'react';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+export const ThemeContext = createContext();
+
+export const ThemeContextProvider = ({ children }) => {
+  const [mode, setMode] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    localStorage.setItem('theme', mode);
+  }, [mode]);
+
+  const toggleTheme = () => {
+    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+  };
+
+  const theme = createTheme({
+    palette: {
+      mode,
     },
-    removeFromCart: (state, action) => {
-      const itemToRemove = state.items.find((item) => item.id === action.payload.id);
-      if (itemToRemove.quantity > 1) {
-        itemToRemove.quantity -= 1;
-      } else {
-        state.items = state.items.filter((item) => item.id !== action.payload.id);
-      }
-      state.total -= action.payload.price;
-    },
-    clearCart: (state) => {
-      state.items = [];
-      state.total = 0;
-    },
-  },
-});
+  });
 
-export const { addToCart, removeFromCart, clearCart } = cartSlice.actions;
-export default cartSlice.reducer;
+  return (
+    <ThemeContext.Provider value={{ toggleTheme, mode }}>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+    </ThemeContext.Provider>
+  );
+};
+```
+
+#### **1.2. Интеграция темы в приложение**
+Обновим файл `src/main.jsx`, чтобы обернуть приложение в `ThemeContextProvider`:
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './store/store';
+import { ThemeContextProvider } from './context/ThemeContext';
+import { CssBaseline } from '@mui/material';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <ThemeContextProvider>
+        <CssBaseline />
+        <App />
+      </ThemeContextProvider>
+    </PersistGate>
+  </Provider>
+);
+```
+
+#### **1.3. Добавление переключателя темы**
+Обновим файл `src/App.jsx`, чтобы добавить переключатель темы:
+
+```jsx
+import React, { useContext } from 'react';
+import { Container, Typography, Grid, IconButton, useTheme } from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import ProductList from './components/ProductList';
+import Cart from './components/Cart';
+import { ThemeContext } from './context/ThemeContext';
+
+function App() {
+  const theme = useTheme();
+  const { toggleTheme } = useContext(ThemeContext);
+
+  return (
+    <Container>
+      <Typography variant="h3" component="h1" align="center" sx={{ my: 4 }}>
+        Интернет-магазин
+      </Typography>
+      <IconButton onClick={toggleTheme} sx={{ position: 'absolute', top: 16, right: 16 }}>
+        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+      </IconButton>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={9}>
+          <ProductList />
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <Cart />
+        </Grid>
+      </Grid>
+    </Container>
+  );
+}
+
+export default App;
 ```
 
 ---
 
-#### **Шаг 2: Настройка хранилища**
-Теперь мы добавим слайс корзины в хранилище Redux. Обновим файл `src/store/store.js`:
+### **Шаг 2: Локальное кэширование корзины**
+
+#### **2.1. Настройка `redux-persist`**
+Убедитесь, что `redux-persist` настроен правильно. Обновите файл `src/store/store.js`:
 
 ```javascript
 import { configureStore } from '@reduxjs/toolkit';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import productsReducer from '../features/productsSlice';
 import cartReducer from '../features/cartSlice';
+
+const persistConfig = {
+  key: 'root',
+  storage,
+};
+
+const persistedCartReducer = persistReducer(persistConfig, cartReducer);
 
 export const store = configureStore({
   reducer: {
     products: productsReducer,
-    cart: cartReducer,
+    cart: persistedCartReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      },
+    }),
 });
+
+export const persistor = persistStore(store);
 ```
 
 ---
 
-#### **Шаг 3: Создание компонента Cart**
-Теперь мы создадим компонент `Cart`, который будет отображать товары в корзине и общую стоимость.
+### **Шаг 3: Улучшение интерфейса**
 
-Создадим файл `src/components/Cart.jsx`. В этом компоненте мы будем использовать `useSelector` для получения состояния корзины из Redux и отображать список товаров и общую стоимость.
+#### **3.1. Адаптивный интерфейс**
+Обновим файл `src/App.jsx`, чтобы сделать интерфейс адаптивным:
 
 ```jsx
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { removeFromCart, clearCart } from '../features/cartSlice';
-import { Card, CardContent, Typography, Button, List, ListItem, ListItemText } from '@mui/material';
+import React, { useContext } from 'react';
+import { Container, Typography, Grid, IconButton, useTheme } from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import ProductList from './components/ProductList';
+import Cart from './components/Cart';
+import { ThemeContext } from './context/ThemeContext';
 
-const Cart = () => {
-  const dispatch = useDispatch();
-  const { items, total } = useSelector((state) => state.cart);
+function App() {
+  const theme = useTheme();
+  const { toggleTheme } = useContext(ThemeContext);
 
   return (
-    <Card sx={{ maxWidth: 345, margin: 2 }}>
-      <CardContent>
-        <Typography variant="h6">Корзина</Typography>
-        <List>
-          {items.map((item) => (
-            <ListItem key={item.id}>
-              <ListItemText
-                primary={item.title}
-                secondary={`${item.quantity} x ${item.price}$`}
-              />
-              <Button onClick={() => dispatch(removeFromCart(item))}>Удалить</Button>
-            </ListItem>
-          ))}
-        </List>
-        <Typography variant="h6">Общая стоимость: {total}$</Typography>
-        <Button onClick={() => dispatch(clearCart())} variant="contained" color="error">
-          Очистить корзину
-        </Button>
-      </CardContent>
-    </Card>
+    <Container>
+      <Typography variant="h3" component="h1" align="center" sx={{ my: 4 }}>
+        Интернет-магазин
+      </Typography>
+      <IconButton onClick={toggleTheme} sx={{ position: 'absolute', top: 16, right: 16 }}>
+        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+      </IconButton>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={9}>
+          <ProductList />
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <Cart />
+        </Grid>
+      </Grid>
+    </Container>
   );
-};
+}
 
-export default Cart;
+export default App;
 ```
 
----
-
-#### **Шаг 4: Добавление кнопки "Добавить в корзину"**
-Теперь мы добавим кнопку "Добавить в корзину" в компонент `ProductCard`. При нажатии на эту кнопку товар будет добавляться в корзину.
-
+#### **3.2. Улучшение стилей**
 Обновим файл `src/components/ProductCard.jsx`:
 
 ```jsx
@@ -145,7 +222,7 @@ const ProductCard = ({ product }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card sx={{ maxWidth: 345, margin: 2 }}>
+      <Card sx={{ maxWidth: 345, margin: 2, boxShadow: 3 }}>
         <CardMedia
           component="img"
           height="140"
@@ -159,6 +236,7 @@ const ProductCard = ({ product }) => {
           <Button
             variant="contained"
             onClick={() => dispatch(addToCart(product))}
+            sx={{ mt: 2 }}
           >
             Добавить в корзину
           </Button>
@@ -170,43 +248,6 @@ const ProductCard = ({ product }) => {
 
 export default ProductCard;
 ```
-
----
-
-#### **Шаг 5: Интеграция корзины в приложение**
-Теперь мы добавим компонент `Cart` в основное приложение. Обновим файл `src/App.jsx`:
-
-```jsx
-import React from 'react';
-import { Container, Typography, Grid } from '@mui/material';
-import ProductList from './components/ProductList';
-import Cart from './components/Cart';
-
-function App() {
-  return (
-    <Container>
-      <Typography variant="h3" component="h1" align="center" sx={{ my: 4 }}>
-        Интернет-магазин
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={9}>
-          <ProductList />
-        </Grid>
-        <Grid item xs={3}>
-          <Cart />
-        </Grid>
-      </Grid>
-    </Container>
-  );
-}
-
-export default App;
-```
-
----
-
-#### **Шаг 6: Улучшение интерфейса**
-Чтобы сделать наше приложение более привлекательным, мы добавим анимации при добавлении товаров в корзину. Для этого мы будем использовать библиотеку `framer-motion`.
 
 Обновим файл `src/components/Cart.jsx`:
 
@@ -222,7 +263,7 @@ const Cart = () => {
   const { items, total } = useSelector((state) => state.cart);
 
   return (
-    <Card sx={{ maxWidth: 345, margin: 2 }}>
+    <Card sx={{ maxWidth: '100%', margin: 2, boxShadow: 3 }}>
       <CardContent>
         <Typography variant="h6">Корзина</Typography>
         <List>
@@ -244,7 +285,7 @@ const Cart = () => {
           ))}
         </List>
         <Typography variant="h6">Общая стоимость: {total}$</Typography>
-        <Button onClick={() => dispatch(clearCart())} variant="contained" color="error">
+        <Button onClick={() => dispatch(clearCart())} variant="contained" color="error" sx={{ mt: 2 }}>
           Очистить корзину
         </Button>
       </CardContent>
@@ -257,5 +298,8 @@ export default Cart;
 
 ---
 
-#### **Заключение**
-На этом занятии мы реализовали функциональность корзины, включая добавление и удаление товаров, а также отображение общей стоимости. В следующий раз мы добавим возможность сохранения состояния корзины в локальном хранилище браузера и реализуем поддержку темной/светлой темы.
+### **Итог**
+Теперь приложение имеет:
+1. Переключение между светлой и темной темой с сохранением состояния.
+2. Локальное кэширование корзины.
+3. Улучшенный и адаптивный интерфейс.

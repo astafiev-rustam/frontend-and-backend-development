@@ -9,7 +9,7 @@ const Cart = () => {
   const { items, total } = useSelector((state) => state.cart);
 
   return (
-    <Card sx={{ maxWidth: 345, margin: 2 }}>
+    <Card sx={{ maxWidth: '100%', margin: 2, boxShadow: 3 }}>
       <CardContent>
         <Typography variant="h6">Корзина</Typography>
         <List>
@@ -31,7 +31,7 @@ const Cart = () => {
           ))}
         </List>
         <Typography variant="h6">Общая стоимость: {total}$</Typography>
-        <Button onClick={() => dispatch(clearCart())} variant="contained" color="error">
+        <Button onClick={() => dispatch(clearCart())} variant="contained" color="error" sx={{ mt: 2 }}>
           Очистить корзину
         </Button>
       </CardContent>
