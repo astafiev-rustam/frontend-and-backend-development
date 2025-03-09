@@ -1,0 +1,274 @@
+{
+    "products": [
+      {
+        "id": 1,
+        "title": "Ноутбук ASUS VivoBook 15",
+        "price": 45000,
+        "description": "15.6 дюймов, Intel Core i5, 8 ГБ ОЗУ, 512 ГБ SSD",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.7
+      },
+      {
+        "id": 2,
+        "title": "Смартфон Samsung Galaxy S21",
+        "price": 60000,
+        "description": "6.2 дюймов, 128 ГБ, Phantom Gray",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.8
+      },
+      {
+        "id": 3,
+        "title": "Наушники Sony WH-1000XM4",
+        "price": 25000,
+        "description": "Беспроводные, шумоподавление, черный",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.9
+      },
+      {
+        "id": 4,
+        "title": "Фитнес-браслет Xiaomi Mi Band 6",
+        "price": 3000,
+        "description": "Цветной AMOLED-экран, черный",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.6
+      },
+      {
+        "id": 5,
+        "title": "Планшет Apple iPad Air",
+        "price": 55000,
+        "description": "10.9 дюймов, 64 ГБ, Space Gray",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.8
+      },
+      {
+        "id": 6,
+        "title": "Фотоаппарат Canon EOS R6",
+        "price": 150000,
+        "description": "Зеркальный, 20 Мп, 4K видео",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.9
+      },
+      {
+        "id": 7,
+        "title": "Монитор Dell UltraSharp 27",
+        "price": 40000,
+        "description": "27 дюймов, 4K, IPS",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.7
+      },
+      {
+        "id": 8,
+        "title": "Игровая мышь Logitech G502",
+        "price": 5000,
+        "description": "11 программируемых кнопок, RGB",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.8
+      },
+      {
+        "id": 9,
+        "title": "Клавиатура Keychron K6",
+        "price": 7000,
+        "description": "Механическая, Bluetooth, 65%",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.7
+      },
+      {
+        "id": 10,
+        "title": "Колонка JBL Flip 5",
+        "price": 8000,
+        "description": "Портативная, водонепроницаемая, синий",
+        "image": "https://via.placeholder.com/150",
+        "category": "electronics",
+        "rating": 4.6
+      },
+      {
+        "id": 11,
+        "title": "Футболка мужская",
+        "price": 1500,
+        "description": "Хлопок, черный",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.5
+      },
+      {
+        "id": 12,
+        "title": "Джинсы женские",
+        "price": 3000,
+        "description": "Скинни, синий",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.6
+      },
+      {
+        "id": 13,
+        "title": "Куртка зимняя",
+        "price": 10000,
+        "description": "Пуховая, черный",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.7
+      },
+      {
+        "id": 14,
+        "title": "Кроссовки Nike Air Max",
+        "price": 8000,
+        "description": "Беговые, белый",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.8
+      },
+      {
+        "id": 15,
+        "title": "Рюкзак Herschel",
+        "price": 5000,
+        "description": "Повседневный, синий",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.6
+      },
+      {
+        "id": 16,
+        "title": "Часы Casio G-Shock",
+        "price": 12000,
+        "description": "Ударопрочные, черный",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.7
+      },
+      {
+        "id": 17,
+        "title": "Очки Ray-Ban",
+        "price": 9000,
+        "description": "Солнцезащитные, черный",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.8
+      },
+      {
+        "id": 18,
+        "title": "Шапка вязаная",
+        "price": 1000,
+        "description": "Шерсть, серый",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.5
+      },
+      {
+        "id": 19,
+        "title": "Платье вечернее",
+        "price": 7000,
+        "description": "Шелк, черный",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.7
+      },
+      {
+        "id": 20,
+        "title": "Сумка женская",
+        "price": 6000,
+        "description": "Кожа, бежевый",
+        "image": "https://via.placeholder.com/150",
+        "category": "clothing",
+        "rating": 4.6
+      },
+      {
+        "id": 21,
+        "title": "Книга '1984'",
+        "price": 500,
+        "description": "Джордж Оруэлл",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.9
+      },
+      {
+        "id": 22,
+        "title": "Книга 'Мастер и Маргарита'",
+        "price": 600,
+        "description": "Михаил Булгаков",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.8
+      },
+      {
+        "id": 23,
+        "title": "Книга 'Гарри Поттер и Философский камень'",
+        "price": 700,
+        "description": "Джоан Роулинг",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.9
+      },
+      {
+        "id": 24,
+        "title": "Книга 'Война и мир'",
+        "price": 800,
+        "description": "Лев Толстой",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.7
+      },
+      {
+        "id": 25,
+        "title": "Книга 'Преступление и наказание'",
+        "price": 550,
+        "description": "Федор Достоевский",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.8
+      },
+      {
+        "id": 26,
+        "title": "Книга 'Маленький принц'",
+        "price": 400,
+        "description": "Антуан де Сент-Экзюпери",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.9
+      },
+      {
+        "id": 27,
+        "title": "Книга 'Алхимик'",
+        "price": 650,
+        "description": "Пауло Коэльо",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.7
+      },
+      {
+        "id": 28,
+        "title": "Книга 'Три товарища'",
+        "price": 750,
+        "description": "Эрих Мария Ремарк",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.8
+      },
+      {
+        "id": 29,
+        "title": "Книга 'Тень горы'",
+        "price": 900,
+        "description": "Грегори Дэвид Робертс",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.7
+      },
+      {
+        "id": 30,
+        "title": "Книга 'Шантарам'",
+        "price": 850,
+        "description": "Грегори Дэвид Робертс",
+        "image": "https://via.placeholder.com/150",
+        "category": "books",
+        "rating": 4.8
+      }
+    ]
+  }
