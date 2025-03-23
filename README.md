@@ -9,293 +9,117 @@
 
 ---
 
-### **Практическое занятие 12: Завершение разработки приложения**
-
-#### **Введение**
-На прошлом занятии мы реализовали функциональность корзины, включая добавление и удаление товаров, а также отображение общей стоимости. Сегодня мы завершим разработку приложения, добавив:
-1. Переключение между светлой и темной темой с сохранением состояния.
-2. Локальное кэширование корзины.
-3. Улучшение интерфейса и адаптивность.
+### **Практическое занятие 13: Процесс аутентификации и токены**
 
 ---
 
-### **Шаг 1: Переключение между светлой и темной темой**
+#### Введение
 
-#### **1.1. Создание контекста для темы**
-Создадим файл `src/context/ThemeContext.jsx` для управления темой:
+Сегодня мы погрузимся в одну из самых важных тем в разработке современных веб-приложений — процесс аутентификации и использование токенов. Аутентификация — это фундаментальный механизм, который позволяет системе идентифицировать пользователя и предоставлять ему доступ к определенным ресурсам. Без надежной аутентификации невозможно построить безопасное и функциональное приложение, будь это социальная сеть, интернет-магазин или корпоративный портал.
 
-```jsx
-import React, { createContext, useState, useEffect } from 'react';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-
-export const ThemeContext = createContext();
-
-export const ThemeContextProvider = ({ children }) => {
-  const [mode, setMode] = useState(localStorage.getItem('theme') || 'light');
-
-  useEffect(() => {
-    localStorage.setItem('theme', mode);
-  }, [mode]);
-
-  const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
-  };
-
-  const theme = createTheme({
-    palette: {
-      mode,
-    },
-  });
-
-  return (
-    <ThemeContext.Provider value={{ toggleTheme, mode }}>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
-    </ThemeContext.Provider>
-  );
-};
-```
-
-#### **1.2. Интеграция темы в приложение**
-Обновим файл `src/main.jsx`, чтобы обернуть приложение в `ThemeContextProvider`:
-
-```jsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor } from './store/store';
-import { ThemeContextProvider } from './context/ThemeContext';
-import { CssBaseline } from '@mui/material';
-import App from './App';
-
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
-      <ThemeContextProvider>
-        <CssBaseline />
-        <App />
-      </ThemeContextProvider>
-    </PersistGate>
-  </Provider>
-);
-```
-
-#### **1.3. Добавление переключателя темы**
-Обновим файл `src/App.jsx`, чтобы добавить переключатель темы:
-
-```jsx
-import React, { useContext } from 'react';
-import { Container, Typography, Grid, IconButton, useTheme } from '@mui/material';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import ProductList from './components/ProductList';
-import Cart from './components/Cart';
-import { ThemeContext } from './context/ThemeContext';
-
-function App() {
-  const theme = useTheme();
-  const { toggleTheme } = useContext(ThemeContext);
-
-  return (
-    <Container>
-      <Typography variant="h3" component="h1" align="center" sx={{ my: 4 }}>
-        Интернет-магазин
-      </Typography>
-      <IconButton onClick={toggleTheme} sx={{ position: 'absolute', top: 16, right: 16 }}>
-        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-      </IconButton>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={9}>
-          <ProductList />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Cart />
-        </Grid>
-      </Grid>
-    </Container>
-  );
-}
-
-export default App;
-```
+Токены, в свою очередь, стали неотъемлемой частью современных систем аутентификации. Они заменяют устаревшие подходы, такие как хранение состояния на сервере, и предлагают более гибкие и безопасные решения. В этом занятии мы разберем, что такое аутентификация, как она работает, и почему токены стали таким популярным инструментом. Мы также рассмотрим примеры использования токенов и их роль в обеспечении безопасности.
 
 ---
 
-### **Шаг 2: Локальное кэширование корзины**
+#### Что такое аутентификация?
 
-#### **2.1. Настройка `redux-persist`**
-Убедитесь, что `redux-persist` настроен правильно. Обновите файл `src/store/store.js`:
+Аутентификация — это процесс проверки подлинности пользователя. Проще говоря, это способ убедиться, что пользователь действительно тот, за кого себя выдает. Например, когда вы вводите логин и пароль на сайте, система проверяет, совпадают ли эти данные с теми, что хранятся в базе данных. Если данные верны, пользователь считается аутентифицированным, и ему предоставляется доступ к определенным функциям или ресурсам.
+
+Важно не путать аутентификацию с авторизацией. Аутентификация отвечает на вопрос "кто вы?", а авторизация — "что вам разрешено?". Например, после того как пользователь успешно аутентифицировался, система может проверить его права доступа к определенным разделам сайта или функциям приложения.
+
+---
+
+#### Основные методы аутентификации
+
+Исторически первым и самым распространенным методом аутентификации является использование логина и пароля. Пользователь создает учетную запись, указывая уникальный логин и пароль, которые затем хранятся в базе данных. При каждом входе система сравнивает введенные данные с теми, что хранятся в базе. Если они совпадают, доступ предоставляется.
+
+Однако у этого метода есть существенные недостатки. Во-первых, пользователи часто выбирают простые пароли, которые легко взломать. Во-вторых, пароли могут быть украдены в результате утечек данных или фишинговых атак. В-третьих, хранение паролей на сервере требует соблюдения строгих мер безопасности, таких как хеширование и использование "соли".
+
+Чтобы решить эти проблемы, были разработаны более сложные методы аутентификации, такие как сессии и токены. Сессии предполагают хранение состояния на сервере. После успешной аутентификации сервер создает сессию и сохраняет ее идентификатор в куках пользователя. При каждом последующем запросе сервер проверяет куки и идентифицирует пользователя. Этот метод более безопасен, чем простое хранение паролей, но он имеет свои ограничения, особенно в контексте масштабируемости. Хранение сессий на сервере требует значительных ресурсов, особенно если приложение обслуживает миллионы пользователей.
+
+Токены, в свою очередь, предлагают более гибкое и масштабируемое решение. Токен — это строка данных, которая содержит информацию о пользователе и может быть проверена сервером без необходимости хранения состояния. После успешной аутентификации сервер генерирует токен и отправляет его клиенту. Клиент сохраняет токен и отправляет его с каждым запросом к защищенным ресурсам. Сервер проверяет токен и, если он валиден, предоставляет доступ.
+
+---
+
+#### Что такое токены и как они работают?
+
+Токен — это цифровой ключ, который подтверждает подлинность пользователя. Он может быть представлен в виде строки, которая содержит закодированную информацию о пользователе, такую как его идентификатор, роль или срок действия токена. Токены могут быть разных типов, но их общая цель — упростить процесс аутентификации и сделать его более безопасным.
+
+Одним из самых популярных типов токенов является JWT (JSON Web Token). JWT состоит из трех частей: заголовка, полезной нагрузки и подписи. Заголовок содержит информацию о типе токена и алгоритме шифрования. Полезная нагрузка содержит данные о пользователе, такие как его идентификатор или роль. Подпись используется для проверки подлинности токена.
+
+Пример JWT:
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYzMzAyNzIyMn0.5f5z5x5y5z5x5y5z5x5y5z5x5y5z5x5y5z5x5y5z
+```
+
+Когда пользователь успешно аутентифицируется, сервер генерирует JWT и отправляет его клиенту. Клиент сохраняет токен (например, в localStorage или куках) и отправляет его с каждым запросом к защищенным ресурсам. Сервер проверяет подпись токена и, если она верна, предоставляет доступ.
+
+---
+
+#### Пример реализации аутентификации с токенами
+
+Давайте рассмотрим простой пример реализации аутентификации с использованием JWT на Node.js. Для начала установим необходимые зависимости:
+
+```bash
+npm install express jsonwebtoken body-parser
+```
+
+Теперь создадим базовый сервер:
 
 ```javascript
-import { configureStore } from '@reduxjs/toolkit';
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import productsReducer from '../features/productsSlice';
-import cartReducer from '../features/cartSlice';
+const express = require('express');
+const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 
-const persistConfig = {
-  key: 'root',
-  storage,
-};
+const app = express();
+const PORT = 3000;
+const SECRET_KEY = 'your_secret_key';
 
-const persistedCartReducer = persistReducer(persistConfig, cartReducer);
+app.use(bodyParser.json());
 
-export const store = configureStore({
-  reducer: {
-    products: productsReducer,
-    cart: persistedCartReducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
-      },
-    }),
+let users = [];
+
+app.post('/register', (req, res) => {
+    const { username, password } = req.body;
+
+    if (users.find(u => u.username === username)) {
+        return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const newUser = { id: users.length + 1, username, password };
+    users.push(newUser);
+
+    res.status(201).json({ message: 'User registered successfully' });
 });
 
-export const persistor = persistStore(store);
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    const user = users.find(u => u.username === username && u.password === password);
+
+    if (user) {
+        const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
+        res.json({ token });
+    } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 ```
+
+В этом примере мы создали два маршрута: `/register` для регистрации пользователей и `/login` для аутентификации. После успешной аутентификации сервер генерирует JWT и отправляет его клиенту.
 
 ---
 
-### **Шаг 3: Улучшение интерфейса**
+#### Советы по безопасности
 
-#### **3.1. Адаптивный интерфейс**
-Обновим файл `src/App.jsx`, чтобы сделать интерфейс адаптивным:
-
-```jsx
-import React, { useContext } from 'react';
-import { Container, Typography, Grid, IconButton, useTheme } from '@mui/material';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import ProductList from './components/ProductList';
-import Cart from './components/Cart';
-import { ThemeContext } from './context/ThemeContext';
-
-function App() {
-  const theme = useTheme();
-  const { toggleTheme } = useContext(ThemeContext);
-
-  return (
-    <Container>
-      <Typography variant="h3" component="h1" align="center" sx={{ my: 4 }}>
-        Интернет-магазин
-      </Typography>
-      <IconButton onClick={toggleTheme} sx={{ position: 'absolute', top: 16, right: 16 }}>
-        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-      </IconButton>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={9}>
-          <ProductList />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Cart />
-        </Grid>
-      </Grid>
-    </Container>
-  );
-}
-
-export default App;
-```
-
-#### **3.2. Улучшение стилей**
-Обновим файл `src/components/ProductCard.jsx`:
-
-```jsx
-import React from 'react';
-import { Card, CardContent, CardMedia, Typography, Button } from '@mui/material';
-import { motion } from 'framer-motion';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../features/cartSlice';
-
-const ProductCard = ({ product }) => {
-  const dispatch = useDispatch();
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card sx={{ maxWidth: 345, margin: 2, boxShadow: 3 }}>
-        <CardMedia
-          component="img"
-          height="140"
-          image={product.image}
-          alt={product.title}
-        />
-        <CardContent>
-          <Typography variant="h6">{product.title}</Typography>
-          <Typography variant="body2">{product.description}</Typography>
-          <Typography variant="h5">{product.price}$</Typography>
-          <Button
-            variant="contained"
-            onClick={() => dispatch(addToCart(product))}
-            sx={{ mt: 2 }}
-          >
-            Добавить в корзину
-          </Button>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-};
-
-export default ProductCard;
-```
-
-Обновим файл `src/components/Cart.jsx`:
-
-```jsx
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { removeFromCart, clearCart } from '../features/cartSlice';
-import { Card, CardContent, Typography, Button, List, ListItem, ListItemText } from '@mui/material';
-import { motion } from 'framer-motion';
-
-const Cart = () => {
-  const dispatch = useDispatch();
-  const { items, total } = useSelector((state) => state.cart);
-
-  return (
-    <Card sx={{ maxWidth: '100%', margin: 2, boxShadow: 3 }}>
-      <CardContent>
-        <Typography variant="h6">Корзина</Typography>
-        <List>
-          {items.map((item) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <ListItem>
-                <ListItemText
-                  primary={item.title}
-                  secondary={`${item.quantity} x ${item.price}$`}
-                />
-                <Button onClick={() => dispatch(removeFromCart(item))}>Удалить</Button>
-              </ListItem>
-            </motion.div>
-          ))}
-        </List>
-        <Typography variant="h6">Общая стоимость: {total}$</Typography>
-        <Button onClick={() => dispatch(clearCart())} variant="contained" color="error" sx={{ mt: 2 }}>
-          Очистить корзину
-        </Button>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default Cart;
-```
+При работе с аутентификацией и токенами важно соблюдать определенные меры безопасности. Во-первых, всегда используйте HTTPS для защиты данных в transit. Во-вторых, ограничивайте срок действия токенов. Например, access токены могут иметь короткий срок действия (например, 1 час), а refresh токены — более длительный. В-третьих, никогда не храните секретные ключи в коде приложения. Используйте переменные окружения или специализированные сервисы для хранения секретов.
 
 ---
 
-### **Итог**
-Теперь приложение имеет:
-1. Переключение между светлой и темной темой с сохранением состояния.
-2. Локальное кэширование корзины.
-3. Улучшенный и адаптивный интерфейс.
+#### Заключение
+
+Сегодня мы изучили основы аутентификации и познакомились с токенами. Вы узнали, как работает процесс аутентификации, какие методы аутентификации существуют, и почему токены стали таким популярным инструментом. Мы также рассмотрели пример реализации аутентификации с использованием JWT токенов.
