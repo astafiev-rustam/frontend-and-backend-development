@@ -9,333 +9,363 @@
 
 ---
 
-### **Практическое занятие 14: JWT токены**
+### **Практическое занятие 15: Кэширование и файлы cookie**
+
+**Введение**  
+Веб-приложения часто работают с данными, которые не должны загружаться заново при каждом запросе. Например, стили сайта, логотип или настройки пользователя могут сохраняться на стороне клиента или сервера, чтобы ускорить загрузку и улучшить пользовательский опыт. Два ключевых механизма для этого — **кэширование** и **файлы cookie**.  
+
+Кэширование позволяет временно хранить данные (например, статические файлы) на клиенте или сервере, чтобы сократить количество запросов к бэкенду. Cookies же чаще используются для хранения небольших фрагментов информации, связанных с пользователем: токенов авторизации, предпочтений языка или данных сессии.  
+
+**Файлы cookie: основы**  
+Cookie — это небольшие текстовые данные (до 4 КБ), которые сервер отправляет браузеру, а браузер автоматически прикрепляет к последующим запросам. Они могут содержать, например, идентификатор сессии или настройки темы интерфейса.  
+
+В JavaScript с cookie можно работать через свойство `document.cookie`. Например, чтобы установить cookie с именем `theme` и значением `dark`, можно написать:  
+
+```javascript
+document.cookie = "theme=dark; path=/; max-age=3600";  
+```  
+
+Здесь `path=/` означает, что cookie доступен на всех страницах сайта, а `max-age=3600` устанавливает срок жизни в 1 час.  
+
+Если нужно прочитать все cookies, можно обратиться к `document.cookie`:  
+
+```javascript
+console.log(document.cookie); // Выведет строку вида "theme=dark; sessionId=abc123"  
+```  
+
+Для удаления cookie достаточно установить его с истёкшим сроком:  
+
+```javascript
+document.cookie = "theme=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";  
+```  
+
+**Безопасность cookie**  
+По умолчанию cookie уязвимы к атакам, например, XSS (кражей через JavaScript). Чтобы снизить риски, используют флаги:  
+- `HttpOnly` — запрещает доступ к cookie из JavaScript (защита от XSS).  
+- `Secure` — передача только по HTTPS.  
+- `SameSite` — запрещает отправку cookie в запросах с других сайтов (защита от CSRF).  
+
+Пример cookie, защищённого от XSS:  
+
+```javascript
+// Серверный код (Node.js + Express)  
+res.cookie('sessionId', 'abc123', {  
+  httpOnly: true,  
+  secure: true,  
+  sameSite: 'strict'  
+});  
+```  
+
+**Кэширование на стороне клиента**  
+Браузер может кэшировать статические файлы (CSS, JS, изображения), чтобы не загружать их повторно. За это отвечают HTTP-заголовки, которые сервер отправляет с ответом:  
+- `Cache-Control: max-age=3600` — кэшировать на 1 час.  
+- `ETag` — уникальный хэш файла для проверки изменений.  
+
+Пример настройки кэширования в Nginx для статических файлов:  
+
+```nginx
+location /static/ {  
+  expires 1y;  
+  add_header Cache-Control "public";  
+}  
+```  
+
+Если файл изменится, браузер получит новую версию благодаря уникальному URL (например, `/static/app.js?v=2`).  
+
+**Серверное кэширование**  
+Сервер может кэшировать ответы API или часто запрашиваемые данные, чтобы снизить нагрузку на базу данных. Популярное решение — **Redis**.  
+
+Пример кэширования в Node.js с Redis:  
+
+```javascript
+const redis = require('redis');  
+const client = redis.createClient();  
+
+// Пытаемся получить данные из кэша  
+client.get('cached_data', (err, reply) => {  
+  if (reply) {  
+    console.log('Данные из кэша:', reply);  
+  } else {  
+    // Если в кэше пусто, загружаем из БД и сохраняем  
+    const data = fetchDataFromDB();  
+    client.setex('cached_data', 3600, JSON.stringify(data)); // Кэш на 1 час  
+  }  
+});  
+```  
 
 ---
 
-#### Введение
-
-На прошлом занятии мы познакомились с процессом аутентификации и узнали, как токены помогают управлять доступом пользователей. Сегодня мы углубимся в тему JWT (JSON Web Tokens) — одного из самых популярных типов токенов, который широко используется в современных веб-приложениях. Мы разберем, что такое JWT, как они устроены, и как их можно использовать для реализации безопасной аутентификации.
-
-JWT — это мощный инструмент, который позволяет передавать информацию между клиентом и сервером в компактном и безопасном формате. В этом занятии мы изучим структуру JWT, принципы их работы, а также рассмотрим практические примеры использования.
+### **Кросс-платформенный пример: Веб-приложение с кэшированием и cookies**
 
 ---
 
-#### Что такое JWT?
-
-JWT (JSON Web Token) — это стандарт для создания токенов, который позволяет передавать данные между сторонами в виде JSON-объекта. JWT состоит из трех частей: заголовка, полезной нагрузки и подписи. Эти части кодируются в формат Base64 и объединяются через точку, образуя компактную строку.
-
-Пример JWT:
+## **1. Структура проекта**
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTYzMzAyNzIyMn0.5f5z5x5y5z5x5y5z5x5y5z5x5y5z5x5y5z5x5y5z
+project/
+├── server.js         # Бэкенд (Node.js)
+├── cache/            # Файловый кэш API-ответов
+├── public/
+│   ├── index.html    # Фронтенд
+│   ├── script.js
+│   └── styles.css
 ```
 
-**Заголовок (Header):**
-Содержит информацию о типе токена (JWT) и алгоритме шифрования, который используется для создания подписи. Например:
-```json
-{
-  "alg": "HS256",
-  "typ": "JWT"
+---
+
+## **2. Серверная часть (`server.js`)**
+
+```javascript
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const cacheDir = path.join(__dirname, 'cache');
+
+// Создаем папку для кэша, если её нет
+if (!fs.existsSync(cacheDir)) {
+  fs.mkdirSync(cacheDir);
+}
+
+app.use(express.static('public'));
+app.use(express.json());
+app.use(cookieParser());
+
+// Функция для кэширования данных в файлы
+function getCachedData(key, ttlSeconds = 30) {
+  const cacheFile = path.join(cacheDir, `${key}.json`);
+
+  // Если файл существует и не устарел
+  if (fs.existsSync(cacheFile)) {
+    const stats = fs.statSync(cacheFile);
+    const now = new Date().getTime();
+    const fileAge = (now - stats.mtimeMs) / 1000;
+
+    if (fileAge < ttlSeconds) {
+      const cachedData = fs.readFileSync(cacheFile, 'utf-8');
+      return JSON.parse(cachedData);
+    }
+  }
+
+  // Генерируем новые данные
+  const newData = { 
+    items: [1, 2, 3], 
+    timestamp: Date.now(),
+    source: 'Файловый кэш'
+  };
+
+  // Сохраняем в файл
+  fs.writeFileSync(cacheFile, JSON.stringify(newData));
+
+  // Удаляем файл после истечения TTL
+  setTimeout(() => {
+    if (fs.existsSync(cacheFile)) {
+      fs.unlinkSync(cacheFile);
+    }
+  }, ttlSeconds * 1000);
+
+  return newData;
+}
+
+// API для получения данных
+app.get('/api/data', (req, res) => {
+  const data = getCachedData('api_data');
+  res.json(data);
+});
+
+// API для сохранения темы
+app.post('/theme', (req, res) => {
+  const theme = req.body.theme;
+  res.cookie('theme', theme, {
+    maxAge: 86400000, // 1 день
+    httpOnly: true,
+    sameSite: 'strict'
+  });
+  res.sendStatus(200);
+});
+
+app.listen(3000, () => {
+  console.log('Сервер запущен на http://localhost:3000');
+  console.log('Кэш хранится в папке:', cacheDir);
+});
+```
+
+---
+
+## **3. Фронтенд (`public/index.html`)**
+
+```html
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Кэширование без Redis</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Демонстрация кэширования</h1>
+  <div class="controls">
+    <button id="toggle-theme">Сменить тему</button>
+    <button id="refresh-data">Обновить данные</button>
+  </div>
+  <div id="data-container"></div>
+  <script src="/script.js"></script>
+</body>
+</html>
+```
+
+---
+
+## **4. Стили (`public/styles.css`)**
+
+```css
+body {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  transition: background 0.3s, color 0.3s;
+}
+
+body[data-theme="light"] {
+  background: #f5f5f5;
+  color: #333;
+}
+
+body[data-theme="dark"] {
+  background: #222;
+  color: #fff;
+}
+
+button {
+  padding: 8px 16px;
+  margin: 0 10px 10px 0;
+  cursor: pointer;
+}
+
+#data-container {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+body[data-theme="light"] #data-container {
+  background: #fff;
+  border: 1px solid #ddd;
+}
+
+body[data-theme="dark"] #data-container {
+  background: #333;
+  border: 1px solid #444;
 }
 ```
 
-**Полезная нагрузка (Payload):**
-Содержит данные о пользователе, такие как его идентификатор, роль, срок действия токена и другие claims (утверждения). Например:
-```json
-{
-  "userId": 1,
-  "username": "user1",
-  "iat": 1633027222,
-  "exp": 1633030822
+---
+
+## **5. Клиентский скрипт (`public/script.js`)**
+
+```javascript
+// Загрузка темы из cookie
+function loadTheme() {
+  const themeCookie = document.cookie.split('; ')
+    .find(row => row.startsWith('theme='));
+  
+  if (themeCookie) {
+    const theme = themeCookie.split('=')[1];
+    document.documentElement.setAttribute('data-theme', theme);
+  }
 }
+
+// Обновление данных
+async function updateData() {
+  const response = await fetch('/api/data');
+  const data = await response.json();
+  
+  document.getElementById('data-container').innerHTML = `
+    <h3>Данные API</h3>
+    <p><strong>Источник:</strong> ${data.source}</p>
+    <p><strong>Время генерации:</strong> ${new Date(data.timestamp).toLocaleTimeString()}</p>
+    <pre>${JSON.stringify(data.items, null, 2)}</pre>
+  `;
+}
+
+// Смена темы
+document.getElementById('toggle-theme').addEventListener('click', () => {
+  const currentTheme = document.documentElement.getAttribute('data-theme');
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  
+  document.documentElement.setAttribute('data-theme', newTheme);
+  
+  fetch('/theme', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ theme: newTheme })
+  });
+});
+
+// Кнопка обновления данных
+document.getElementById('refresh-data').addEventListener('click', updateData);
+
+// Инициализация
+loadTheme();
+updateData();
+
+// Автообновление каждые 5 секунд
+setInterval(updateData, 5000);
 ```
 
-**Подпись (Signature):**
-Используется для проверки подлинности токена. Подпись создается путем шифрования заголовка и полезной нагрузки с использованием секретного ключа и алгоритма, указанного в заголовке.
-
 ---
 
-#### Как работают JWT?
+## **6. Запуск приложения**
 
-1. **Генерация токена:**
-   После успешной аутентификации сервер создает JWT, подписывает его с использованием секретного ключа и отправляет клиенту.
-
-2. **Использование токена:**
-   Клиент сохраняет JWT (например, в localStorage или куках) и отправляет его с каждым запросом к защищенным ресурсам.
-
-3. **Проверка токена:**
-   Сервер проверяет подпись JWT и, если она верна, извлекает данные из полезной нагрузки. Это позволяет серверу идентифицировать пользователя без необходимости хранения состояния.
-
----
-
-#### Преимущества JWT
-
-1. **Stateless:**
-   JWT не требуют хранения состояния на сервере, что упрощает масштабирование приложения.
-
-2. **Компактность:**
-   JWT представляют собой компактные строки, которые легко передавать по сети.
-
-3. **Гибкость:**
-   JWT могут содержать любые данные, что делает их универсальным инструментом для аутентификации и передачи информации.
-
-4. **Безопасность:**
-   Подпись JWT обеспечивает защиту от подделки токенов.
-
----
-
-#### Пример реализации аутентификации с использованием JWT
-
----
-
-### Шаг 1: Настройка бэкенда
-
-1. Создайте новую директорию для проекта и инициализируйте Node.js проект:
+1. Установите зависимости:
    ```bash
    npm init -y
+   npm install express cookie-parser
    ```
 
-2. Установите необходимые зависимости:
-   ```bash
-   npm install express jsonwebtoken body-parser cors dotenv
-   ```
-   - `cors`: для обработки CORS-запросов (чтобы фронтенд мог взаимодействовать с бэкендом).
-
-3. Создайте файл `.env` и добавьте секретный ключ для JWT:
-   ```
-   JWT_SECRET=your_secret_key
-   ```
-
-4. Создайте файл `server.js` и настройте базовый сервер:
-   ```javascript
-   const express = require('express');
-   const bodyParser = require('body-parser');
-   const jwt = require('jsonwebtoken');
-   const cors = require('cors');
-   const dotenv = require('dotenv');
-
-   dotenv.config();
-   const app = express();
-   const PORT = 3000;
-
-   app.use(bodyParser.json());
-   app.use(cors());
-
-   let users = []; // "База данных" пользователей
-
-   app.listen(PORT, () => {
-       console.log(`Server is running on port ${PORT}`);
-   });
-   ```
-
----
-
-### Шаг 2: Реализация маршрутов
-
-1. **Регистрация пользователя (`/register`):**
-   - Принимает username и password.
-   - Сохраняет пользователя в массиве `users`.
-   ```javascript
-   app.post('/register', (req, res) => {
-       const { username, password } = req.body;
-
-       if (users.find(u => u.username === username)) {
-           return res.status(400).json({ message: 'User already exists' });
-       }
-
-       const newUser = { id: users.length + 1, username, password };
-       users.push(newUser);
-
-       res.status(201).json({ message: 'User registered successfully' });
-   });
-   ```
-
-2. **Аутентификация пользователя (`/login`):**
-   - Принимает username и password.
-   - Проверяет наличие пользователя в массиве `users`.
-   - Генерирует JWT токен, если данные верны.
-   ```javascript
-   app.post('/login', (req, res) => {
-       const { username, password } = req.body;
-
-       const user = users.find(u => u.username === username && u.password === password);
-
-       if (user) {
-           const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-           res.json({ token });
-       } else {
-           res.status(401).json({ message: 'Invalid credentials' });
-       }
-   });
-   ```
-
-3. **Защищенный маршрут (`/protected`):**
-   - Проверяет JWT токен.
-   - Возвращает данные, если токен валиден.
-   ```javascript
-   const authenticateJWT = (req, res, next) => {
-       const authHeader = req.headers.authorization;
-
-       if (authHeader) {
-           const token = authHeader.split(' ')[1];
-
-           jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-               if (err) {
-                   return res.sendStatus(403);
-               }
-
-               req.user = user;
-               next();
-           });
-       } else {
-           res.sendStatus(401);
-       }
-   };
-
-   app.get('/protected', authenticateJWT, (req, res) => {
-       res.json({ message: 'This is a protected route', user: req.user });
-   });
-   ```
-
----
-
-### Шаг 3: Создание фронтенда
-
-1. Создайте файл `index.html` в корне проекта:
-   ```html
-   <!DOCTYPE html>
-   <html lang="en">
-   <head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <title>JWT Auth Example</title>
-   </head>
-   <body>
-       <h1>JWT Authentication Example</h1>
-
-       <div>
-           <h2>Register</h2>
-           <form id="registerForm">
-               <input type="text" id="registerUsername" placeholder="Username" required>
-               <input type="password" id="registerPassword" placeholder="Password" required>
-               <button type="submit">Register</button>
-           </form>
-           <p id="registerMessage"></p>
-       </div>
-
-       <div>
-           <h2>Login</h2>
-           <form id="loginForm">
-               <input type="text" id="loginUsername" placeholder="Username" required>
-               <input type="password" id="loginPassword" placeholder="Password" required>
-               <button type="submit">Login</button>
-           </form>
-           <p id="loginMessage"></p>
-       </div>
-
-       <div>
-           <h2>Protected Data</h2>
-           <button id="fetchProtectedData">Fetch Protected Data</button>
-           <p id="protectedData"></p>
-       </div>
-
-       <script src="app.js"></script>
-   </body>
-   </html>
-   ```
-
-2. Создайте файл `app.js` для фронтенда:
-   ```javascript
-   let token = null;
-
-   document.getElementById('registerForm').addEventListener('submit', async (e) => {
-       e.preventDefault();
-       const username = document.getElementById('registerUsername').value;
-       const password = document.getElementById('registerPassword').value;
-
-       const response = await fetch('http://localhost:3000/register', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ username, password })
-       });
-
-       const result = await response.json();
-       document.getElementById('registerMessage').textContent = result.message || 'Registration failed';
-   });
-
-   document.getElementById('loginForm').addEventListener('submit', async (e) => {
-       e.preventDefault();
-       const username = document.getElementById('loginUsername').value;
-       const password = document.getElementById('loginPassword').value;
-
-       const response = await fetch('http://localhost:3000/login', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ username, password })
-       });
-
-       const result = await response.json();
-       if (response.ok) {
-           token = result.token;
-           document.getElementById('loginMessage').textContent = 'Login successful!';
-       } else {
-           document.getElementById('loginMessage').textContent = result.message || 'Login failed';
-       }
-   });
-
-   document.getElementById('fetchProtectedData').addEventListener('click', async () => {
-       if (!token) {
-           document.getElementById('protectedData').textContent = 'Please login first';
-           return;
-       }
-
-       const response = await fetch('http://localhost:3000/protected', {
-           headers: { 'Authorization': `Bearer ${token}` }
-       });
-
-       const result = await response.json();
-       if (response.ok) {
-           document.getElementById('protectedData').textContent = JSON.stringify(result);
-       } else {
-           document.getElementById('protectedData').textContent = 'Access denied';
-       }
-   });
-   ```
-
----
-
-### Шаг 4: Тестирование
-
-1. Запустите сервер:
+2. Запустите сервер:
    ```bash
    node server.js
    ```
 
-2. Откройте файл `index.html` в браузере.
-
-3. Протестируйте:
-   - Регистрацию нового пользователя.
-   - Вход в систему.
-   - Доступ к защищенным данным.
+3. Откройте в браузере:
+   ```
+   http://localhost:3000
+   ```
 
 ---
 
-#### Советы по работе с JWT
+## **7. Дополнительные улучшения**
 
-1. **Храните секретный ключ безопасно:**
-   Никогда не храните секретный ключ в коде приложения. Используйте переменные окружения или специализированные сервисы для хранения секретов.
+1. **Оптимизация статики**:
+   Добавьте в `server.js`:
+   ```javascript
+   app.use((req, res, next) => {
+     if (req.url.endsWith('.js') || req.url.endsWith('.css')) {
+       res.set('Cache-Control', 'public, max-age=86400');
+     }
+     next();
+   });
+   ```
 
-2. **Ограничивайте срок действия токенов:**
-   Устанавливайте короткий срок действия access токенов (например, 1 час) и используйте refresh токены для их обновления.
+2. **Логирование**:
+   ```javascript
+   app.use((req, res, next) => {
+     console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+     next();
+   });
+   ```
 
-3. **Проверяйте подпись токена:**
-   Всегда проверяйте подпись JWT на сервере, чтобы убедиться в его подлинности.
+3. **Обработка ошибок**:
+   ```javascript
+   process.on('uncaughtException', (err) => {
+     console.error('Необработанная ошибка:', err);
+   });
+   ```
 
-4. **Используйте HTTPS:**
-   Всегда используйте HTTPS для защиты данных в transit.
+   **Заключение**  
+Кэширование и cookies — важные механизмы для оптимизации и персонализации веб-приложений. Cookies удобны для хранения пользовательских данных, но требуют внимания к безопасности. Кэширование ускоряет загрузку, но важно правильно настраивать сроки жизни данных.  
 
----
-
-#### Заключение
-
-Сегодня мы изучили JWT — мощный инструмент для реализации аутентификации в современных веб-приложениях. Мы разобрали структуру JWT, принципы их работы и рассмотрели пример реализации аутентификации с использованием JWT на Node.js. Перейдем к условию Базового задания №5.
+На практике стоит комбинировать оба подхода: например, использовать cookie для сессий, а Redis — для кэширования API. В следующем занятии мы разберём, как управлять состоянием пользователя и реализовывать авторизацию.  
