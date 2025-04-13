@@ -9,403 +9,448 @@
 
 ---
 
-### **Практическое занятие 19: HTTPS и App Shell**
+### **Практическое занятие 20: PWA с Push-уведомления**
 
 ---
 
-#### **Введение в безопасное соединение и мгновенную загрузку**
+#### 1. Создаем структуру проекта
+```bash
+mkdir pwa-push-demo
+cd pwa-push-demo
+mkdir -p client/icons server
+```
 
-Представьте, что вы разрабатываете веб-приложение для заметок. Пользователи жалуются, что при плохом интернете приложение не загружается, а браузер показывает предупреждение о небезопасном соединении. Сегодня мы решим обе проблемы: настроим HTTPS для безопасности и реализуем App Shell для мгновенной загрузки.
+#### 2. Инициализируем проект
+```bash
+npm init -y
+cd server
+npm install express web-push dotenv
+```
 
-#### **Шаг 1: Настройка локального HTTPS (практический пример)**
+#### 3. Полное содержимое всех файлов:
 
-**Проблема:** Браузер блокирует важные функции PWA без HTTPS.
-
-**Решение:** Создадим локальный HTTPS-сервер за 10 минут.
-
-1. Устанавливаем mkcert (Windows/macOS/Linux):
-   ```bash
-   # Для Windows (Chocolatey):
-   choco install mkcert
-
-   # Для macOS (Homebrew):
-   brew install mkcert
-   ```
-
-2. Генерируем сертификаты:
-   ```bash
-   mkcert -install
-   mkcert localhost 127.0.0.1 ::1
-   ```
-   После выполнения в папке появятся два файла: `localhost.pem` (сертификат) и `localhost-key.pem` (ключ).
-
-3. Запускаем сервер с HTTPS:
-   ```bash
-   npx http-server --ssl --cert localhost.pem --key localhost-key.pem -p 3000
-   ```
-   Открываем в браузере: `https://localhost:3000`. Видим замок 🔒 в адресной строке – это подтверждение успешной настройки.
-
-**Проверка безопасности:**
-1. Открываем DevTools (F12)
-2. Переходим на вкладку "Security"
-3. Видим статус "Secure" и информацию о сертификате
-
-#### **Шаг 2: Создание App Shell (реальный пример)**
-
-**Проблема:** Приложение долго загружается на медленных соединениях.
-
-**Решение:** Реализуем мгновенную загрузку интерфейса.
-
-#### **Контекст и подготовка**
-Перед началом убедитесь, что у вас:
-1. Установлен Node.js (версия 16+)
-2. Текстовый редактор (VS Code, Sublime Text)
-3. Браузер Chrome или Edge (для DevTools)
-
-#### **Создание структуры проекта**
-Создайте новую папку проекта и следующие файлы:
-
-**1. index.html** - основной каркас приложения:
+**client/index.html**
 ```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои заметки</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4a76a8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Push Demo</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4a76a8">
 </head>
 <body>
-    <div class="app-shell">
-        <header class="app-header">
-            <h1>Мои заметки</h1>
-        </header>
-        <nav class="app-nav">
-            <button id="home-btn" class="nav-btn active">Главная</button>
-            <button id="about-btn" class="nav-btn">О приложении</button>
-        </nav>
-        <main id="app-content" class="app-main">
-            <!-- Контент будет загружаться здесь -->
-        </main>
+  <div class="container">
+    <h1>Push-уведомления</h1>
+    <button id="subscribeBtn">Подписаться</button>
+    <div id="status">Статус: проверка...</div>
+    <div class="send-box">
+      <h3>Тест:</h3>
+      <input type="text" id="titleInput" value="Новое уведомление">
+      <textarea id="bodyInput">Привет! Это тест push-сообщения</textarea>
+      <button id="sendBtn">Отправить тест</button>
     </div>
-    <script src="app.js"></script>
+  </div>
+  <script src="app.js"></script>
 </body>
 </html>
 ```
 
-**2. styles.css** - базовые стили:
+**client/styles.css**
 ```css
 body {
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
+  font-family: 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #333;
 }
 
-.app-shell {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+.container {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.app-header {
-    background-color: #4a76a8;
-    color: white;
-    padding: 1rem;
-    text-align: center;
+button {
+  background: #4a76a8;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 10px 0;
+  transition: background 0.3s;
 }
 
-.app-nav {
-    display: flex;
-    background-color: #3a6399;
+button:hover {
+  background: #3a6399;
 }
 
-.nav-btn {
-    flex: 1;
-    padding: 1rem;
-    border: none;
-    background: none;
-    color: white;
-    cursor: pointer;
+#status {
+  padding: 12px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  margin: 15px 0;
 }
 
-.nav-btn.active {
-    background-color: #2d4d73;
+.send-box {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 }
 
-.app-main {
-    flex: 1;
-    padding: 2rem;
-    background-color: white;
-}
-```
-
-**3. app.js** - основная логика:
-```javascript
-// Инициализация приложения
-document.addEventListener('DOMContentLoaded', () => {
-    // Загрузка начального контента
-    loadContent('home');
-    
-    // Обработчики кнопок навигации
-    document.getElementById('home-btn').addEventListener('click', () => {
-        setActiveButton('home-btn');
-        loadContent('home');
-    });
-    
-    document.getElementById('about-btn').addEventListener('click', () => {
-        setActiveButton('about-btn');
-        loadContent('about');
-    });
-});
-
-// Функция загрузки контента
-async function loadContent(page) {
-    try {
-        const response = await fetch(`/content/${page}.html`);
-        const content = await response.text();
-        document.getElementById('app-content').innerHTML = content;
-    } catch (error) {
-        document.getElementById('app-content').innerHTML = `
-            <div class="error">
-                <h2>Ошибка загрузки</h2>
-                <p>Не удалось загрузить содержимое страницы</p>
-            </div>
-        `;
-    }
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
 }
 
-// Функция активации кнопки
-function setActiveButton(buttonId) {
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.getElementById(buttonId).classList.add('active');
-}
-
-// Регистрация Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-                console.log('ServiceWorker зарегистрирован');
-            })
-            .catch(error => {
-                console.log('Ошибка регистрации:', error);
-            });
-    });
+textarea {
+  height: 100px;
+  resize: vertical;
 }
 ```
 
-**4. Создаем папку content с HTML-фрагментами**
-```
-/content
-   ├── home.html
-   └── about.html
-```
-
-**home.html**:
-```html
-<div class="home-content">
-    <h2>Добро пожаловать!</h2>
-    <p>Это приложение для заметок с мгновенной загрузкой.</p>
-    <button id="new-note-btn">Создать заметку</button>
-</div>
-```
-
-**about.html**:
-```html
-<div class="about-content">
-    <h2>О приложении</h2>
-    <p>Версия 1.0.0</p>
-    <p>Использует технологию App Shell для быстрой загрузки</p>
-</div>
-```
-
-**5. manifest.json** - конфигурация PWA:
+**client/manifest.json**
 ```json
 {
-    "name": "Мои заметки",
-    "short_name": "Заметки",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#f5f5f5",
-    "theme_color": "#4a76a8",
-    "icons": [
-        {
-            "src": "icons/icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "icons/icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ]
+  "name": "Push Demo",
+  "short_name": "PushDemo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4a76a8",
+  "description": "Демонстрация push-уведомлений",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
 ```
 
-Добавьте необходимые иконки для приложения
-
-### **Файл sw.js: Полная реализация Service Worker для App Shell**
-
-Вот готовый файл `sw.js`, который необходимо добавить в корень вашего проекта (рядом с `index.html`):
-
+**client/app.js**
 ```javascript
-// Версия кэша - при обновлении приложения измените эту версию
-const CACHE_NAME = 'app-shell-v2';
-const DYNAMIC_CACHE_NAME = 'dynamic-content-v1';
+const VAPID_PUBLIC_KEY = 'BANyYVYp6Ne3cULh5y8QE9NWuPXtTpwPUc3DJllSANezWTM-jkKu8Ma29JbMveNJyv_bA_B3u_wSuQi2j1cyUtg'
+const VAPID_PRIVATE_KEY='VH6lg8zKldw7AxC6zB1vcUmOXP6DAzItk4LtmeVWCj4'
+const VAPID_EMAIL='your@email.com'
+const PORT='3000'
 
-// Файлы, которые будут закэшированы при установке (App Shell)
+// В начале app.js
+console.log('VAPID Key:', VAPID_PUBLIC_KEY);
+console.log('Key length:', VAPID_PUBLIC_KEY.length);
+
+if (VAPID_PUBLIC_KEY.length !== 87 || !VAPID_PUBLIC_KEY.startsWith('B')) {
+  alert('ОШИБКА: Неверный формат VAPID ключа! Проверьте консоль.');
+  console.error('Ключ должен быть 87 символов и начинаться с "B"');
+}
+
+// Проверка поддержки
+if (!('serviceWorker' in navigator)) {
+  updateStatus('Service Worker не поддерживается', 'red');
+  document.getElementById('subscribeBtn').disabled = true;
+}
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    console.log('Service Worker зарегистрирован');
+    
+    const subscription = await reg.pushManager.getSubscription();
+    updateUI(subscription);
+    
+    setupEventHandlers(reg, subscription);
+  } catch (error) {
+    console.error('Ошибка инициализации:', error);
+    updateStatus(`Ошибка: ${error.message}`, 'red');
+  }
+}
+
+function setupEventHandlers(reg, subscription) {
+  document.getElementById('subscribeBtn').addEventListener('click', async () => {
+    try {
+      if (subscription) {
+        await unsubscribe(subscription);
+        updateUI(null);
+      } else {
+        const newSub = await subscribe(reg);
+        updateUI(newSub);
+      }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      updateStatus(`Ошибка: ${error.message}`, 'red');
+    }
+  });
+
+  document.getElementById('sendBtn').addEventListener('click', sendTestNotification);
+}
+
+async function subscribe(reg) {
+  const subscription = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+  });
+  
+  await fetch('/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription)
+  });
+  
+  return subscription;
+}
+
+async function unsubscribe(subscription) {
+  await subscription.unsubscribe();
+  await fetch('/unsubscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ endpoint: subscription.endpoint })
+  });
+}
+
+async function sendTestNotification() {
+  const title = document.getElementById('titleInput').value;
+  const body = document.getElementById('bodyInput').value;
+  
+  try {
+    const response = await fetch('/send-notification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, body })
+    });
+    
+    if (!response.ok) throw new Error('Ошибка сервера');
+    updateStatus('Уведомление отправлено!', 'green');
+  } catch (error) {
+    console.error('Ошибка отправки:', error);
+    updateStatus(`Ошибка: ${error.message}`, 'red');
+  }
+}
+
+function updateUI(subscription) {
+  const btn = document.getElementById('subscribeBtn');
+  if (subscription) {
+    btn.textContent = 'Отписаться';
+    updateStatus('Подписка активна', 'green');
+  } else {
+    btn.textContent = 'Подписаться';
+    updateStatus('Не подписано', 'gray');
+  }
+}
+
+function updateStatus(text, color) {
+  const el = document.getElementById('status');
+  el.textContent = `Статус: ${text}`;
+  el.style.color = color;
+}
+
+function urlBase64ToUint8Array(base64String) {
+    // Удаляем возможные пробелы и лишние символы
+    base64String = base64String.trim();
+    
+    // Проверка длины ключа
+    if (base64String.length !== 87) {
+      throw new Error(`Неверная длина ключа: ${base64String.length} (должно быть 87)`);
+    }
+  
+    // Стандартное преобразование
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+  
+    try {
+      const rawData = atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+  
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    } catch (e) {
+      throw new Error(`Ошибка декодирования: ${e.message}`);
+    }
+}
+```
+
+**client/sw.js**
+```javascript
+const CACHE_NAME = 'push-demo-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/styles.css',
   '/app.js',
   '/manifest.json',
-  '/content/home.html',  // Основной контент для быстрой загрузки
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/icon-192.png'
 ];
 
-// Установка Service Worker и кэширование App Shell
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Установка');
-  
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[Service Worker] Кэширование App Shell');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => {
-        console.log('[Service Worker] Пропуск фазы ожидания');
-        return self.skipWaiting();
-      })
+      .then(cache => cache.addAll(STATIC_ASSETS))
   );
 });
 
-// Активация и очистка старых кэшей
-self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Активация');
-  
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() || {
+    title: 'Новое уведомление',
+    body: 'У вас новое сообщение',
+    icon: '/icons/icon-192.png'
+  };
+
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME && cacheName !== DYNAMIC_CACHE_NAME) {
-            console.log('[Service Worker] Удаление старого кэша:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-    .then(() => {
-      console.log('[Service Worker] Активация завершена');
-      return self.clients.claim();
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: data.icon,
+      vibrate: [200, 100, 200],
+      data: { url: data.url || '/' }
     })
   );
 });
 
-// Стратегия кэширования: Cache First с fallback к сети
-self.addEventListener('fetch', (event) => {
-  const requestUrl = new URL(event.request.url);
-  
-  // Пропускаем запросы к API и другие некритичные ресурсы
-  if (requestUrl.origin !== location.origin) {
-    return;
-  }
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url)
+  );
+});
 
-  // Для App Shell используем Cache First
-  if (STATIC_ASSETS.includes(requestUrl.pathname)) {
-    event.respondWith(
-      caches.match(event.request)
-        .then((cachedResponse) => {
-          return cachedResponse || fetch(event.request);
-        })
-    );
-  } 
-  // Для динамического контента используем Network First
-  else if (event.request.url.includes('/content/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((networkResponse) => {
-          // Кэшируем успешные ответы
-          return caches.open(DYNAMIC_CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request.url, networkResponse.clone());
-              return networkResponse;
-            });
-        })
-        .catch(() => {
-          // Fallback к кэшу если нет сети
-          return caches.match(event.request)
-            .then((cachedResponse) => {
-              return cachedResponse || caches.match('/content/home.html');
-            });
-        })
-    );
-  }
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+  );
 });
 ```
 
-### **Как интегрировать этот файл в проект:**
-
-Для регистрации Service Worker добавьте в `app.js` следующий код (если его еще нет):
-
+**server/index.js**
 ```javascript
-// Регистрация Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js')
-      .then(function(registration) {
-        console.log('ServiceWorker зарегистрирован:', registration.scope);
-      })
-      .catch(function(err) {
-        console.log('Ошибка регистрации ServiceWorker:', err);
-      });
+require('dotenv').config();
+const express = require('express');
+const webPush = require('web-push');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../client')));
+
+// Инициализация VAPID
+webPush.setVapidDetails(
+  `mailto:${process.env.VAPID_EMAIL}`,
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
+// Хранилище подписок
+let subscriptions = [];
+
+// API для подписки
+app.post('/subscribe', (req, res) => {
+  const subscription = req.body;
+  if (!subscriptions.some(s => s.endpoint === subscription.endpoint)) {
+    subscriptions.push(subscription);
+    console.log('Добавлена подписка:', subscription.endpoint);
+  }
+  res.status(201).json({});
+});
+
+// API для отписки
+app.post('/unsubscribe', (req, res) => {
+  const { endpoint } = req.body;
+  subscriptions = subscriptions.filter(s => s.endpoint !== endpoint);
+  console.log('Удалена подписка:', endpoint);
+  res.status(200).json({});
+});
+
+// Отправка уведомлений
+app.post('/send-notification', (req, res) => {
+  const { title, body } = req.body;
+  
+  const payload = JSON.stringify({
+    title: title || 'Тестовое уведомление',
+    body: body || 'Это тестовое сообщение',
+    icon: '/icons/icon-192.png',
+    url: '/'
   });
-}
+
+  const results = [];
+  const promises = subscriptions.map(sub => 
+    webPush.sendNotification(sub, payload)
+      .then(() => results.push({ status: 'success', endpoint: sub.endpoint }))
+      .catch(err => {
+        console.error('Ошибка отправки:', err);
+        results.push({ status: 'error', endpoint: sub.endpoint, error: err.message });
+      })
+  );
+
+  Promise.all(promises)
+    .then(() => res.json({ results }))
+    .catch(err => res.status(500).json({ error: err.message }));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на http://localhost:${PORT}`);
+  console.log('VAPID Public Key:', process.env.VAPID_PUBLIC_KEY);
+});
 ```
 
-#### **Запуск приложения**
+#### 4. Иконки (поместить в client/icons)
+Скачайте пример иконок и разместите в папке
 
-1. Установите http-server глобально:
-```bash
-npm install -g http-server
-```
+#### 5. Запуск проекта
+1. Сгенерируйте VAPID-ключи:
+   ```bash
+   npx web-push generate-vapid-keys --json
+   ```
+   Скопируйте вывод в раздел файла
 
-2. Запустите сервер из папки проекта:
-```bash
-http-server -p 3000
-```
+2. Запустите сервер:
+   ```bash
+   cd server
+   node index.js
+   ```
 
 3. Откройте в браузере:
+   ```
+   http://localhost:3000
+   ```
+
+4. Тестирование:
+   - Нажмите "Подписаться" и разрешите уведомления
+   - Отправьте тестовое сообщение через форму
+   - Проверьте получение уведомлений даже при закрытой вкладке
+
+#### 6. Дополнительные команды для тестирования
+Отправка через curl:
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"title":"Тест","body":"Работает!"}' http://localhost:3000/send-notification
 ```
-http://localhost:3000
-```
 
-4. Для тестирования PWA:
-- В Chrome: Откройте DevTools (F12)
-- Перейдите на вкладку "Application" → "Manifest"
-- Нажмите "Add to homescreen" для проверки установки
+Проверка Service Worker:
+1. Chrome DevTools → Application → Service Workers
+2. Проверьте статус регистрации
+3. Эмуляция push-событий через "Push" button
 
-#### **Проверка работы App Shell**
-
-1. В DevTools перейдите на вкладку "Network"
-2. Установите throttling на "Slow 3G"
-3. Обновите страницу (Ctrl+R)
-4. Наблюдайте:
-   - Мгновенную загрузку каркаса приложения
-   - Задержку при загрузке содержимого страниц
-
-5. Проверьте офлайн-режим:
-   - В DevTools: "Application" → "Service Workers"
-   - Отметьте "Offline"
-   - Обновите страницу
-   - Убедитесь, что каркас приложения работает без интернета
-
-**Совет для продвинутых:** Попробуйте добавить индикатор загрузки, который будет показываться при запросе нового контента и скрываться после его получения. Это улучшит пользовательский опыт.
+Перейдем к рассмотрению базового задания №8
