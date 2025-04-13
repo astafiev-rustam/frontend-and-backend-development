@@ -1,0 +1,43 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.app-header {
+    background-color: #4a76a8;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+.app-nav {
+    display: flex;
+    background-color: #3a6399;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    background: none;
+    color: white;
+    cursor: pointer;
+}
+
+.nav-btn.active {
+    background-color: #2d4d73;
+}
+
+.app-main {
+    flex: 1;
+    padding: 2rem;
+    background-color: white;
+}
