@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Push Demo</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4a76a8">
+</head>
+<body>
+  <div class="container">
+    <h1>Push-уведомления</h1>
+    <button id="subscribeBtn">Подписаться</button>
+    <div id="status">Статус: проверка...</div>
+    <div class="send-box">
+      <h3>Тест:</h3>
+      <input type="text" id="titleInput" value="Новое уведомление">
+      <textarea id="bodyInput">Привет! Это тест push-сообщения</textarea>
+      <button id="sendBtn">Отправить тест</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
