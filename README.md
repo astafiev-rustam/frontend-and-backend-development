@@ -9,170 +9,128 @@
 
 ---
 
-### **Практическое занятие 21-22: Работа со сборщиками приложений. Docker и разработка**
+### **Практическое занятие 23-24: Балансировщики нагрузки и средства разворачивания веб-приложений**
 
-Данная тема рассчитана на два практических занятия, поэтому практики 21 и 22 дублируют друг друга
+Данная тема рассчитана на два практических занятия, поэтому практики 23 и 24 дублируют друг друга
 
 ---
 
-## **Введение**  
+## **1. Введение**  
+**Теоретическая часть:**  
+- Понятие балансировки нагрузки (Load Balancing) и её роль в веб-разработке.  
+- Виды балансировщиков:  
+  - **Аппаратные** (F5, Citrix ADC).  
+  - **Программные** (Nginx, HAProxy, Traefik, Cloudflare).  
+- Сценарии использования:  
+  - Распределение трафика между серверами.  
+  - Отказоустойчивость и масштабирование.  
+  - Разделение статики и API (микросервисы).  
 
-Современная разработка программного обеспечения требует не только написания кода, но и обеспечения его стабильной работы в различных окружениях. Разработчики часто сталкиваются с проблемами, когда приложение работает на их компьютере, но перестаёт функционировать на сервере или у коллег. Это может быть связано с различиями в версиях языков программирования, библиотек, операционных систем или конфигураций.  
+---
 
-Для решения этой проблемы используются **контейнеры** — изолированные среды, которые содержат всё необходимое для запуска приложения: код, зависимости, системные инструменты и настройки. **Docker** — это ведущая платформа для работы с контейнерами, позволяющая быстро разворачивать приложения и масштабировать их.  
+## **2. Настройка Nginx как балансировщика нагрузки**  
+### **2.1. Базовые алгоритмы балансировки**  
+- Round Robin (по умолчанию).  
+- Least Connections (наименьшие соединения).  
+- IP Hash (фиксация клиента за сервером).  
 
-На этом занятии мы разберём, как Docker помогает в разработке фронтенд- и бэкенд-приложений, научимся создавать Docker-образы, запускать контейнеры и управлять ими с помощью Docker Compose.  
+**Практика:**  
+1. Запуск 2+ бэкенд-серверов (Node.js/Flask) на разных портах.  
+2. Конфигурация Nginx для балансировки:  
+   ```nginx
+   upstream backend {
+       server 127.0.0.1:3000;  # Сервер 1
+       server 127.0.0.1:3001;  # Сервер 2
+       server 127.0.0.1:3002 backup;  # Резервный сервер
+   }
 
----  
+   server {
+       listen 80;
+       location / {
+           proxy_pass http://backend;
+       }
+   }
+   ```  
+3. Тестирование через `curl` или Postman.  
 
-## **1. Установка Docker и базовые команды**  
+### **2.2. Health Checks и отказоустойчивость**  
+- Проверка работоспособности серверов:  
+  ```nginx
+  server 127.0.0.1:3000 max_fails=2 fail_timeout=30s;
+  ```  
 
-Перед началом работы необходимо установить Docker. Инструкции для разных ОС можно найти на [официальном сайте](https://docs.docker.com/get-docker/). После установки проверим, что Docker работает:  
+---
 
-```bash
-docker --version
-```  
+## **3. Альтернативные балансировщики: HAProxy**  
+### **3.1. Установка и базовая настройка**  
+- Конфигурация HAProxy для балансировки:  
+  ```cfg
+  frontend http_front
+      bind *:80
+      default_backend http_back
 
-Если Docker установлен корректно, можно запустить тестовый контейнер:  
+  backend http_back
+      balance roundrobin
+      server server1 127.0.0.1:3000 check
+      server server2 127.0.0.1:3001 check
+  ```  
 
-```bash
-docker run hello-world
-```  
+---
 
-Эта команда скачает образ `hello-world` из Docker Hub (реестра образов) и запустит его. Если всё работает, мы увидим приветственное сообщение.  
+## **4. Оркестрация с Docker и Docker Compose**  
+### **4.1. Развертывание стека с балансировкой**  
+- Пример `docker-compose.yml` для 3 сервисов:  
+  ```yaml
+  version: "3.8"
+  services:
+    backend1:
+      image: node:18
+      command: node server.js
+      ports: ["3000:3000"]
 
----  
+    backend2:
+      image: node:18
+      command: node server.js
+      ports: ["3001:3000"]
 
-## **2. Docker-образ для фронтенд-приложения**  
+    nginx:
+      image: nginx
+      ports: ["80:80"]
+      volumes:
+        - ./nginx.conf:/etc/nginx/nginx.conf
+  ```   
 
-### 1. Структура проекта
-```
-simple-docker-example/
-├── docker-compose.yml
-├── backend/
-│   ├── Dockerfile
-│   ├── index.js
-│   └── package.json
-└── frontend/
-    ├── Dockerfile
-    ├── index.html
-    └── script.js
-```
+---
 
-### 2. Базовые файлы
-
-#### `docker-compose.yml`
-```yaml
-version: '3.8'
-
-services:
-  backend:
-    build: ./backend
+## **5. Введение в Kubernetes**  
+### **5.1. Базовые концепции**  
+- Поды (Pods), Сервисы (Services), Ingress.  
+- Настройка балансировки через `kubectl`:  
+  ```yaml
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: backend
+  spec:
+    selector:
+      app: backend
     ports:
-      - "5000:5000"
+      - protocol: TCP
+        port: 80
+        targetPort: 3000
+    type: LoadBalancer
+  ```
   
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-```
+---
 
-### 3. Бэкенд (Node.js)
+## **6. Заключение**  
+- **Разбор кейсов:**  
+  - Когда выбрать Nginx, а когда — Kubernetes?  
+  - Оптимизация для высоконагруженных проектов.
+    
+- **Дополнительные материалы:**  
+  - [Документация Nginx](https://nginx.org/en/docs/)  
+  - [HAProxy Tutorials](https://www.haproxy.com/documentation/)  
+  - [Kubernetes для начинающих](https://kubernetes.io/ru/docs/tutorials/)
 
-#### `backend/Dockerfile`
-```dockerfile
-FROM node:14-alpine
-WORKDIR /app
-COPY package.json .
-RUN npm install
-COPY . .
-EXPOSE 5000
-CMD ["node", "index.js"]
-```
-
-#### `backend/package.json`
-```json
-{
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "express": "^4.17.1"
-  }
-}
-```
-
-#### `backend/index.js`
-```javascript
-const express = require('express');
-const app = express();
-const PORT = 5000;
-
-app.get('/api', (req, res) => {
-  res.send('Hello from Backend!');
-});
-
-app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
-});
-```
-
-### 4. Фронтенд (чистый HTML/JS)
-
-#### `frontend/Dockerfile`
-```dockerfile
-FROM nginx:alpine
-COPY . /usr/share/nginx/html
-EXPOSE 80
-```
-
-#### `frontend/index.html`
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Simple Docker Example</title>
-</head>
-<body>
-    <h1>Frontend</h1>
-    <div id="response"></div>
-    <script src="script.js"></script>
-</body>
-</html>
-```
-
-#### `frontend/script.js`
-```javascript
-fetch('http://backend:5000/api')
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById('response').textContent = data;
-  });
-```
-
-### 5. Инструкция по запуску
-
-1. Убедитесь, что Docker установлен и запущен
-2. В корне проекта выполните:
-```bash
-docker-compose up --build
-```
-3. Откройте в браузере:
-   - Фронтенд: http://localhost:3000
-   - Бэкенд: http://localhost:5000/api
-
----  
-
-## **Заключение**  
-
-Docker значительно упрощает разработку, тестирование и развёртывание приложений. Мы научились:  
-- Создавать Docker-образы для фронтенда и бэкенда.  
-- Запускать контейнеры вручную и через Docker Compose.  
-- Оптимизировать образы для production.  
-
-Перейдем к знакомству с Базовым заданием №9
+Перейдем к знакомству с Базовым заданием №10
