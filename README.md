@@ -9,231 +9,181 @@
 
 ---
 
-### **Практическое занятие 26: Работа с реляционными базами данных в приложениях**
+### **Практическое занятие 27: Разработка веб-приложений. Лендинг**
 
 ---
 
-#### **Введение в реляционные базы данных и PostgreSQL**
-Реляционные базы данных (РБД) представляют собой организованную систему хранения данных, основанную на таблицах с четко определенными связями между ними. В отличие от NoSQL-решений, таких как MongoDB, реляционные СУБД требуют предварительного определения схемы данных и используют язык SQL (Structured Query Language) для манипуляции информацией.  
+## **Введение в разработку лендингов**
 
-PostgreSQL — это мощная, открытая объектно-реляционная СУБД, поддерживающая сложные запросы, транзакции, индексы и механизмы репликации. Ее расширяемость и соответствие стандартам SQL делают ее популярным выбором для enterprise-решений.  
+Лендинг (посадочная страница) — это одностраничный сайт, созданный для конкретной маркетинговой цели: презентации продукта, сбора контактов или продвижения услуги. В отличие от многостраничных сайтов, лендинг фокусирует внимание пользователя на одном действии — например, на покупке или подписке.  
 
-#### **Установка и настройка PostgreSQL**
-Перед началом работы необходимо установить PostgreSQL. Доступны варианты локальной установки или использования облачного сервиса (например, ElephantSQL).  
+Хороший лендинг — это не просто красивая картинка, а продуманный инструмент конверсии. Он должен быстро загружаться, корректно отображаться на всех устройствах и удерживать внимание посетителя. Сегодня мы разберём, как создать такой лендинг с нуля, учитывая все современные требования веб-разработки.  
 
-1. **Локальная установка**  
-   - На Windows: загрузить инсталлятор с [официального сайта](https://www.postgresql.org/download/) и следовать инструкциям.  
-   - На Linux (Ubuntu/Debian):  
-     ```bash
-     sudo apt-get install postgresql postgresql-contrib
-     sudo service postgresql start
-     ```  
-   После установки сервер PostgreSQL будет доступен на `localhost:5432`. Для подключения используется клиент `psql` или графические инструменты (pgAdmin, DBeaver).  
+---
 
-2. **Облачное решение (ElephantSQL)**  
-   - Регистрация на [ElephantSQL](https://www.elephantsql.com/).  
-   - Создание инстанса (бесплатный план `Tiny Turtle`).  
-   - Получение строки подключения:  
-     ```plaintext
-     postgres://<username>:<password>@<host>:5432/<database>
-     ```  
+## **Проектирование и подготовка**
 
-#### **Подключение PostgreSQL к Node.js-приложению**
-Для работы с PostgreSQL в Node.js используются библиотеки `pg` (низкоуровневый драйвер) или ORM (Sequelize, TypeORM). В данном примере рассмотрим `pg` и `Sequelize`.  
+Прежде чем писать код, необходимо спроектировать структуру страницы. Начнём с анализа целевой аудитории. Например, если мы делаем лендинг для IT-курсов, наша аудитория — это люди, которые хотят сменить профессию или повысить квалификацию. Им важны: программа обучения, отзывы студентов и стоимость.  
 
-1. **Инициализация проекта**  
-   Устанавливаем зависимости:  
-   ```bash
-   npm init -y
-   npm install pg sequelize express
-   ```  
+Следующий шаг — создание прототипа. Можно использовать Figma или даже нарисовать схему на бумаге. Главное — определить расположение ключевых блоков:  
 
-2. **Подключение через `pg`**  
-   Создаем файл `server.js`:  
-   ```javascript
-   const { Pool } = require('pg');
-   const express = require('express');
-   const app = express();
+- **Шапка (Header)** с логотипом и кнопкой "Записаться".  
+- **Главный экран (Hero-секция)** с заголовком и кратким описанием курса.  
+- **Блок преимуществ**, где мы расскажем, почему стоит выбрать именно эти курсы.  
+- **Отзывы** для повышения доверия.  
+- **Форма обратной связи** для сбора контактов.  
+- **Подвал (Footer)** с контактами и ссылками на соцсети.  
 
-   const pool = new Pool({
-       user: 'postgres',
-       host: 'localhost',
-       database: 'mydatabase',
-       password: 'password',
-       port: 5432,
-   });
+Цветовая гамма и шрифты должны соответствовать тематике. Для IT-курсов подойдут современные шрифты (например, "Inter" или "Roboto") и сине-фиолетовая гамма, которая ассоциируется с технологиями.  
 
-   app.use(express.json());
+---
 
-   app.listen(3000, () => {
-       console.log('Server is running on http://localhost:3000');
-   });
-   ```  
+## **Верстка: от HTML к адаптивному дизайну**
 
-   Для облачного подключения конфигурация будет выглядеть так:  
-   ```javascript
-   const pool = new Pool({
-       connectionString: 'postgres://user:password@host:5432/database',
-       ssl: { rejectUnauthorized: false },
-   });
-   ```  
+Основу лендинга составляет HTML-разметка. Начнём с базовой структуры:  
 
-3. **Подключение через Sequelize**  
-   Sequelize — это ORM (Object-Relational Mapping), который абстрагирует работу с SQL. Инициализация:  
-   ```javascript
-   const { Sequelize } = require('sequelize');
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT-курсы: Стань разработчиком за 6 месяцев</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <a href="#" class="logo">IT School</a>
+      <nav class="nav">
+        <a href="#program">Программа</a>
+        <a href="#reviews">Отзывы</a>
+      </nav>
+      <button class="btn">Записаться</button>
+    </div>
+  </header>
 
-   const sequelize = new Sequelize('mydatabase', 'postgres', 'password', {
-       host: 'localhost',
-       dialect: 'postgres',
-   });
+  <section class="hero">
+    <div class="container">
+      <h1>Стань востребованным разработчиком</h1>
+      <p>Обучение с нуля до трудоустройства</p>
+      <button class="btn btn-primary">Оставить заявку</button>
+    </div>
+  </section>
 
-   // Проверка подключения
-   sequelize.authenticate()
-       .then(() => console.log('Connected to PostgreSQL'))
-       .catch(err => console.error('Connection error:', err));
-   ```  
+  <!-- Остальные секции -->
+  
+  <script src="script.js"></script>
+</body>
+</html>
+```
 
-#### **Определение моделей и связей**
-В отличие от MongoDB, в PostgreSQL необходимо предварительно создать таблицы. Рассмотрим пример модели "Пользователь" и "Задача" с отношением "один-ко-многим".  
+Далее стилизуем страницу с помощью CSS. Важно использовать **Flexbox** или **Grid** для создания адаптивной сетки. Например, так можно оформить шапку:  
 
-1. **Создание таблиц через SQL**  
-   ```sql
-   CREATE TABLE users (
-       id SERIAL PRIMARY KEY,
-       name VARCHAR(100) NOT NULL,
-       email VARCHAR(100) UNIQUE NOT NULL,
-       created_at TIMESTAMP DEFAULT NOW()
-   );
+```css
+.header {
+  padding: 20px 0;
+  position: fixed;
+  width: 100%;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-   CREATE TABLE tasks (
-       id SERIAL PRIMARY KEY,
-       title VARCHAR(100) NOT NULL,
-       user_id INTEGER REFERENCES users(id),
-       completed BOOLEAN DEFAULT false
-   );
-   ```  
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-2. **Определение моделей в Sequelize**  
-   ```javascript
-   const User = sequelize.define('User', {
-       name: { type: DataTypes.STRING, allowNull: false },
-       email: { type: DataTypes.STRING, unique: true },
-   });
+.nav a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: #333;
+}
 
-   const Task = sequelize.define('Task', {
-       title: { type: DataTypes.STRING },
-       completed: { type: DataTypes.BOOLEAN, defaultValue: false },
-   });
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-   // Связь 1:N
-   User.hasMany(Task);
-   Task.belongsTo(User);
+.btn-primary {
+  background: #6e48eb;
+  color: white;
+}
+```
 
-   // Синхронизация с БД
-   sequelize.sync({ force: true }); // Опция `force` пересоздает таблицы
-   ```  
+Для мобильных устройств добавим медиазапросы:  
 
-#### **CRUD-операции в PostgreSQL**
+```css
+@media (max-width: 768px) {
+  .nav {
+    display: none; /* Скрываем навигацию на мобильных */
+  }
+  .hero h1 {
+    font-size: 24px; /* Уменьшаем заголовок */
+  }
+}
+```
 
-##### **1. Создание записи (Create)**  
-Добавление пользователя через Sequelize:  
+---
+
+## **Интерактивность и работа с формами**
+
+Чтобы лендинг был динамичным, добавим JavaScript. Например, плавную прокрутку к якорям:  
+
 ```javascript
-app.post('/users', async (req, res) => {
-    try {
-        const user = await User.create(req.body);
-        res.status(201).send(user);
-    } catch (err) {
-        res.status(400).send(err.message);
-    }
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    target.scrollIntoView({ behavior: 'smooth' });
+  });
 });
-```  
+```
 
-##### **2. Чтение данных (Read)**  
-Получение пользователей с задачами (JOIN через Sequelize):  
+Форма обратной связи должна проверять введённые данные перед отправкой:  
+
 ```javascript
-app.get('/users', async (req, res) => {
-    try {
-        const users = await User.findAll({ include: Task });
-        res.send(users);
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
+const form = document.querySelector('.contact-form');
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const email = form.querySelector('input[type="email"]').value;
+  if (!email.includes('@')) {
+    alert('Введите корректный email!');
+    return;
+  }
+  // Отправка данных (например, через Fetch API)
+  console.log('Форма отправлена!', email);
 });
-```  
+```
 
-##### **3. Обновление данных (Update)**  
-Изменение данных пользователя:  
-```javascript
-app.patch('/users/:id', async (req, res) => {
-    try {
-        const user = await User.update(req.body, {
-            where: { id: req.params.id },
-            returning: true, // Для PostgreSQL (возвращает обновленную запись)
-        });
-        res.send(user);
-    } catch (err) {
-        res.status(400).send(err.message);
-    }
-});
-```  
+---
 
-##### **4. Удаление данных (Delete)**  
-Удаление пользователя:  
-```javascript
-app.delete('/users/:id', async (req, res) => {
-    try {
-        await User.destroy({ where: { id: req.params.id } });
-        res.send({ message: 'User deleted' });
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
-});
-```  
+## **Оптимизация и публикация**
 
-#### **Сложные запросы и транзакции**  
-1. **Транзакции**  
-   Обеспечивают атомарность операций:  
-   ```javascript
-   const result = await sequelize.transaction(async (t) => {
-       const user = await User.create({ name: 'John' }, { transaction: t });
-       await Task.create({ title: 'Learn SQL', userId: user.id }, { transaction: t });
-       return user;
-   });
-   ```  
+Перед запуском важно оптимизировать лендинг:  
 
-2. **Агрегация**  
-   Пример: подсчет задач по пользователям:  
-   ```javascript
-   const stats = await Task.findAll({
-       attributes: [
-           'userId',
-           [Sequelize.fn('COUNT', Sequelize.col('id')), 'taskCount'],
-       ],
-       group: ['userId'],
-   });
-   ```  
+1. **Сжать изображения** (используйте инструменты вроде Squoosh).  
+2. **Включить ленивую загрузку** для изображений:  
+   ```html
+   <img src="image.jpg" loading="lazy" alt="Описание">
+   ```
+3. **Проверить скорость загрузки** в Google PageSpeed Insights.  
 
-#### **Интеграция с фронтендом**  
-Пример запроса с фронтенда (Fetch API):  
-```javascript
-fetch('http://localhost:3000/users')
-    .then(response => response.json())
-    .then(data => console.log(data));
-```  
+Для публикации можно использовать GitHub Pages, Netlify или Vercel.  
 
-#### **Оптимизация**  
-- **Индексы** — ускоряют поиск:  
-  ```sql
-  CREATE INDEX idx_users_email ON users(email);
-  ```  
-- **Репликация** — повышает отказоустойчивость (настройка в `postgresql.conf`).  
+---
 
-#### **Заключение**  
-На занятии были рассмотрены:  
-- Настройка PostgreSQL (локально и в облаке).  
-- Подключение к Node.js через `pg` и Sequelize.  
-- Реализация CRUD-операций и связей между таблицами.  
-- Примеры сложных запросов (транзакции, агрегация).  
+## **Заключение**
 
-Перейдем к рассмотрению семестрового задания №2
+Сегодня мы разобрали весь процесс создания лендинга: от проектирования до публикации. Главное — помнить, что хороший лендинг не только красивый, но и функциональный. Дальше можно развивать проект: добавлять анимации, подключать аналитику или даже превратить его в многостраничный сайт.  
+
+**Примеры улучшений:**  
+- Добавить темную тему.  
+- Реализовать чат с поддержкой.  
+- Настроить A/B-тестирование кнопок.  
