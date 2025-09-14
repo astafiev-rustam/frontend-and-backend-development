@@ -7,7 +7,7 @@
 |ПРЕПОДАВАТЕЛЬ|Астафьев Рустам Уралович|
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
-Ссылка на материал: https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-5
+Ссылка на материал: https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-6
 
 ---
 
