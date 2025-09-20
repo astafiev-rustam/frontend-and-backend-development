@@ -190,10 +190,10 @@ https://astafiev-rustam.github.io/frontend-and-backend-practice/
 
 В результатте выполнения поставленной задачи доступ к проекту становится возможен по ссылке через GitHub Pages. С помощью меню можно перемещаться между страницами сайта, каждая из которых открывается и отображается в соответствие с настройками.
 
-Пример реализации:<br>
+**Пример реализации:**<br>
 https://astafiev-rustam.github.io/frontend-and-backend-practice/
 
-Скриншоты примера:<br>
+**Скриншоты примера:**<br>
 ![](images/4-1.png)<br>
 ![](images/4-2.png)<br>
 ![](images/4-3.png)<br>
