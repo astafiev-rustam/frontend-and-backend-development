@@ -22,7 +22,7 @@
 |1|||4|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-4)|
 |1|2||5|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-5)|
 |1|||6|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-6)|
-|1|||7|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-7)|
+|1|||7|[Основы языка HTML](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-7)|
 |1|||8|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-8)|
 |1|3||9|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-9)|
 |1|||10|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-10)|
