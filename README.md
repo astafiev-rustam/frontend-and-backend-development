@@ -113,15 +113,15 @@ https://astafiev-rustam.github.io/frontend-and-backend-practice/
         <div id="menu">
             <ul>
                 <li><a href="index.html">Главная</a></li>
-                <li><a href="news.html">О нас</a></li>
-                <li><a href="practices.html">Практики</a></li> 
-                <li><a href="goods .html">Товары</a></li>
-                <li><a href="contacts.html">Контакты</a></li>
+                <li><a href="pages/news.html">Новости</a></li>
+                <li><a href="pages/practices.html">Практики</a></li> 
+                <li><a href="pages/goods.html">Товары</a></li>
+                <li><a href="pages/contacts.html">Контакты</a></li>
             </ul>
         </div>
         <div id="content">
             <p>Информация об авторе</p>
-            <img src="photo.png" alt="Фото автора" width="200" height="250">
+            <img src="images/photo.png" alt="Фото автора" width="200" height="250">
             <p>Иванов Иван Иванович</p>
             <p>ЭФБО-00-00</p>
             <p>Обо мне: Я родился в Москве в 70-м на краю города. Глупость рано ударила в голову. В четыре активно ругался.
@@ -189,6 +189,24 @@ https://astafiev-rustam.github.io/frontend-and-backend-practice/
 ### ЭТАП 4. Проверка результата
 
 В результате выполнения поставленной задачи доступ к проекту становится возможен по ссылке через GitHub Pages. С помощью меню можно перемещаться между страницами сайта, каждая из которых открывается и отображается в соответствие с настройками.
+
+Рекомендуемая итоговая структура проекта:
+```bash
+.
+|   index.html
+|
++---images
+|       goods1.jpg
+|       goods2.jpg
+|       goods3.jpg
+|       photo.png
+|
+\---pages
+        contacts.html
+        goods.html
+        news.html
+        practices.html
+```
 
 **Пример реализации:**<br>
 https://astafiev-rustam.github.io/frontend-and-backend-practice/
