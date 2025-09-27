@@ -8,61 +8,26 @@
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
 Ссылка на материал: <br>
-https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-8
+https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-9
 
 ---
 
-# Практическое занятие 8: Основы языка CSS
+# Практическое занятие 9: Семантические теги, основы навигации. Flex и Grid
 
 ---
 
-Об основах языка CSS было рассказно в лекциях по дисциплине. Освежить память можно посредством знакоства с презентациией лекции или ознакомьтесь с материалом по ссылке:<br>
+Об основах позиционирования, использования сеток и семантических тегах было рассказно в лекциях по дисциплине. Освежить память можно посредством знакоства с презентациией лекции или ознакомьтесь с материалом по ссылке:<br>
 https://htmlacademy.ru/courses/299/
 
-## Базовая структура сайта проекта
+## Продолжение работы над проектом
 
-Пошагово выполним добавление стилевых компонентов и подключи элементы таблицы стилей к файлам предыдущего практического занятия.
+Пошагово выполним преобразование семантики проекта и упростим вёрстку страниц с помощью вышеупомянутых инструментов
 
-### ЭТАП 1. Организация локального и удалённого репозиториев
+### ЭТАП 1. Работа над изменениями в файле index.html
 
-1. Добавьте в директорию проекта папку ```style```, в которой разместите файл ```styles.css```.
-Таким образом, текущее дерево проекта будет выглядеть так:
-```bash
-.
-│   index.html
-│
-├───images
-│       goods1.jpg
-│       goods2.jpg
-│       goods3.jpg
-│       photo.png
-│
-├───pages
-│       contacts.html
-│       goods.html
-│       news.html
-│       practices.html
-│
-└───style
-        styles.css
-```
+Отредактируем содержимое исходный файлов, добавив в страницу index.html семантические теги, а стилевые настройки компонентов наполним вёрсткой на основе flex и grid.
 
-2. Подключите файл стилей в каждый из файлов .html для задания стилевых настроек в каждом элементе.
-
-Для ```index.html```:
-```html
-<link rel="stylesheet" href="style/styles.css">
-```
-
-Для файлов в папке ```pages```:
-```html
-<link rel="stylesheet" href="../style/styles.css">
-```
-
-3. Для всех используемых тегов задайте в файле соответствующие стилевые настройки. Предусмотрите уникальное размещение отдельных объектов и финализируйте полученный результат.
-
-Для начала модернизируем файл ```index.html``` с использованием классов для удобной и качественной настройки стилей:
-
+Содержимое index.html:
 ```html
 <!DOCTYPE html>
 <html lang="ru">
@@ -73,9 +38,13 @@ https://htmlacademy.ru/courses/299/
         <link rel="stylesheet" href="style/styles.css">
     </head>
     <body>
+        <!-- Изменение: Заменили div на семантические теги -->
         <div class="page-container">
-            <div class="header">Хэдер</div>
-            <div class="nav">
+            <header class="header"> <!-- Было: <div class="header"> -->
+                <h1>Хэдер</h1> <!-- Добавили заголовок для семантики -->
+            </header>
+
+            <nav class="nav"> <!-- Было: <div class="nav"> -->
                 <ul class="nav-list">
                     <li class="nav-item"><a class="nav-link" href="index.html">Главная</a></li>
                     <li class="nav-item"><a class="nav-link" href="pages/news.html">Новости</a></li>
@@ -83,246 +52,409 @@ https://htmlacademy.ru/courses/299/
                     <li class="nav-item"><a class="nav-link" href="pages/goods.html">Товары</a></li>
                     <li class="nav-item"><a class="nav-link" href="pages/contacts.html">Контакты</a></li>
                 </ul>
-            </div>
-            <div class="content">
-                <div class="profile-header">
+            </nav>
+
+            <main class="content"> <!-- Было: <div class="content"> -->
+                <article class="profile-header"> <!-- Было: <div class="profile-header"> -->
                     <h1 class="profile-title">Информация об авторе</h1>
                     <img class="profile-photo" src="images/photo.png" alt="Фото автора">
                     <h2 class="profile-name">Иванов Иван Иванович</h2>
                     <p class="profile-group">ЭФБО-00-00</p>
-                </div>
+                </article>
                 
-                <div class="about-me">
+                <section class="about-me"> <!-- Было: <div class="about-me"> -->
+                    <h2>Обо мне</h2> <!-- Добавили заголовок для семантики -->
                     <p>Обо мне: Я родился в Москве в 70-м на краю города. Глупость рано ударила в голову. В четыре активно ругался.
                     Потом школа, форма, драки, клей. Так я становился сильней. Воровал деньги в раздевалке.</p>
-                </div>
+                </section>
                 
-                <div class="skills-container">
-                    <div class="skill-tag">Навык 1</div>
-                    <div class="skill-tag">Навык 2</div>
-                    <div class="skill-tag">Навык 3</div>
-                    <div class="skill-tag">Навык 4</div>
-                </div>
+                <section class="skills-container"> <!-- Было: <div class="skills-container"> -->
+                    <h2>Мои навыки</h2> <!-- Добавили заголовок для семантики -->
+                    <div class="skills-grid"> <!-- Обертка для Grid -->
+                        <div class="skill-tag">Навык 1</div>
+                        <div class="skill-tag">Навык 2</div>
+                        <div class="skill-tag">Навык 3</div>
+                        <div class="skill-tag">Навык 4</div>
+                    </div>
+                </section>
                 
-                <div class="experience-section">
+                <section class="experience-section"> <!-- Было: <div class="experience-section"> -->
                     <h2 class="section-title">Мой опыт работы</h2>
-                    <div class="experience-card">
-                        <h3 class="experience-title">Опыт 1</h3>
-                        <p class="experience-desc">Работал фантазёром. Сочинял и праздновал.</p>
+                    <div class="experience-grid"> <!-- Обертка для Grid -->
+                        <article class="experience-card"> <!-- Было: <div class="experience-card"> -->
+                            <h3 class="experience-title">Опыт 1</h3>
+                            <p class="experience-desc">Работал фантазёром. Сочинял и праздновал.</p>
+                        </article>
+                        <article class="experience-card">
+                            <h3 class="experience-title">Опыт 2</h3>
+                            <p class="experience-desc">Работал воровством. Воровал и продавал.</p>
+                        </article>
+                        <article class="experience-card">
+                            <h3 class="experience-title">Опыт 3</h3>
+                            <p class="experience-desc">Работал рэпером. Читал и пел.</p>
+                        </article>
                     </div>
-                    <div class="experience-card">
-                        <h3 class="experience-title">Опыт 2</h3>
-                        <p class="experience-desc">Работал воровством. Воровал и продавал.</p>
-                    </div>
-                    <div class="experience-card">
-                        <h3 class="experience-title">Опыт 3</h3>
-                        <p class="experience-desc">Работал рэпером. Читал и пел.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="footer">Футер</div>    
+                </section>
+            </main>
+
+            <footer class="footer"> <!-- Было: <div class="footer"> -->
+                <p>Футер</p> <!-- Добавили параграф для семантики -->
+            </footer>    
         </div>
     </body>
 </html>
 ```
 
-После этого добавим изменения и финализируем файл ```style.css```:
-
+Содержимое styles.css:
 ```css
 /* ===== БАЗОВЫЕ СТИЛИ ===== */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Современный шрифт для лучшей читаемости */
-    margin: 0; /* Убираем стандартные отступы браузера */
-    padding: 0; /* Убираем стандартные внутренние отступы */
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Красивый градиентный фон всей страницы */
-    min-height: 100vh; /* Минимальная высота равна высоте окна браузера */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
 }
 
 /* ===== КОНТЕЙНЕР СТРАНИЦЫ ===== */
+/* ИЗМЕНЕНИЕ: Добавили CSS Grid для основного макета страницы */
 .page-container {
-    max-width: 1200px; /* Максимальная ширина контента */
-    margin: 0 auto; /* Центрирование контейнера по горизонтали */
-    background: white; /* Белый фон для основного содержимого */
-    min-height: 100vh; /* Минимальная высота равна высоте окна браузера */
-    box-shadow: 0 0 30px rgba(0,0,0,0.1); /* Легкая тень вокруг всего контента */
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    min-height: 100vh;
+    box-shadow: 0 0 30px rgba(0,0,0,0.1);
+    /* Новое: Сеточный макет для семантических областей */
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas: 
+        "header"
+        "nav"
+        "main"
+        "footer";
 }
 
 /* ===== ШАПКА ===== */
 .header {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); /* Темный градиентный фон */
-    color: white; /* Белый цвет текста */
-    text-align: center; /* Выравнивание текста по центру */
-    padding: 30px; /* Внутренние отступы со всех сторон */
-    font-size: 28px; /* Размер шрифта */
-    font-weight: 300; /* Легкое начертание шрифта */
-    letter-spacing: 2px; /* Расстояние между буквами */
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    text-align: center;
+    padding: 30px;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    /* Новое: Привязка к области сетки */
+    grid-area: header;
 }
 
 /* ===== НАВИГАЦИЯ ===== */
 .nav {
-    background: #2c3e50; /* Темно-синий фон навигации */
-    padding: 20px 0; /* Вертикальные отступы */
+    background: #2c3e50;
+    padding: 20px 0;
+    /* Новое: Привязка к области сетки */
+    grid-area: nav;
 }
 
 .nav-list {
-    list-style: none; /* Убираем маркеры списка */
-    margin: 0; /* Убираем внешние отступы */
-    padding: 0; /* Убираем внутренние отступы */
-    display: flex; /* Горизонтальное расположение элементов */
-    justify-content: center; /* Выравнивание по центру */
-    gap: 25px; /* Расстояние между элементами навигации */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
 }
 
 .nav-item {
-    margin: 0; /* Убираем отступы у пунктов меню */
+    margin: 0;
 }
 
 .nav-link {
-    color: white; /* Белый цвет текста ссылок */
-    text-decoration: none; /* Убираем подчеркивание ссылок */
-    padding: 12px 25px; /* Отступы внутри ссылок */
-    border-radius: 25px; /* Скругленные углы (капсульная форма) */
-    transition: all 0.3s ease; /* Плавные анимации при изменении */
-    font-weight: 500; /* Средняя жирность шрифта */
+    color: white;
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .nav-link:hover {
-    background: rgba(255,255,255,0.1); /* Полупрозрачный белый фон при наведении */
-    transform: translateY(-2px); /* Легкое поднятие элемента при наведении */
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
 }
 
 /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
-.content {
-    padding: 40px; /* Внутренние отступы контента */
-    max-width: 900px; /* Максимальная ширина контента */
-    margin: 0 auto; /* Центрирование контента */
+/* ИЗМЕНЕНИЕ: Заменили .content на main для семантики */
+main.content {
+    padding: 40px;
+    max-width: 900px;
+    margin: 0 auto;
+    /* Новое: Привязка к области сетки */
+    grid-area: main;
 }
 
 /* ===== ГЛАВНАЯ СТРАНИЦА ===== */
 .profile-header {
-    text-align: center; /* Выравнивание по центру */
-    margin-bottom: 40px; /* Отступ снизу */
+    text-align: center;
+    margin-bottom: 40px;
 }
 
 .profile-title {
-    font-size: 32px; /* Размер шрифта заголовка */
-    color: #2c3e50; /* Темно-синий цвет текста */
-    margin-bottom: 10px; /* Отступ снизу */
-    font-weight: 300; /* Легкое начертание шрифта */
+    font-size: 32px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-weight: 300;
 }
 
 .profile-photo {
-    width: 220px; /* Фиксированная ширина фото */
-    height: 280px; /* Фиксированная высота фото */
-    border-radius: 15px; /* Скругленные углы фото */
-    object-fit: cover; /* Обрезка фото для сохранения пропорций */
-    margin: 20px auto; /* Центрирование и отступы */
-    border: 4px solid #667eea; /* Синяя рамка вокруг фото */
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3); /* Тень с синим оттенком */
+    width: 220px;
+    height: 280px;
+    border-radius: 15px;
+    object-fit: cover;
+    margin: 20px auto;
+    border: 4px solid #667eea;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
 .profile-name {
-    font-size: 24px; /* Размер шрифта имени */
-    color: #2c3e50; /* Темно-синий цвет текста */
-    margin: 10px 0; /* Вертикальные отступы */
-    font-weight: 500; /* Средняя жирность шрифта */
+    font-size: 24px;
+    color: #2c3e50;
+    margin: 10px 0;
+    font-weight: 500;
 }
 
 .profile-group {
-    font-size: 18px; /* Размер шрифта группы */
-    color: #7f8c8d; /* Серый цвет текста */
-    margin: 5px 0; /* Вертикальные отступы */
+    font-size: 18px;
+    color: #7f8c8d;
+    margin: 5px 0;
 }
 
 .about-me {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); /* Светлый градиентный фон */
-    padding: 25px; /* Внутренние отступы */
-    border-radius: 15px; /* Скругленные углы */
-    margin: 30px 0; /* Вертикальные отступы */
-    border-left: 5px solid #667eea; /* Синяя полоса слева */
-    font-size: 16px; /* Размер шрифта текста */
-    line-height: 1.8; /* Межстрочный интервал */
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 25px;
+    border-radius: 15px;
+    margin: 30px 0;
+    border-left: 5px solid #667eea;
+    font-size: 16px;
+    line-height: 1.8;
 }
 
 /* ===== НАВЫКИ ===== */
-.skills-container {
-    display: flex; /* Горизонтальное расположение навыков */
-    justify-content: center; /* Выравнивание по центру */
-    flex-wrap: wrap; /* Перенос на новую строку при необходимости */
-    gap: 15px; /* Расстояние между навыками */
-    margin: 30px 0; /* Вертикальные отступы */
+/* ИЗМЕНЕНИЕ: Добавили CSS Grid для навыков */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
 }
 
 .skill-tag {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); /* Голубой градиентный фон */
-    color: white; /* Белый цвет текста */
-    padding: 12px 25px; /* Внутренние отступы */
-    border-radius: 25px; /* Круглые углы (капсульная форма) */
-    font-weight: 600; /* Жирный шрифт */
-    font-size: 14px; /* Размер шрифта */
-    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3); /* Тень с голубым оттенком */
-    transition: all 0.3s ease; /* Плавные анимации при изменении */
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    transition: all 0.3s ease;
+    text-align: center;
 }
 
 .skill-tag:hover {
-    transform: translateY(-3px); /* Поднятие элемента при наведении */
-    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4); /* Увеличение тени при наведении */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
 }
 
 /* ===== ОПЫТ РАБОТЫ ===== */
 .experience-section {
-    margin-top: 50px; /* Отступ сверху */
+    margin-top: 50px;
 }
 
 .section-title {
-    font-size: 28px; /* Размер шрифта заголовка секции */
-    color: #2c3e50; /* Темно-синий цвет текста */
-    text-align: center; /* Выравнивание по центру */
-    margin-bottom: 30px; /* Отступ снизу */
-    font-weight: 300; /* Легкое начертание шрифта */
+    font-size: 28px;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+/* ИЗМЕНЕНИЕ: Добавили CSS Grid для карточек опыта */
+.experience-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
 }
 
 .experience-card {
-    background: white; /* Белый фон карточки */
-    padding: 25px; /* Внутренние отступы */
-    margin: 20px 0; /* Вертикальные отступы */
-    border-radius: 12px; /* Скругленные углы */
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08); /* Легкая тень */
-    border-left: 4px solid #667eea; /* Синяя полоса слева */
-    transition: transform 0.3s ease; /* Плавная анимация трансформации */
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    border-left: 4px solid #667eea;
+    transition: transform 0.3s ease;
 }
 
 .experience-card:hover {
-    transform: translateX(5px); /* Сдвиг вправо при наведении */
+    transform: translateX(5px);
 }
 
 .experience-title {
-    font-size: 20px; /* Размер шрифта заголовка опыта */
-    color: #2c3e50; /* Темно-синий цвет текста */
-    margin: 0 0 10px 0; /* Отступ снизу */
-    font-weight: 600; /* Жирный шрифт */
+    font-size: 20px;
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-weight: 600;
 }
 
 .experience-desc {
-    color: #7f8c8d; /* Серый цвет текста */
-    line-height: 1.6; /* Межстрочный интервал */
-    margin: 0; /* Убираем отступы */
+    color: #7f8c8d;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ===== НОВОСТИ ===== */
+.news-container {
+    display: grid;
+    gap: 25px;
+}
+
+.news-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    border-left: 4px solid #667eea;
+}
+
+.news-title {
+    font-size: 24px;
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.news-meta {
+    color: #95a5a6;
+    font-size: 14px;
+    margin: 0 0 15px 0;
+}
+
+.news-text {
+    color: #34495e;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* ===== ТОВАРЫ ===== */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.product-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-image {
+    width: 200px;
+    height: 250px;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border: 3px solid #f8f9fa;
+}
+
+.product-name {
+    font-size: 18px;
+    color: #2c3e50;
+    margin: 10px 0;
+    font-weight: 600;
+}
+
+.product-price {
+    font-size: 20px;
+    color: #e74c3c;
+    font-weight: 700;
+    margin: 5px 0;
+}
+
+/* ===== КОНТАКТЫ ===== */
+.contacts-container {
+    text-align: center;
+}
+
+.contact-info {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 25px;
+    margin: 20px 0;
+    border-radius: 15px;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.contact-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.contact-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 /* ===== ФУТЕР ===== */
 .footer {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); /* Темный градиентный фон */
-    color: white; /* Белый цвет текста */
-    text-align: center; /* Выравнивание по центру */
-    padding: 30px; /* Внутренние отступы */
-    margin-top: 50px; /* Отступ сверху */
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    text-align: center;
+    padding: 30px;
+    margin-top: 50px;
+    /* Новое: Привязка к области сетки */
+    grid-area: footer;
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+/* Новое: Медиа-запросы для мобильных устройств */
+@media (max-width: 768px) {
+    .nav-list {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .experience-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    main.content {
+        padding: 20px;
+    }
 }
 ```
 
 Полученный вид index.html:
 
 ![](images/1-1.png)
-![](images/1-2.png)
 
 Ссылка:<br>
 https://astafiev-rustam.github.io/frontend-and-backend-practice/
@@ -334,8 +466,6 @@ https://astafiev-rustam.github.io/frontend-and-backend-practice/
 Проведите аналогичные операции для каждой разработанной страницы ```news.html```, ```goods.html```, ```contacts.html``` в соответствие с собственным видением реализации. Обратите внимание, что стилизация элементов и их видение хоть и является индивидуальным, но общие принципы построения интерфейсов в рамках текущей задачи:
 - каждый логически и смыслово отличающийся должен отличаться и виузально;
 - необходимо соблюдение принципов единства интерфейсов для элементов одинакового назначения.
-
-**ОБРАТИТЕ ВНИМАНИЕ** Использование исключительно id без использования классов не является обязательным, то есть можно использовать известные Вам прочие механизмы настройки стилей, в которых Вы уверены.
 
 ### ЭТАП 3. Проверка результата
 
