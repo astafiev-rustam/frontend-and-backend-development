@@ -349,6 +349,7 @@ https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practic
 ```
 
 Получим следующий результат:
+
 ![](images/1-1.png)
 
 ### ЭТАП2. Самостоятельная работа
