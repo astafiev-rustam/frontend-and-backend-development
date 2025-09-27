@@ -16,16 +16,16 @@
 
 |Семестр|№ лекции|Тема лекции|№ практики|Тема практики|
 |---|---|---|---|---|
-|1|1||1|[Инициализация Git-репозитория, работа с GitHub и публикация проекта на GitHub Pages](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-1)|
-|1|||2|[Создание многостраничного сайта: семантическая разметка, навигация, якорные ссылки](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-2)|
+|1|1||1|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-1)|
+|1|||2|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-2)|
 |1|||3|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-3)|
 |1|||4|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-4)|
 |1|2||5|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-5)|
 |1|||6|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-6)|
 |1|||7|[Основы языка HTML](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-7)|
-|1|||8|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-8)|
-|1|3||9|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-9)|
-|1|||10|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-10)|
+|1|||8|[Основы CSS](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-8)|
+|1|3||9|[Семантические теги, основы навигации. Flex и Grid](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-9)|
+|1|||10|[Разработка форм и модальных окон](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-10)|
 |1|||11|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-11)|
 |1|||12|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-12)|
 |1|4||13|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-13)|
