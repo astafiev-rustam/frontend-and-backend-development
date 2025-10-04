@@ -26,8 +26,8 @@
 |1|||8|[Основы CSS](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-8)|
 |1|3||9|[Семантические теги, основы навигации. Flex и Grid](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-9)|
 |1|||10|[Разработка форм и модальных окон](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-10)|
-|1|||11|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-11)|
-|1|||12|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-12)|
+|1|||11|[БЭМ, переменные и состояния в CSS](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-11)|
+|1|||12|[Bootstrap](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-12)|
 |1|4||13|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-13)|
 |1|||14|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-14)|
 |1|||15|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-15)|
