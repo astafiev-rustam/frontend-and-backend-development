@@ -1,0 +1,319 @@
+/* Базовые сбросы и переменные */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #2563eb;
+    --text-color: #1e293b;
+    --text-light: #64748b;
+    --bg-color: #f8fafc;
+    --border-color: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --radius: 8px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Шапка */
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.header__title {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.header__subtitle {
+    font-size: 1.2rem;
+    color: var(--text-light);
+}
+
+/* Секции */
+.section {
+    background: white;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.section__title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+/* Контейнер для изображений */
+.image-container {
+    margin-bottom: 1.5rem;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius);
+    padding: 1rem;
+    background: #f8fafc;
+}
+
+/* 1. Базовое адаптивное изображение */
+.responsive-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radius);
+}
+
+/* 2. Picture element - стили такие же как у базового */
+picture {
+    display: block;
+}
+
+/* 3. Разные изображения для разных экранов - уже работает через HTML */
+
+/* 4. Retina изображение */
+.retina-image {
+    width: 100px;
+    height: 100px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 5. Object-fit демонстрация */
+.object-fit-demo {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.object-fit-item {
+    text-align: center;
+}
+
+.object-fit-item img {
+    width: 100%;
+    height: 200px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
+
+.object-fit-contain {
+    object-fit: contain;
+    background: #f1f5f9;
+}
+
+.object-fit-fill {
+    object-fit: fill;
+}
+
+/* 6. Адаптивная галерея БЕЗ ОБРЕЗКИ */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.gallery__item {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery__item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.gallery__image-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border-radius: var(--radius);
+    overflow: hidden;
+    padding: 0.5rem;
+}
+
+.gallery__image {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: calc(var(--radius) - 2px);
+    transition: var(--transition);
+}
+
+.gallery__item:hover .gallery__image {
+    transform: scale(1.03);
+}
+
+/* Блоки с объяснениями */
+.explanation {
+    background: #f1f5f9;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.explanation h3 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.explanation ul {
+    list-style-position: inside;
+}
+
+.explanation li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+}
+
+/* Подвал */
+.footer {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    color: var(--text-light);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .header__title {
+        font-size: 2rem;
+    }
+    
+    .section {
+        padding: 1rem;
+    }
+    
+    .object-fit-demo {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .gallery {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1.25rem;
+    }
+    
+    .gallery__image-container {
+        min-height: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header__title {
+        font-size: 1.5rem;
+    }
+    
+    .section__title {
+        font-size: 1.3rem;
+    }
+    
+    .gallery__item {
+        padding: 0.75rem;
+    }
+    
+    .gallery__image-container {
+        min-height: 150px;
+        padding: 0.25rem;
+    }
+}
+
+/* Поддержка высоких экранов */
+@media (min-height: 800px) and (min-width: 1200px) {
+    .gallery__image-container {
+        min-height: 250px;
+    }
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-color: #e2e8f0;
+        --bg-color: #0f172a;
+        --border-color: #334155;
+    }
+    
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+    
+    .section, .header, .footer {
+        background: #1e293b;
+    }
+    
+    .explanation {
+        background: #334155;
+    }
+    
+    .object-fit-contain {
+        background: #475569;
+    }
+}
+
+/* Адаптивность для печати */
+@media print {
+    .section {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .gallery__item {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    
+    .gallery__image-container {
+        background: white;
+        padding: 0.25rem;
+    }
+}

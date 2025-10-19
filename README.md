@@ -8,1038 +8,606 @@
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
 Ссылка на материал: <br>
-https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-15
+https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-16
 
 ---
 
-# Практическое занятие 15: Комбинирование методов адаптивной вёрстки
+# Практическое занятие 16: Отзывчивое использование изображений. Адаптивность форм, тиблиц и масштабирование элементов
 
 В рамках данного занятия будут использоваться основные подходы к адаптивной вёрстке, о которой речь велась на лекциях.
 
 Для восполнения знаний по данной теме рекомендуется повторить материалы лекции. Дополнительно можно ознакомиться с материалом по ссылке:
-https://habr.com/ru/companies/simpleone/articles/881168/
+https://habr.com/ru/articles/572368/
 
-## Пример в проекте
-В качестве примера рассмотрим следующую модернизацию нашего проекта на примере главной страницы.
+## Примеры
+Выполним примеры и рассмотрим пошаговую подготовку примера с разными способами адаптивности изображений и ресурсов.
 
+### Шаг 1: Подготовка файловой структуры
+```
+project/
+├── index.html
+├── styles.css
+└── images/
+    ├── landscape.jpg
+    ├── portrait.jpg
+    ├── portrait.webp
+    ├── wide-desktop.jpg
+    ├── tablet.jpg
+    ├── mobile.jpg
+    ├── icon@1x.png
+    ├── icon@2x.png
+    ├── square.jpg
+    ├── gallery1.jpg
+    ├── gallery2.jpg
+    ├── gallery3.jpg
+    └── gallery4.jpg
+```
+
+### Шаг 2: Создание HTML структуры
+1. **Базовая разметка** - создаем контейнер, шапку, основные секции и подвал
+2. **Семантические теги** - используем header, main, section, footer для доступности
+3. **Секции по техникам** - каждая секция демонстрирует отдельную технику адаптивности
+
+### Шаг 3: Реализация техник адаптивности
+
+#### Техника 1: Базовое адаптивное изображение
+```css
+.responsive-image {
+    width: 100%;      /* Занимает всю ширину контейнера */
+    height: auto;     /* Высота рассчитывается автоматически */
+    display: block;   /* Убирает лишние отступы */
+}
+```
+**Что происходит:** Изображение масштабируется пропорционально ширине родительского контейнера.
+
+#### Техника 2: Picture element с форматами
+```html
+<picture>
+    <source srcset="images/portrait.webp" type="image/webp">
+    <source srcset="images/portrait.jpg" type="image/jpeg">
+    <img src="images/portrait.jpg" class="responsive-image">
+</picture>
+```
+**Что происходит:** Браузер выбирает WebP если поддерживает, иначе JPEG.
+
+#### Техника 3: Разные изображения для разных экранов
+```html
+<picture>
+    <source media="(min-width: 1200px)" srcset="images/wide-desktop.jpg">
+    <source media="(min-width: 768px)" srcset="images/tablet.jpg">
+    <img src="images/mobile.jpg" class="responsive-image">
+</picture>
+```
+**Что происходит:** Загрузка оптимизированных версий изображений для разных устройств.
+
+#### Техника 4: Retina display поддержка
+```html
+<img src="images/icon@1x.png" 
+     srcset="images/icon@1x.png 1x, images/icon@2x.png 2x"
+     class="retina-image">
+```
+**Что происходит:** На Retina-экранах автоматически загружается @2x версия.
+
+#### Техника 5: Object-fit свойства
+```css
+.object-fit-cover { object-fit: cover; }    /* Заполняет с обрезкой */
+.object-fit-contain { object-fit: contain; } /* Вписывает полностью */
+.object-fit-fill { object-fit: fill; }      /* Растягивает */
+```
+**Что происходит:** Контроль заполнения контейнера изображением.
+
+#### Техника 6: Адаптивная галерея
+```css
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 колонки на десктопе */
+}
+
+@media (max-width: 768px) {
+    .gallery {
+        grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшете */
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery {
+        grid-template-columns: 1fr; /* 1 колонка на мобильном */
+    }
+}
+```
+**Что происходит:** Автоматическое перестроение сетки при изменении размера экрана.
+
+### Шаг 4: Тестирование адаптивности
+
+1. **Изменение размера окна** - плавно меняйте ширину браузера
+2. **DevTools Device Mode** - тестируйте на разных устройствах
+3. **Проверка Retina** - на MacBook Pro или других Retina-устройствах
+4. **Сеть в DevTools** - смотрите какие изображения загружаются
+
+### Шаг 5: Оптимизации
+
+1. **Сжатие изображений** - используйте Squoosh.app или ImageOptim
+2. **Правильные форматы** - WebP для фото, PNG для графики
+3. **Оптимальные размеры** - готовьте изображения под распространенные breakpoints
+4. **Lazy loading** - добавьте `loading="lazy"` для изображений ниже fold
+
+### 1. index.html
 ```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная - StudentDev Portfolio</title>
-    <link rel="stylesheet" href="styles/styles.css">
+    <title>Адаптивные изображения - Демо</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="page">
-        <!-- Header -->
+    <div class="container">
         <header class="header">
-            <div class="container">
-                <div class="header__content">
-                    <h1 class="header__title">Алексей Петров</h1>
-                    <p class="header__subtitle">Студент-разработчик</p>
-                </div>
-            </div>
+            <h1 class="header__title">Адаптивные изображения</h1>
+            <p class="header__subtitle">Демонстрация современных техник</p>
         </header>
 
-        <!-- Navigation -->
-        <nav class="nav">
-            <div class="container">
-                <ul class="nav__list">
-                    <li class="nav__item nav__item--active">
-                        <a href="index.html" class="nav__link">Главная</a>
-                    </li>
-                    <li class="nav__item">
-                        <a href="pages/projects.html" class="nav__link">Проекты</a>
-                    </li>
-                    <li class="nav__item">
-                        <a href="pages/diary.html" class="nav__link">Дневник</a>
-                    </li>
-                    <li class="nav__item">
-                        <a href="pages/contacts.html" class="nav__link">Контакты</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Main Content -->
         <main class="main">
-            <div class="container">
-                <!-- Hero Section -->
-                <section class="hero">
-                    <div class="hero__content">
-                        <div class="hero__image">
-                            <img src="images/photo.jpg" alt="Фото студента" class="hero__photo">
-                        </div>
-                        <div class="hero__info">
-                            <h2 class="hero__greeting">Привет! Я студент</h2>
-                            <p class="hero__description">
-                                Факультет информационных технологий, группа ИТ-21-1<br>
-                                Увлекаюсь веб-разработкой и созданием современных интерфейсов
-                            </p>
-                            <button class="button button--primary hero__button">
-                                Скачать резюме
-                            </button>
-                        </div>
-                    </div>
-                </section>
+            <!-- Секция 1: Простое адаптивное изображение -->
+            <section class="section">
+                <h2 class="section__title">1. Базовое адаптивное изображение</h2>
+                <div class="image-container">
+                    <img src="images/landscape.jpg" 
+                         alt="Красивый пейзаж с горами и озером"
+                         class="responsive-image">
+                </div>
+                <div class="explanation">
+                    <h3>Что происходит:</h3>
+                    <ul>
+                        <li>Изображение занимает 100% ширины контейнера</li>
+                        <li>Высота автоматически рассчитывается для сохранения пропорций</li>
+                        <li>Работает на всех устройствах</li>
+                    </ul>
+                </div>
+            </section>
 
-                <!-- Skills Section -->
-                <section class="skills">
-                    <h2 class="section-title">Мои навыки</h2>
-                    <div class="skills__grid">
-                        <div class="skill">
-                            <div class="skill__header">
-                                <span class="skill__name">HTML/CSS</span>
-                                <span class="skill__percent">90%</span>
-                            </div>
-                            <div class="skill__progress">
-                                <div class="skill__progress-bar" style="width: 90%"></div>
-                            </div>
-                        </div>
-                        <div class="skill">
-                            <div class="skill__header">
-                                <span class="skill__name">JavaScript</span>
-                                <span class="skill__percent">80%</span>
-                            </div>
-                            <div class="skill__progress">
-                                <div class="skill__progress-bar" style="width: 80%"></div>
-                            </div>
-                        </div>
-                        <div class="skill">
-                            <div class="skill__header">
-                                <span class="skill__name">Bootstrap</span>
-                                <span class="skill__percent">85%</span>
-                            </div>
-                            <div class="skill__progress">
-                                <div class="skill__progress-bar" style="width: 85%"></div>
-                            </div>
-                        </div>
-                        <div class="skill">
-                            <div class="skill__header">
-                                <span class="skill__name">React</span>
-                                <span class="skill__percent">60%</span>
-                            </div>
-                            <div class="skill__progress">
-                                <div class="skill__progress-bar" style="width: 60%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            <!-- Секция 2: Picture element с разными версиями -->
+            <section class="section">
+                <h2 class="section__title">2. Picture element с форматами</h2>
+                <div class="image-container">
+                    <picture>
+                        <!-- WebP для современных браузеров -->
+                        <source srcset="images/portrait.webp" type="image/webp">
+                        <!-- JPEG для старых браузеров -->
+                        <source srcset="images/portrait.jpg" type="image/jpeg">
+                        <!-- Фолбэк -->
+                        <img src="images/portrait.jpg" 
+                             alt="Портрет человека"
+                             class="responsive-image">
+                    </picture>
+                </div>
+                <div class="explanation">
+                    <h3>Что происходит:</h3>
+                    <ul>
+                        <li>Браузер выбирает лучший формат (WebP или JPEG)</li>
+                        <li>Автоматическое переключение между форматами</li>
+                        <li>Фолбэк для старых браузеров</li>
+                    </ul>
+                </div>
+            </section>
 
-                <!-- Projects Preview -->
-                <section class="projects-preview">
-                    <h2 class="section-title">Лучшие проекты</h2>
-                    <div class="projects-preview__grid">
-                        <article class="project-card">
-                            <div class="project-card__image">
-                                <img src="images/project1.jpg" alt="Личный сайт">
-                            </div>
-                            <div class="project-card__content">
-                                <h3 class="project-card__title">Личный сайт</h3>
-                                <p class="project-card__description">
-                                    Адаптивный сайт-портфолио на HTML и CSS
-                                </p>
-                                <div class="project-card__tags">
-                                    <span class="tag">HTML</span>
-                                    <span class="tag">CSS</span>
-                                    <span class="tag">JavaScript</span>
-                                </div>
-                            </div>
-                        </article>
-                        <article class="project-card">
-                            <div class="project-card__image">
-                                <img src="images/project2.jpg" alt="Todo приложение">
-                            </div>
-                            <div class="project-card__content">
-                                <h3 class="project-card__title">Todo приложение</h3>
-                                <p class="project-card__description">
-                                    Приложение для управления задачами
-                                </p>
-                                <div class="project-card__tags">
-                                    <span class="tag">JavaScript</span>
-                                    <span class="tag">LocalStorage</span>
-                                </div>
-                            </div>
-                        </article>
-                        <article class="project-card">
-                            <div class="project-card__image">
-                                <img src="images/project3.jpg" alt="Интернет-магазин">
-                            </div>
-                            <div class="project-card__content">
-                                <h3 class="project-card__title">Интернет-магазин</h3>
-                                <p class="project-card__description">
-                                    Прототип магазина с корзиной товаров
-                                </p>
-                                <div class="project-card__tags">
-                                    <span class="tag">React</span>
-                                    <span class="tag">API</span>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-                </section>
-            </div>
-        </main>
+            <!-- Секция 3: Разные изображения для разных размеров экрана -->
+            <section class="section">
+                <h2 class="section__title">3. Разные изображения для разных экранов</h2>
+                <div class="image-container">
+                    <picture>
+                        <!-- Большое изображение для десктопов -->
+                        <source media="(min-width: 1200px)" 
+                                srcset="images/wide-desktop.jpg">
+                        <!-- Среднее для планшетов -->
+                        <source media="(min-width: 768px)" 
+                                srcset="images/tablet.jpg">
+                        <!-- Маленькое для мобильных -->
+                        <img src="images/mobile.jpg" 
+                             alt="Адаптивное изображение для разных устройств"
+                             class="responsive-image">
+                    </picture>
+                </div>
+                <div class="explanation">
+                    <h3>Что происходит:</h3>
+                    <ul>
+                        <li>Десктопы: wide-desktop.jpg (1200px+)</li>
+                        <li>Планшеты: tablet.jpg (768px-1199px)</li>
+                        <li>Мобильные: mobile.jpg (до 767px)</li>
+                        <li>Браузер сам выбирает подходящее изображение</li>
+                    </ul>
+                </div>
+            </section>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container">
-                <div class="footer__content">
-                    <p class="footer__copyright">&copy; 2025 StudentDev Portfolio</p>
-                    <div class="footer__links">
-                        <a href="mailto:student@edu.ru" class="footer__link">student@edu.ru</a>
-                        <a href="https://github.com" class="footer__link">GitHub</a>
+            <!-- Секция 4: Retina display поддержка -->
+            <section class="section">
+                <h2 class="section__title">4. Поддержка Retina дисплеев</h2>
+                <div class="image-container">
+                    <img src="images/icon@1x.png" 
+                         srcset="images/icon@1x.png 1x, images/icon@2x.png 2x"
+                         alt="Иконка с поддержкой Retina"
+                         class="retina-image">
+                </div>
+                <div class="explanation">
+                    <h3>Что происходит:</h3>
+                    <ul>
+                        <li>Обычные экраны: icon@1x.png</li>
+                        <li>Retina экраны: icon@2x.png (в 2 раза четче)</li>
+                        <li>Автоматическое определение плотности пикселей</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Секция 5: Object-fit демонстрация -->
+            <section class="section">
+                <h2 class="section__title">5. Object-fit свойства</h2>
+                <div class="object-fit-demo">
+                    <div class="object-fit-item">
+                        <img src="images/square.jpg" 
+                             alt="Cover пример"
+                             class="object-fit-cover">
+                        <span>object-fit: cover</span>
+                    </div>
+                    <div class="object-fit-item">
+                        <img src="images/square.jpg" 
+                             alt="Contain пример"
+                             class="object-fit-contain">
+                        <span>object-fit: contain</span>
+                    </div>
+                    <div class="object-fit-item">
+                        <img src="images/square.jpg" 
+                             alt="Fill пример"
+                             class="object-fit-fill">
+                        <span>object-fit: fill</span>
                     </div>
                 </div>
-            </div>
+                <div class="explanation">
+                    <h3>Что происходит:</h3>
+                    <ul>
+                        <li><strong>cover</strong> - заполняет контейнер, обрезая края</li>
+                        <li><strong>contain</strong> - вписывает полностью, могут быть поля</li>
+                        <li><strong>fill</strong> - растягивает, искажая пропорции</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Секция 6: Адаптивная галерея без обрезки -->
+            <section class="section">
+                <h2 class="section__title">6. Адаптивная галерея (без обрезки)</h2>
+                <div class="gallery">
+                    <div class="gallery__item">
+                        <div class="gallery__image-container">
+                            <img src="images/gallery1.jpg" 
+                                alt="Галерея 1 - Горный пейзаж"
+                                class="gallery__image">
+                        </div>
+                    </div>
+                    <div class="gallery__item">
+                        <div class="gallery__image-container">
+                            <img src="images/gallery2.jpg" 
+                                alt="Галерея 2 - Городской вид"
+                                class="gallery__image">
+                        </div>
+                    </div>
+                    <div class="gallery__item">
+                        <div class="gallery__image-container">
+                            <img src="images/gallery3.jpg" 
+                                alt="Галерея 3 - Природа"
+                                class="gallery__image">
+                        </div>
+                    </div>
+                    <div class="gallery__item">
+                        <div class="gallery__image-container">
+                            <img src="images/gallery4.jpg" 
+                                alt="Галерея 4 - Архитектура"
+                                class="gallery__image">
+                        </div>
+                    </div>
+                </div>
+                <div class="explanation">
+                    <h3>Что происходит:</h3>
+                    <ul>
+                        <li><strong>На десктопах:</strong> 4 изображения в ряд, пропорциональное масштабирование</li>
+                        <li><strong>На мобильных:</strong> 1 изображение в ряд, полная видимость</li>
+                        <li><strong>Особенности:</strong> Никакой обрезки, плавное масштабирование, сохранение пропорций</li>
+        </ul>
+    </div>
+</section>
+        </main>
+
+        <footer class="footer">
+            <p>Измените размер окна браузера чтобы увидеть адаптивность в действии!</p>
         </footer>
     </div>
 </body>
 </html>
 ```
 
-styles.css:
-
+### 2. styles.css
 ```css
-/* CSS Variables */
-:root {
-    /* Colors */
-    --primary-color: #2563eb;
-    --primary-dark: #1d4ed8;
-    --primary-light: #3b82f6;
-    --secondary-color: #64748b;
-    --accent-color: #f59e0b;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --error-color: #ef4444;
-    
-    /* Text Colors */
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-light: #94a3b8;
-    --text-white: #ffffff;
-    
-    /* Background Colors */
-    --bg-body: #f8fafc;
-    --bg-card: #ffffff;
-    --bg-header: #1e293b;
-    --bg-footer: #1e293b;
-    
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    --gradient-dark: linear-gradient(135deg, var(--bg-header), #334155);
-    
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    
-    /* Border Radius */
-    --radius-sm: 0.375rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-    
-    /* Spacing */
-    --space-xs: 0.5rem;
-    --space-sm: 0.75rem;
-    --space-md: 1rem;
-    --space-lg: 1.5rem;
-    --space-xl: 2rem;
-    --space-2xl: 3rem;
-    
-    /* Transitions */
-    --transition: all 0.3s ease;
-}
-
-/* Reset and Base Styles */
+/* Базовые сбросы и переменные */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+:root {
+    --primary-color: #2563eb;
+    --text-color: #1e293b;
+    --text-light: #64748b;
+    --bg-color: #f8fafc;
+    --border-color: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --radius: 8px;
+    --transition: all 0.3s ease;
+}
+
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Segoe UI', system-ui, sans-serif;
     line-height: 1.6;
-    color: var(--text-primary);
-    background-color: var(--bg-body);
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    padding: 20px;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--space-md);
 }
 
-/* Page Layout */
-.page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Header */
+/* Шапка */
 .header {
-    background: var(--gradient-dark);
-    color: var(--text-white);
-    padding: var(--space-xl) 0;
     text-align: center;
-}
-
-.header__content {
-    max-width: 600px;
-    margin: 0 auto;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
 
 .header__title {
     font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: var(--space-xs);
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
 }
 
 .header__subtitle {
     font-size: 1.2rem;
-    opacity: 0.9;
+    color: var(--text-light);
 }
 
-/* Navigation */
-.nav {
-    background: var(--primary-color);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: var(--shadow-md);
+/* Секции */
+.section {
+    background: white;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
 
-.nav__list {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    gap: var(--space-lg);
-    padding: var(--space-md) 0;
-}
-
-.nav__item {
-    margin: 0;
-}
-
-.nav__link {
-    display: block;
-    padding: var(--space-sm) var(--space-md);
-    color: var(--text-white);
-    text-decoration: none;
-    border-radius: var(--radius-md);
-    transition: var(--transition);
-    font-weight: 500;
-}
-
-.nav__link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-1px);
-}
-
-.nav__item--active .nav__link {
-    background: rgba(255, 255, 255, 0.2);
-    font-weight: 600;
-}
-
-/* Main Content */
-.main {
-    flex: 1;
-    padding: var(--space-2xl) 0;
-}
-
-/* Section Title */
-.section-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    text-align: center;
-    margin-bottom: var(--space-2xl);
-}
-
-/* Hero Section */
-.hero {
-    margin-bottom: var(--space-2xl);
-}
-
-.hero__content {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: var(--space-2xl);
-    align-items: center;
-    background: var(--bg-card);
-    padding: var(--space-2xl);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-}
-
-.hero__image {
-    text-align: center;
-}
-
-.hero__photo {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid var(--primary-color);
-    box-shadow: var(--shadow-lg);
-}
-
-.hero__greeting {
+.section__title {
     font-size: 1.8rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-md);
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
 }
 
-.hero__description {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    margin-bottom: var(--space-lg);
+/* Контейнер для изображений */
+.image-container {
+    margin-bottom: 1.5rem;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius);
+    padding: 1rem;
+    background: #f8fafc;
 }
 
-.hero__button {
-    font-size: 1.1rem;
-    padding: var(--space-md) var(--space-lg);
+/* 1. Базовое адаптивное изображение */
+.responsive-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radius);
 }
 
-/* Skills Section */
-.skills {
-    margin-bottom: var(--space-2xl);
+/* 2. Picture element - стили такие же как у базового */
+picture {
+    display: block;
 }
 
-.skills__grid {
-    display: grid;
-    gap: var(--space-lg);
-    max-width: 600px;
+/* 3. Разные изображения для разных экранов - уже работает через HTML */
+
+/* 4. Retina изображение */
+.retina-image {
+    width: 100px;
+    height: 100px;
+    display: block;
     margin: 0 auto;
 }
 
-.skill {
-    background: var(--bg-card);
-    padding: var(--space-lg);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-}
-
-.skill__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-sm);
-}
-
-.skill__name {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.skill__percent {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.skill__progress {
-    height: 8px;
-    background: #e2e8f0;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-}
-
-.skill__progress-bar {
-    height: 100%;
-    background: var(--primary-color);
-    border-radius: var(--radius-sm);
-    transition: width 1s ease-in-out;
-}
-
-/* Projects Preview */
-.projects-preview {
-    margin-bottom: var(--space-2xl);
-}
-
-.projects-preview__grid {
+/* 5. Object-fit демонстрация */
+.object-fit-demo {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-/* Project Card */
-.project-card {
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    transition: var(--transition);
+.object-fit-item {
+    text-align: center;
 }
 
-.project-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
-
-.project-card__image {
-    height: 200px;
-    overflow: hidden;
-}
-
-.project-card__image img {
+.object-fit-item img {
     width: 100%;
-    height: 100%;
+    height: 200px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
+
+.object-fit-contain {
+    object-fit: contain;
+    background: #f1f5f9;
+}
+
+.object-fit-fill {
+    object-fit: fill;
+}
+
+/* 6. Адаптивная галерея */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.gallery__item {
+    overflow: hidden;
+    border-radius: var(--radius);
+}
+
+.gallery__image {
+    width: 100%;
+    height: 200px;
     object-fit: cover;
     transition: var(--transition);
 }
 
-.project-card:hover .project-card__image img {
+.gallery__image:hover {
     transform: scale(1.05);
 }
 
-.project-card__content {
-    padding: var(--space-lg);
+/* Блоки с объяснениями */
+.explanation {
+    background: #f1f5f9;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary-color);
 }
 
-.project-card__title {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-sm);
-}
-
-.project-card__description {
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: var(--space-md);
-}
-
-.project-card__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xs);
-    margin-bottom: var(--space-md);
-}
-
-.project-card__button {
-    width: 100%;
-}
-
-/* Tag Component */
-.tag {
-    display: inline-block;
-    padding: var(--space-xs) var(--space-sm);
-    background: var(--primary-light);
-    color: var(--text-white);
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-/* Button Component */
-.button {
-    display: inline-block;
-    padding: var(--space-sm) var(--space-lg);
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-    font-family: inherit;
-}
-
-.button--primary {
-    background: var(--primary-color);
-    color: var(--text-white);
-}
-
-.button--primary:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-}
-
-.button--outline {
-    background: transparent;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
-}
-
-.button--outline:hover {
-    background: var(--primary-color);
-    color: var(--text-white);
-    transform: translateY(-2px);
-}
-
-/* Projects Page Specific Styles */
-.projects__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-2xl);
-    flex-wrap: wrap;
-    gap: var(--space-md);
-}
-
-.projects__filters {
-    display: flex;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
-}
-
-.filter {
-    padding: var(--space-sm) var(--space-md);
-    background: var(--bg-card);
-    border: 2px solid #e2e8f0;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: var(--transition);
-    font-weight: 500;
-}
-
-.filter:hover {
-    border-color: var(--primary-color);
+.explanation h3 {
+    margin-bottom: 1rem;
     color: var(--primary-color);
 }
 
-.filter--active {
-    background: var(--primary-color);
-    color: var(--text-white);
-    border-color: var(--primary-color);
+.explanation ul {
+    list-style-position: inside;
 }
 
-.projects__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: var(--space-lg);
+.explanation li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
 }
 
-/* Diary Page Specific Styles */
-.timeline {
-    max-width: 800px;
-    margin: 0 auto var(--space-2xl);
-}
-
-.timeline__item {
-    display: grid;
-    grid-template-columns: 150px 1fr;
-    gap: var(--space-lg);
-    padding: var(--space-lg);
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--space-md);
-    box-shadow: var(--shadow-md);
-    position: relative;
-}
-
-.timeline__item::before {
-    content: '';
-    position: absolute;
-    left: 170px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #e2e8f0;
-}
-
-.timeline__date {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.timeline__content {
-    position: relative;
-}
-
-.timeline__title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-xs);
-}
-
-.timeline__description {
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: var(--space-sm);
-}
-
-.timeline__status {
-    display: inline-block;
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.timeline__status--completed {
-    background: var(--success-color);
-    color: white;
-}
-
-.timeline__status--in-progress {
-    background: var(--warning-color);
-    color: white;
-}
-
-.timeline__status--planned {
-    background: var(--secondary-color);
-    color: white;
-}
-
-/* Courses Section */
-.courses {
-    margin-bottom: var(--space-2xl);
-}
-
-.courses__title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-lg);
-    text-align: center;
-}
-
-.courses__grid {
-    display: grid;
-    gap: var(--space-lg);
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.course {
-    background: var(--bg-card);
-    padding: var(--space-lg);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-}
-
-.course__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--space-sm);
-}
-
-.course__name {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.course__percent {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.course__progress {
-    height: 8px;
-    background: #e2e8f0;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-}
-
-.course__progress-bar {
-    height: 100%;
-    background: var(--primary-color);
-    border-radius: var(--radius-sm);
-    transition: width 1s ease-in-out;
-}
-
-/* Add Entry Form */
-.add-entry {
-    background: var(--bg-card);
-    padding: var(--space-2xl);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.add-entry__title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-lg);
-    text-align: center;
-}
-
-.add-entry__form {
-    display: grid;
-    gap: var(--space-lg);
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-label {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-xs);
-}
-
-.form-input,
-.form-textarea {
-    padding: var(--space-md);
-    border: 2px solid #e2e8f0;
-    border-radius: var(--radius-md);
-    font-family: inherit;
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.form-input:focus,
-.form-textarea:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-/* Contacts Page Specific Styles */
-.contacts__content {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: var(--space-2xl);
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-.contact-form {
-    background: var(--bg-card);
-    padding: var(--space-2xl);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-}
-
-.form {
-    display: grid;
-    gap: var(--space-lg);
-}
-
-.form__group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form__label {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-xs);
-}
-
-.form__input,
-.form__textarea {
-    padding: var(--space-md);
-    border: 2px solid #e2e8f0;
-    border-radius: var(--radius-md);
-    font-family: inherit;
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.form__input:focus,
-.form__textarea:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form__textarea {
-    resize: vertical;
-    min-height: 120px;
-}
-
-.form__button {
-    font-size: 1.1rem;
-    padding: var(--space-md) var(--space-lg);
-}
-
-.contact-info {
-    background: var(--bg-card);
-    padding: var(--space-2xl);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    height: fit-content;
-}
-
-.contact-info__title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-lg);
-    text-align: center;
-}
-
-.contact-info__items {
-    display: grid;
-    gap: var(--space-lg);
-}
-
-.contact-item {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-md);
-    padding: var(--space-lg);
-    background: #f8fafc;
-    border-radius: var(--radius-lg);
-    transition: var(--transition);
-}
-
-.contact-item:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.contact-item__icon {
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.contact-item__content {
-    flex: 1;
-}
-
-.contact-item__title {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--space-xs);
-}
-
-.contact-item__value {
-    color: var(--text-secondary);
-}
-
-/* Footer */
+/* Подвал */
 .footer {
-    background: var(--gradient-dark);
-    color: var(--text-white);
-    padding: var(--space-xl) 0;
-    margin-top: auto;
-}
-
-.footer__content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-md);
-}
-
-.footer__copyright {
-    margin: 0;
-    opacity: 0.9;
-}
-
-.footer__links {
-    display: flex;
-    gap: var(--space-lg);
-}
-
-.footer__link {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
     color: var(--text-light);
-    text-decoration: none;
-    transition: var(--transition);
 }
 
-.footer__link:hover {
-    color: var(--text-white);
-}
-
-/* Responsive Design */
+/* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
-    .container {
-        padding: 0 var(--space-sm);
+    body {
+        padding: 10px;
     }
     
     .header__title {
         font-size: 2rem;
     }
     
-    .nav__list {
-        flex-direction: column;
-        gap: var(--space-xs);
-        align-items: center;
+    .section {
+        padding: 1rem;
     }
     
-    .hero__content {
+    .object-fit-demo {
         grid-template-columns: 1fr;
-        text-align: center;
-        gap: var(--space-lg);
+        gap: 1rem;
     }
     
-    .hero__photo {
-        width: 150px;
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .gallery__image {
         height: 150px;
-    }
-    
-    .projects__header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .projects__filters {
-        justify-content: center;
-    }
-    
-    .projects__grid,
-    .projects-preview__grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .timeline__item {
-        grid-template-columns: 1fr;
-        gap: var(--space-md);
-    }
-    
-    .timeline__item::before {
-        display: none;
-    }
-    
-    .contacts__content {
-        grid-template-columns: 1fr;
-    }
-    
-    .footer__content {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .footer__links {
-        justify-content: center;
     }
 }
 
 @media (max-width: 480px) {
+    .header__title {
+        font-size: 1.5rem;
+    }
+    
+    .section__title {
+        font-size: 1.3rem;
+    }
+    
+    .gallery {
+        grid-template-columns: 1fr;
+    }
+    
+    .object-fit-item img {
+        height: 150px;
+    }
+}
+
+/* Поддержка высоких экранов */
+@media (min-height: 800px) and (min-width: 1200px) {
+    .gallery__image {
+        height: 250px;
+    }
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
     :root {
-        --space-xl: 1.5rem;
-        --space-2xl: 2rem;
+        --text-color: #e2e8f0;
+        --bg-color: #0f172a;
+        --border-color: #334155;
     }
     
-    .section-title {
-        font-size: 1.5rem;
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
     }
     
-    .hero__greeting {
-        font-size: 1.5rem;
+    .section, .header, .footer {
+        background: #1e293b;
     }
     
-    .button {
-        width: 100%;
+    .explanation {
+        background: #334155;
+    }
+    
+    .object-fit-contain {
+        background: #475569;
+    }
+}
+
+/* Адаптивность для печати */
+@media print {
+    .section {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 ```
 
 ## Самостоятельная работа
-В рамках самостоятельной работы необходимо реализовать средства адаптивности и для остальных страниц проекта (по аналогии с главной страницей).
-
-Обратите внимание, что адаптирование изображений будет выступать в качестве следующих тем, в том числе анализ доступности и метрики.
+В рамках самостоятельной работы необходимо реализовать средства адаптивности изображений для страниц проекта (по аналогии с главной страницей).
