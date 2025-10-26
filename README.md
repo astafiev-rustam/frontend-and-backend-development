@@ -20,6 +20,24 @@ https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practic
 
 https://web-standards.ru/articles/a11y-audit-basics/
 
+# Зачем нужна доступность (A11y) и что мы будем делать?
+Доступность (Accessibility, A11y) — это практика разработки веб-интерфейсов так, чтобы ими могли пользоваться люди с различными ограничениями: слабовидящие, незрячие, люди с двигательными нарушениями, когнитивными расстройствами и другими особенностями.
+Мы не всегда видим этих пользователей, но они существуют — и для многих из них доступность является не опцией, а единственным способом взаимодействия с цифровыми продуктами.
+
+На этом занятии:
+- Узнаем, как проводить A11y-аудит — находить типичные проблемы доступности.
+- Научимся исправлять их с помощью:
+- Семантической HTML-разметки
+- ARIA-атрибутов
+- Управления с клавиатуры
+- Корректной работы со скринридерами
+
+Каждый пример ниже построен по схеме:
+- Исходный код — пример с типичными ошибками доступности.
+- Проблемы — что именно мешает пользователям.
+- Исправленный код — готовое доступное решение.
+- Что изменилось и почему — подробное описание правок и их значения.
+
 ## Примеры
 Рассмотрим несколько примеров на обеспечение доступности в веб-приложениях.
 
@@ -60,6 +78,66 @@ https://web-standards.ru/articles/a11y-audit-basics/
 - Нет визуального индикатора фокуса
 
 **Вот так это можно исправить:**
+
+1. Контейнер навигации
+
+    <!-- БЫЛО -->
+    <div class="nav">
+      <!-- Простой div без семантики -->
+    </div>
+    
+    <!-- СТАЛО -->
+    <nav aria-label="Основная навигация">
+      <!-- 
+        <nav> - семантический тег для навигации
+        aria-label - описывает назначение для скринридеров
+      -->
+    </nav>
+    
+2. Элементы меню
+
+    <!-- БЫЛО -->
+    <div class="nav-item" onclick="showPage('home')">Главная</div>
+    <!-- 
+      Проблемы:
+      - div не семантичен для навигации
+      - onclick недоступен с клавиатуры
+      - нет состояния текущей страницы
+    -->
+    
+    <!-- СТАЛО -->
+    <ul>
+      <li>
+        <a href="#home" class="nav-link" aria-current="page">Главная</a>
+        <!--
+          <a> - семантическая ссылка, доступна с клавиатуры
+          href - работает без JavaScript
+          aria-current="page" - указывает текущую страницу
+        -->
+      </li>
+    </ul>
+    
+3. Стили фокуса
+
+    /* БЫЛО */
+    .nav-item {
+      padding: 10px;
+      cursor: pointer;
+      background: #f0f0f0;
+      /* Нет индикатора фокуса для клавиатуры */
+    }
+    
+    /* СТАЛО */
+    .nav-link:focus {
+      outline: none;
+      border-color: #0066cc;
+      background: #e6f3ff;
+      /* Четкий визуальный индикатор фокуса */
+    }
+
+    
+**Полный код исправления:**
+
 ```html
 <!DOCTYPE html>
 <html lang="ru">
@@ -169,6 +247,60 @@ https://web-standards.ru/articles/a11y-audit-basics/
 - Нет текстовой альтернативы для иконки
 
 **Вот так это можно исправить:**
+
+1. Структура кнопки
+
+    <!-- БЫЛО -->
+    <button class="close-btn">x</button>
+    <!-- 
+      Проблемы:
+      - скринридер зачитает только "x"
+      - нет контекста назначения кнопки
+    -->
+    
+    <!-- СТАЛО -->
+    <button class="close-btn" aria-label="Закрыть диалоговое окно">
+      <span class="icon" aria-hidden="true">x</span>
+      <span class="sr-only">Закрыть диалоговое окно</span>
+    </button>
+    <!--
+      aria-label - текстовое описание для скринридера
+      aria-hidden="true" - скрывает иконку от скринридера
+      .sr-only - скрытый текст для дополнительного описания
+    -->
+
+2. Стили доступности
+
+    /* БЫЛО */
+    .close-btn {
+      background: #fff4444;
+      /* Нет индикатора фокуса */
+    }
+    
+    /* СТАЛО */
+    .close-btn:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3);
+      /* Яркий индикатор фокуса для клавиатурной навигации */
+    }
+    
+    /* Класс для скрытия текста визуально */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+
+**Полный код исправления:**
+
 ```html
 <!DOCTYPE html>
 <html lang="ru">
@@ -306,6 +438,103 @@ https://web-standards.ru/articles/a11y-audit-basics/
 - Нет правильной семантики для модального окна
 
 **Вот так это можно исправить:**
+
+1. Разметка модального окна
+
+    <!-- БЫЛО -->
+    <div class="modal" id="modal">
+      <h2>Важное сообщение</h2>
+      <button onclick="closeModal()"></button>
+    </div>
+    <!-- 
+      Проблемы:
+      - нет семантической роли
+      - скринридер не понимает, что это модальное окно
+    -->
+    
+    <!-- СТАЛО -->
+    <div class="modal" 
+         id="modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-title"
+         tabindex="-1">
+      <h2 id="modal-title">Важное сообщение</h2>
+      <button aria-label="Закрыть диалоговое окно" autofocus></button>
+    </div>
+    <!--
+      role="dialog" - определяет диалоговое окно
+      aria-modal="true" - указывает на модальный режим
+      aria-labelledby - связывает с заголовком
+      tabindex="-1" - позволяет программный фокус
+      autofocus - автоматический фокус при открытии
+    -->
+
+2. Управление фокусом
+
+    // БЫЛО
+    function openModal() {
+      document.getElementById('modal').style.display = 'block';
+      // Фокус остается на предыдущем элементе
+    }
+    
+    // СТАЛО
+    function openModal() {
+      // Запоминаем активный элемент для возврата фокуса
+      previousActiveElement = document.activeElement;
+      
+      // Фокусируемся на модалке
+      modal.focus();
+      
+      // Скрываем основной контент от скринридера
+      document.querySelectorAll('body > *:not(.modal):not(.overlay)')
+        .forEach(el => el.setAttribute('aria-hidden', 'true'));
+    }
+    
+    function closeModal() {
+      // Возвращаем фокус на предыдущий элемент
+      if (previousActiveElement) {
+        previousActiveElement.focus();
+      }
+    }
+
+3. Захват фокуса внутри модалки
+
+    // НОВЫЙ КОД - ловим фокус внутри модалки
+    modal.addEventListener('keydown', function(event) {
+      if (event.key === 'Tab') {
+        const focusableElements = modal.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+    
+        // Зацикливаем фокус внутри модалки
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    });
+
+4. Закрытие по Escape
+
+    // НОВЫЙ КОД - обработка клавиши Escape
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    }
+    
+    // Добавляем при открытии модалки
+    document.addEventListener('keydown', handleEscape);
+
+
+**Полный код исправления:**
+
 ```html
 <!DOCTYPE html>
 <html lang="ru">
