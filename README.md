@@ -81,7 +81,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
 
 1. Контейнер навигации
 
-
+```html
     <!-- БЫЛО -->
     <div class="nav">
       <!-- Простой div без семантики -->
@@ -94,10 +94,11 @@ https://web-standards.ru/articles/a11y-audit-basics/
         aria-label - описывает назначение для скринридеров
       -->
     </nav>
+```
     
 2. Элементы меню
 
-
+```html
     <!-- БЫЛО -->
     <div class="nav-item" onclick="showPage('home')">Главная</div>
     <!-- 
@@ -118,10 +119,11 @@ https://web-standards.ru/articles/a11y-audit-basics/
         -->
       </li>
     </ul>
+```
     
 3. Стили фокуса
 
-
+```css
     /* БЫЛО */
     .nav-item {
       padding: 10px;
@@ -137,7 +139,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
       background: #e6f3ff;
       /* Четкий визуальный индикатор фокуса */
     }
-
+```
     
 **Полный код исправления:**
 
@@ -253,7 +255,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
 
 1. Структура кнопки
 
-
+```html
     <!-- БЫЛО -->
     <button class="close-btn">x</button>
     <!-- 
@@ -272,10 +274,11 @@ https://web-standards.ru/articles/a11y-audit-basics/
       aria-hidden="true" - скрывает иконку от скринридера
       .sr-only - скрытый текст для дополнительного описания
     -->
+```
 
 2. Стили доступности
 
-
+```css
     /* БЫЛО */
     .close-btn {
       background: #fff4444;
@@ -302,6 +305,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
       white-space: nowrap;
       border: 0;
     }
+```
 
 
 **Полный код исправления:**
@@ -446,7 +450,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
 
 1. Разметка модального окна
 
-
+```html
     <!-- БЫЛО -->
     <div class="modal" id="modal">
       <h2>Важное сообщение</h2>
@@ -475,10 +479,11 @@ https://web-standards.ru/articles/a11y-audit-basics/
       tabindex="-1" - позволяет программный фокус
       autofocus - автоматический фокус при открытии
     -->
+```
 
 2. Управление фокусом
 
-
+```javascript
     // БЫЛО
     function openModal() {
       document.getElementById('modal').style.display = 'block';
@@ -504,10 +509,11 @@ https://web-standards.ru/articles/a11y-audit-basics/
         previousActiveElement.focus();
       }
     }
-
+```
+    
 3. Захват фокуса внутри модалки
 
-
+```javascript
     // НОВЫЙ КОД - ловим фокус внутри модалки
     modal.addEventListener('keydown', function(event) {
       if (event.key === 'Tab') {
@@ -527,10 +533,11 @@ https://web-standards.ru/articles/a11y-audit-basics/
         }
       }
     });
+```
 
 4. Закрытие по Escape
 
-
+```javascript
     // НОВЫЙ КОД - обработка клавиши Escape
     function handleEscape(event) {
       if (event.key === 'Escape') {
@@ -540,7 +547,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
     
     // Добавляем при открытии модалки
     document.addEventListener('keydown', handleEscape);
-
+```
 
 **Полный код исправления:**
 
