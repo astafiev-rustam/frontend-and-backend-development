@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сайт</title>
+    <style>
+        nav ul { 
+            display: flex; 
+            gap: 20px; 
+            list-style: none;
+            padding: 0;
+        }
+        .nav-link { 
+            padding: 10px; 
+            background: #f0f0f0;
+            text-decoration: none;
+            color: #333;
+            border: 2px solid transparent;
+            display: block;
+        }
+        /* Критически важные стили для доступности */
+        .nav-link:focus {
+            outline: none;
+            border-color: #0066cc;
+            background: #e6f3ff;
+        }
+        .nav-link:hover {
+            background: #ddefff;
+        }
+        /* Индикатор текущей страницы */
+        .nav-link[aria-current="page"] {
+            background: #0066cc;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+        aria-label описывает назначение навигации для скринридеров
+        Скринридер зачитает: "Основная навигация, список из 3 пунктов"
+    -->
+    <nav aria-label="Основная навигация">
+        <ul>
+            <li>
+                <!-- 
+                    aria-current="page" указывает скринридеру на текущую страницу
+                    При фокусе скринридер зачитает: "Главная, текущая страница, ссылка"
+                -->
+                <a href="#home" 
+                   class="nav-link" 
+                   aria-current="page">
+                   Главная
+                </a>
+            </li>
+            <li>
+                <a href="#about" class="nav-link">О нас</a>
+            </li>
+            <li>
+                <a href="#contact" class="nav-link">Контакты</a>
+            </li>
+        </ul>
+    </nav>
+</body>
+</html>

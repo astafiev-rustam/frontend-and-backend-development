@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <style>
+        .close-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            border: 2px solid transparent;
+        }
+        /* Обязательные стили для фокуса */
+        .close-btn:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3);
+        }
+        .icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        /* Скрываем текст визуально, но оставляем для скринридеров */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+        aria-label дает текстовое описание для скринридера
+        Скринридер зачитает: "Закрыть диалоговое окно, кнопка"
+    -->
+    <button class="close-btn" aria-label="Закрыть диалоговое окно">
+        <span class="icon" aria-hidden="true">×</span>
+        <!-- 
+            aria-hidden="true" скрывает иконку от скринридера
+            чтобы не зачитывался символ "×"
+        -->
+        <span class="sr-only">Закрыть диалоговое окно</span>
+        <!-- 
+            Альтернативный вариант: видимый текст
+            <span>Закрыть</span>
+        -->
+    </button>
+
+    <!-- Дополнительный пример: кнопка с состоянием -->
+    <button class="close-btn" 
+            aria-label="Добавить в избранное"
+            aria-pressed="false">
+        <span class="icon" aria-hidden="true">♥</span>
+        Избранное
+    </button>
+</body>
+</html>

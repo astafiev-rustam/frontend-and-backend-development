@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .modal:focus {
+            outline: 3px solid #0066cc;
+            outline-offset: 2px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .close-btn:focus {
+            outline: 2px solid #0066cc;
+        }
+        /* Скрыть контент за модалкой от скринридера */
+        [aria-hidden="true"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="openModal()">Открыть модальное окно</button>
+    
+    <div class="overlay" onclick="closeModal()"></div>
+    
+    <!-- 
+        role="dialog" указывает, что это диалоговое окно
+        aria-modal="true" сообщает скринридеру о модальном режиме
+        aria-labelledby связывает заголовок с окном
+        tabindex="-1" позволяет программно фокусироваться
+    -->
+    <div class="modal" 
+         id="modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-title"
+         tabindex="-1">
+         
+        <h2 id="modal-title">Важное сообщение</h2>
+        <p>Это тестовое модальное окно с полной доступностью.</p>
+        
+        <!-- 
+            aria-label дает описание для кнопки закрытия
+            Автофокус на кнопке закрытия при открытии
+        -->
+        <button class="close-btn" 
+                onclick="closeModal()"
+                aria-label="Закрыть диалоговое окно"
+                autofocus>
+            ×
+        </button>
+    </div>
+
+    <script>
+        let previousActiveElement;
+        let modal = document.getElementById('modal');
+        
+        function openModal() {
+            // Запоминаем активный элемент для возврата фокуса
+            previousActiveElement = document.activeElement;
+            
+            // Показываем модалку
+            modal.style.display = 'block';
+            document.querySelector('.overlay').style.display = 'block';
+            
+            // Скрываем основной контент от скринридера
+            document.querySelectorAll('body > *:not(.modal):not(.overlay)')
+                .forEach(el => el.setAttribute('aria-hidden', 'true'));
+            
+            // Фокусируемся на модалке
+            modal.focus();
+            
+            // Добавляем обработчик Escape
+            document.addEventListener('keydown', handleEscape);
+        }
+        
+        function closeModal() {
+            // Скрываем модалку
+            modal.style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+            
+            // Возвращаем видимость основному контенту
+            document.querySelectorAll('[aria-hidden="true"]')
+                .forEach(el => el.removeAttribute('aria-hidden'));
+            
+            // Возвращаем фокус на предыдущий элемент
+            if (previousActiveElement) {
+                previousActiveElement.focus();
+            }
+            
+            // Убираем обработчик Escape
+            document.removeEventListener('keydown', handleEscape);
+        }
+        
+        function handleEscape(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        }
+        
+        // Ловим фокус внутри модалки, чтобы он не уходил наружу
+        modal.addEventListener('keydown', function(event) {
+            if (event.key === 'Tab') {
+                const focusableElements = modal.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+                
+                if (event.shiftKey && document.activeElement === firstElement) {
+                    event.preventDefault();
+                    lastElement.focus();
+                } else if (!event.shiftKey && document.activeElement === lastElement) {
+                    event.preventDefault();
+                    firstElement.focus();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

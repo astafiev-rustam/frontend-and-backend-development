@@ -8,606 +8,502 @@
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
 Ссылка на материал: <br>
-https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-16
+https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-17
 
 ---
 
-# Практическое занятие 16: Отзывчивое использование изображений. Адаптивность форм, тиблиц и масштабирование элементов
+# Практическое занятие 17: A11y-аудит и обеспечение доступности
 
-В рамках данного занятия будут использоваться основные подходы к адаптивной вёрстке, о которой речь велась на лекциях.
+В рамках данного занятия будут использоваться основные подходы к обеспечению доступности и его аудиту.
 
 Для восполнения знаний по данной теме рекомендуется повторить материалы лекции. Дополнительно можно ознакомиться с материалом по ссылке:
-https://habr.com/ru/articles/572368/
+
+https://web-standards.ru/articles/a11y-audit-basics/
 
 ## Примеры
-Выполним примеры и рассмотрим пошаговую подготовку примера с разными способами адаптивности изображений и ресурсов.
+Рассмотрим несколько примеров на обеспечение доступности в веб-приложениях.
 
-### Шаг 1: Подготовка файловой структуры
-```
-project/
-├── index.html
-├── styles.css
-└── images/
-    ├── landscape.jpg
-    ├── portrait.jpg
-    ├── portrait.webp
-    ├── wide-desktop.jpg
-    ├── tablet.jpg
-    ├── mobile.jpg
-    ├── icon@1x.png
-    ├── icon@2x.png
-    ├── square.jpg
-    ├── gallery1.jpg
-    ├── gallery2.jpg
-    ├── gallery3.jpg
-    └── gallery4.jpg
-```
+Понял! Сделаем три четких примера с такой структурой.
 
-### Шаг 2: Создание HTML структуры
-1. **Базовая разметка** - создаем контейнер, шапку, основные секции и подвал
-2. **Семантические теги** - используем header, main, section, footer для доступности
-3. **Секции по техникам** - каждая секция демонстрирует отдельную технику адаптивности
+### Пример 1: Доступная навигация
 
-### Шаг 3: Реализация техник адаптивности
+**Рассмотрим пример создания доступного навигационного меню.**
 
-#### Техника 1: Базовое адаптивное изображение
-```css
-.responsive-image {
-    width: 100%;      /* Занимает всю ширину контейнера */
-    height: auto;     /* Высота рассчитывается автоматически */
-    display: block;   /* Убирает лишние отступы */
-}
-```
-**Что происходит:** Изображение масштабируется пропорционально ширине родительского контейнера.
-
-#### Техника 2: Picture element с форматами
-```html
-<picture>
-    <source srcset="images/portrait.webp" type="image/webp">
-    <source srcset="images/portrait.jpg" type="image/jpeg">
-    <img src="images/portrait.jpg" class="responsive-image">
-</picture>
-```
-**Что происходит:** Браузер выбирает WebP если поддерживает, иначе JPEG.
-
-#### Техника 3: Разные изображения для разных экранов
-```html
-<picture>
-    <source media="(min-width: 1200px)" srcset="images/wide-desktop.jpg">
-    <source media="(min-width: 768px)" srcset="images/tablet.jpg">
-    <img src="images/mobile.jpg" class="responsive-image">
-</picture>
-```
-**Что происходит:** Загрузка оптимизированных версий изображений для разных устройств.
-
-#### Техника 4: Retina display поддержка
-```html
-<img src="images/icon@1x.png" 
-     srcset="images/icon@1x.png 1x, images/icon@2x.png 2x"
-     class="retina-image">
-```
-**Что происходит:** На Retina-экранах автоматически загружается @2x версия.
-
-#### Техника 5: Object-fit свойства
-```css
-.object-fit-cover { object-fit: cover; }    /* Заполняет с обрезкой */
-.object-fit-contain { object-fit: contain; } /* Вписывает полностью */
-.object-fit-fill { object-fit: fill; }      /* Растягивает */
-```
-**Что происходит:** Контроль заполнения контейнера изображением.
-
-#### Техника 6: Адаптивная галерея
-```css
-.gallery {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 колонки на десктопе */
-}
-
-@media (max-width: 768px) {
-    .gallery {
-        grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшете */
-    }
-}
-
-@media (max-width: 480px) {
-    .gallery {
-        grid-template-columns: 1fr; /* 1 колонка на мобильном */
-    }
-}
-```
-**Что происходит:** Автоматическое перестроение сетки при изменении размера экрана.
-
-### Шаг 4: Тестирование адаптивности
-
-1. **Изменение размера окна** - плавно меняйте ширину браузера
-2. **DevTools Device Mode** - тестируйте на разных устройствах
-3. **Проверка Retina** - на MacBook Pro или других Retina-устройствах
-4. **Сеть в DevTools** - смотрите какие изображения загружаются
-
-### Шаг 5: Оптимизации
-
-1. **Сжатие изображений** - используйте Squoosh.app или ImageOptim
-2. **Правильные форматы** - WebP для фото, PNG для графики
-3. **Оптимальные размеры** - готовьте изображения под распространенные breakpoints
-4. **Lazy loading** - добавьте `loading="lazy"` для изображений ниже fold
-
-### 1. index.html
+**Исходный файл:**
 ```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Адаптивные изображения - Демо</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Сайт</title>
+    <style>
+        .nav { display: flex; gap: 20px; }
+        .nav-item { 
+            padding: 10px; 
+            cursor: pointer;
+            background: #f0f0f0;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1 class="header__title">Адаптивные изображения</h1>
-            <p class="header__subtitle">Демонстрация современных техник</p>
-        </header>
-
-        <main class="main">
-            <!-- Секция 1: Простое адаптивное изображение -->
-            <section class="section">
-                <h2 class="section__title">1. Базовое адаптивное изображение</h2>
-                <div class="image-container">
-                    <img src="images/landscape.jpg" 
-                         alt="Красивый пейзаж с горами и озером"
-                         class="responsive-image">
-                </div>
-                <div class="explanation">
-                    <h3>Что происходит:</h3>
-                    <ul>
-                        <li>Изображение занимает 100% ширины контейнера</li>
-                        <li>Высота автоматически рассчитывается для сохранения пропорций</li>
-                        <li>Работает на всех устройствах</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Секция 2: Picture element с разными версиями -->
-            <section class="section">
-                <h2 class="section__title">2. Picture element с форматами</h2>
-                <div class="image-container">
-                    <picture>
-                        <!-- WebP для современных браузеров -->
-                        <source srcset="images/portrait.webp" type="image/webp">
-                        <!-- JPEG для старых браузеров -->
-                        <source srcset="images/portrait.jpg" type="image/jpeg">
-                        <!-- Фолбэк -->
-                        <img src="images/portrait.jpg" 
-                             alt="Портрет человека"
-                             class="responsive-image">
-                    </picture>
-                </div>
-                <div class="explanation">
-                    <h3>Что происходит:</h3>
-                    <ul>
-                        <li>Браузер выбирает лучший формат (WebP или JPEG)</li>
-                        <li>Автоматическое переключение между форматами</li>
-                        <li>Фолбэк для старых браузеров</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Секция 3: Разные изображения для разных размеров экрана -->
-            <section class="section">
-                <h2 class="section__title">3. Разные изображения для разных экранов</h2>
-                <div class="image-container">
-                    <picture>
-                        <!-- Большое изображение для десктопов -->
-                        <source media="(min-width: 1200px)" 
-                                srcset="images/wide-desktop.jpg">
-                        <!-- Среднее для планшетов -->
-                        <source media="(min-width: 768px)" 
-                                srcset="images/tablet.jpg">
-                        <!-- Маленькое для мобильных -->
-                        <img src="images/mobile.jpg" 
-                             alt="Адаптивное изображение для разных устройств"
-                             class="responsive-image">
-                    </picture>
-                </div>
-                <div class="explanation">
-                    <h3>Что происходит:</h3>
-                    <ul>
-                        <li>Десктопы: wide-desktop.jpg (1200px+)</li>
-                        <li>Планшеты: tablet.jpg (768px-1199px)</li>
-                        <li>Мобильные: mobile.jpg (до 767px)</li>
-                        <li>Браузер сам выбирает подходящее изображение</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Секция 4: Retina display поддержка -->
-            <section class="section">
-                <h2 class="section__title">4. Поддержка Retina дисплеев</h2>
-                <div class="image-container">
-                    <img src="images/icon@1x.png" 
-                         srcset="images/icon@1x.png 1x, images/icon@2x.png 2x"
-                         alt="Иконка с поддержкой Retina"
-                         class="retina-image">
-                </div>
-                <div class="explanation">
-                    <h3>Что происходит:</h3>
-                    <ul>
-                        <li>Обычные экраны: icon@1x.png</li>
-                        <li>Retina экраны: icon@2x.png (в 2 раза четче)</li>
-                        <li>Автоматическое определение плотности пикселей</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Секция 5: Object-fit демонстрация -->
-            <section class="section">
-                <h2 class="section__title">5. Object-fit свойства</h2>
-                <div class="object-fit-demo">
-                    <div class="object-fit-item">
-                        <img src="images/square.jpg" 
-                             alt="Cover пример"
-                             class="object-fit-cover">
-                        <span>object-fit: cover</span>
-                    </div>
-                    <div class="object-fit-item">
-                        <img src="images/square.jpg" 
-                             alt="Contain пример"
-                             class="object-fit-contain">
-                        <span>object-fit: contain</span>
-                    </div>
-                    <div class="object-fit-item">
-                        <img src="images/square.jpg" 
-                             alt="Fill пример"
-                             class="object-fit-fill">
-                        <span>object-fit: fill</span>
-                    </div>
-                </div>
-                <div class="explanation">
-                    <h3>Что происходит:</h3>
-                    <ul>
-                        <li><strong>cover</strong> - заполняет контейнер, обрезая края</li>
-                        <li><strong>contain</strong> - вписывает полностью, могут быть поля</li>
-                        <li><strong>fill</strong> - растягивает, искажая пропорции</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- Секция 6: Адаптивная галерея без обрезки -->
-            <section class="section">
-                <h2 class="section__title">6. Адаптивная галерея (без обрезки)</h2>
-                <div class="gallery">
-                    <div class="gallery__item">
-                        <div class="gallery__image-container">
-                            <img src="images/gallery1.jpg" 
-                                alt="Галерея 1 - Горный пейзаж"
-                                class="gallery__image">
-                        </div>
-                    </div>
-                    <div class="gallery__item">
-                        <div class="gallery__image-container">
-                            <img src="images/gallery2.jpg" 
-                                alt="Галерея 2 - Городской вид"
-                                class="gallery__image">
-                        </div>
-                    </div>
-                    <div class="gallery__item">
-                        <div class="gallery__image-container">
-                            <img src="images/gallery3.jpg" 
-                                alt="Галерея 3 - Природа"
-                                class="gallery__image">
-                        </div>
-                    </div>
-                    <div class="gallery__item">
-                        <div class="gallery__image-container">
-                            <img src="images/gallery4.jpg" 
-                                alt="Галерея 4 - Архитектура"
-                                class="gallery__image">
-                        </div>
-                    </div>
-                </div>
-                <div class="explanation">
-                    <h3>Что происходит:</h3>
-                    <ul>
-                        <li><strong>На десктопах:</strong> 4 изображения в ряд, пропорциональное масштабирование</li>
-                        <li><strong>На мобильных:</strong> 1 изображение в ряд, полная видимость</li>
-                        <li><strong>Особенности:</strong> Никакой обрезки, плавное масштабирование, сохранение пропорций</li>
-        </ul>
-    </div>
-</section>
-        </main>
-
-        <footer class="footer">
-            <p>Измените размер окна браузера чтобы увидеть адаптивность в действии!</p>
-        </footer>
+    <div class="nav">
+        <div class="nav-item" onclick="showPage('home')">Главная</div>
+        <div class="nav-item" onclick="showPage('about')">О нас</div>
+        <div class="nav-item" onclick="showPage('contact')">Контакты</div>
     </div>
 </body>
 </html>
 ```
 
-### 2. styles.css
-```css
-/* Базовые сбросы и переменные */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+**Здесь, как мы видим, есть проблемы:**
+- Используются `div` вместо семантических элементов
+- Нет возможности навигации с клавиатуры (Tab не работает)
+- Скринридер не понимает, что это меню навигации
+- Нет визуального индикатора фокуса
 
-:root {
-    --primary-color: #2563eb;
-    --text-color: #1e293b;
-    --text-light: #64748b;
-    --bg-color: #f8fafc;
-    --border-color: #e2e8f0;
-    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --radius: 8px;
-    --transition: all 0.3s ease;
-}
-
-body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    line-height: 1.6;
-    color: var(--text-color);
-    background-color: var(--bg-color);
-    padding: 20px;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/* Шапка */
-.header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding: 2rem;
-    background: white;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-}
-
-.header__title {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
-}
-
-.header__subtitle {
-    font-size: 1.2rem;
-    color: var(--text-light);
-}
-
-/* Секции */
-.section {
-    background: white;
-    margin-bottom: 3rem;
-    padding: 2rem;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-}
-
-.section__title {
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 0.5rem;
-}
-
-/* Контейнер для изображений */
-.image-container {
-    margin-bottom: 1.5rem;
-    border: 2px dashed var(--border-color);
-    border-radius: var(--radius);
-    padding: 1rem;
-    background: #f8fafc;
-}
-
-/* 1. Базовое адаптивное изображение */
-.responsive-image {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: var(--radius);
-}
-
-/* 2. Picture element - стили такие же как у базового */
-picture {
-    display: block;
-}
-
-/* 3. Разные изображения для разных экранов - уже работает через HTML */
-
-/* 4. Retina изображение */
-.retina-image {
-    width: 100px;
-    height: 100px;
-    display: block;
-    margin: 0 auto;
-}
-
-/* 5. Object-fit демонстрация */
-.object-fit-demo {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.object-fit-item {
-    text-align: center;
-}
-
-.object-fit-item img {
-    width: 100%;
-    height: 200px;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius);
-    margin-bottom: 0.5rem;
-}
-
-.object-fit-cover {
-    object-fit: cover;
-}
-
-.object-fit-contain {
-    object-fit: contain;
-    background: #f1f5f9;
-}
-
-.object-fit-fill {
-    object-fit: fill;
-}
-
-/* 6. Адаптивная галерея */
-.gallery {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.gallery__item {
-    overflow: hidden;
-    border-radius: var(--radius);
-}
-
-.gallery__image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    transition: var(--transition);
-}
-
-.gallery__image:hover {
-    transform: scale(1.05);
-}
-
-/* Блоки с объяснениями */
-.explanation {
-    background: #f1f5f9;
-    padding: 1.5rem;
-    border-radius: var(--radius);
-    border-left: 4px solid var(--primary-color);
-}
-
-.explanation h3 {
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.explanation ul {
-    list-style-position: inside;
-}
-
-.explanation li {
-    margin-bottom: 0.5rem;
-    padding-left: 1rem;
-}
-
-/* Подвал */
-.footer {
-    text-align: center;
-    padding: 2rem;
-    background: white;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    color: var(--text-light);
-}
-
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
-    
-    .header__title {
-        font-size: 2rem;
-    }
-    
-    .section {
-        padding: 1rem;
-    }
-    
-    .object-fit-demo {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .gallery {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .gallery__image {
-        height: 150px;
-    }
-}
-
-@media (max-width: 480px) {
-    .header__title {
-        font-size: 1.5rem;
-    }
-    
-    .section__title {
-        font-size: 1.3rem;
-    }
-    
-    .gallery {
-        grid-template-columns: 1fr;
-    }
-    
-    .object-fit-item img {
-        height: 150px;
-    }
-}
-
-/* Поддержка высоких экранов */
-@media (min-height: 800px) and (min-width: 1200px) {
-    .gallery__image {
-        height: 250px;
-    }
-}
-
-/* Темная тема */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --text-color: #e2e8f0;
-        --bg-color: #0f172a;
-        --border-color: #334155;
-    }
-    
-    body {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-    }
-    
-    .section, .header, .footer {
-        background: #1e293b;
-    }
-    
-    .explanation {
-        background: #334155;
-    }
-    
-    .object-fit-contain {
-        background: #475569;
-    }
-}
-
-/* Адаптивность для печати */
-@media print {
-    .section {
-        break-inside: avoid;
-        box-shadow: none;
-        border: 1px solid #ccc;
-    }
-    
-    .gallery {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+**Вот так это можно исправить:**
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сайт</title>
+    <style>
+        nav ul { 
+            display: flex; 
+            gap: 20px; 
+            list-style: none;
+            padding: 0;
+        }
+        .nav-link { 
+            padding: 10px; 
+            background: #f0f0f0;
+            text-decoration: none;
+            color: #333;
+            border: 2px solid transparent;
+            display: block;
+        }
+        /* Критически важные стили для доступности */
+        .nav-link:focus {
+            outline: none;
+            border-color: #0066cc;
+            background: #e6f3ff;
+        }
+        .nav-link:hover {
+            background: #ddefff;
+        }
+        /* Индикатор текущей страницы */
+        .nav-link[aria-current="page"] {
+            background: #0066cc;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+        aria-label описывает назначение навигации для скринридеров
+        Скринридер зачитает: "Основная навигация, список из 3 пунктов"
+    -->
+    <nav aria-label="Основная навигация">
+        <ul>
+            <li>
+                <!-- 
+                    aria-current="page" указывает скринридеру на текущую страницу
+                    При фокусе скринридер зачитает: "Главная, текущая страница, ссылка"
+                -->
+                <a href="#home" 
+                   class="nav-link" 
+                   aria-current="page">
+                   Главная
+                </a>
+            </li>
+            <li>
+                <a href="#about" class="nav-link">О нас</a>
+            </li>
+            <li>
+                <a href="#contact" class="nav-link">Контакты</a>
+            </li>
+        </ul>
+    </nav>
+</body>
+</html>
 ```
 
+Таким образом, мы получили меню, которое:
+- Работает с клавиатуры (Tab/Shift+Tab)
+- Имеет четкий визуальный фокус
+- Правильно озвучивается скринридерами
+- Семантически корректно размечено
+
+---
+
+## Пример 2: Доступная кнопка с иконкой
+
+**Рассмотрим пример создания доступной кнопки с иконкой.**
+
+**Исходный файл:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .close-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Проблема: скринридер зачитает только "×" без контекста -->
+    <button class="close-btn">×</button>
+</body>
+</html>
+```
+
+**Здесь, как мы видим, есть проблемы:**
+- Скринридер зачитает только символ "×" без контекста
+- Непонятно назначение кнопки для незрячих пользователей
+- Нет текстовой альтернативы для иконки
+
+**Вот так это можно исправить:**
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <style>
+        .close-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            border: 2px solid transparent;
+        }
+        /* Обязательные стили для фокуса */
+        .close-btn:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3);
+        }
+        .icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        /* Скрываем текст визуально, но оставляем для скринридеров */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+        aria-label дает текстовое описание для скринридера
+        Скринридер зачитает: "Закрыть диалоговое окно, кнопка"
+    -->
+    <button class="close-btn" aria-label="Закрыть диалоговое окно">
+        <span class="icon" aria-hidden="true">×</span>
+        <!-- 
+            aria-hidden="true" скрывает иконку от скринридера
+            чтобы не зачитывался символ "×"
+        -->
+        <span class="sr-only">Закрыть диалоговое окно</span>
+        <!-- 
+            Альтернативный вариант: видимый текст
+            <span>Закрыть</span>
+        -->
+    </button>
+
+    <!-- Дополнительный пример: кнопка с состоянием -->
+    <button class="close-btn" 
+            aria-label="Добавить в избранное"
+            aria-pressed="false">
+        <span class="icon" aria-hidden="true">♥</span>
+        Избранное
+    </button>
+</body>
+</html>
+```
+
+Таким образом, мы получили кнопку, которая:
+- Имеет понятное текстовое описание для скринридеров
+- Корректно работает с клавиатурой
+- Имеет четкий индикатор фокуса
+- Может передавать свое состояние (aria-pressed)
+
+---
+
+## Пример 3: Доступное модальное окно
+
+**Рассмотрим пример создания доступного модального окна.**
+
+**Исходный файл:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            z-index: 1000;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="openModal()">Открыть окно</button>
+    
+    <div class="overlay" onclick="closeModal()"></div>
+    <div class="modal" id="modal">
+        <h2>Важное сообщение</h2>
+        <p>Это тестовое модальное окно</p>
+        <button onclick="closeModal()">×</button>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('modal').style.display = 'block';
+            document.querySelector('.overlay').style.display = 'block';
+        }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+```
+
+**Здесь, как мы вишем, есть проблемы:**
+- При открытии модалки фокус остается на кнопке открытия
+- Нельзя закрыть модалку клавишей Escape
+- Скринридер продолжает читать контент под модалкой
+- Нет правильной семантики для модального окна
+
+**Вот так это можно исправить:**
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .modal:focus {
+            outline: 3px solid #0066cc;
+            outline-offset: 2px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .close-btn:focus {
+            outline: 2px solid #0066cc;
+        }
+        /* Скрыть контент за модалкой от скринридера */
+        [aria-hidden="true"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="openModal()">Открыть модальное окно</button>
+    
+    <div class="overlay" onclick="closeModal()"></div>
+    
+    <!-- 
+        role="dialog" указывает, что это диалоговое окно
+        aria-modal="true" сообщает скринридеру о модальном режиме
+        aria-labelledby связывает заголовок с окном
+        tabindex="-1" позволяет программно фокусироваться
+    -->
+    <div class="modal" 
+         id="modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-title"
+         tabindex="-1">
+         
+        <h2 id="modal-title">Важное сообщение</h2>
+        <p>Это тестовое модальное окно с полной доступностью.</p>
+        
+        <!-- 
+            aria-label дает описание для кнопки закрытия
+            Автофокус на кнопке закрытия при открытии
+        -->
+        <button class="close-btn" 
+                onclick="closeModal()"
+                aria-label="Закрыть диалоговое окно"
+                autofocus>
+            ×
+        </button>
+    </div>
+
+    <script>
+        let previousActiveElement;
+        let modal = document.getElementById('modal');
+        
+        function openModal() {
+            // Запоминаем активный элемент для возврата фокуса
+            previousActiveElement = document.activeElement;
+            
+            // Показываем модалку
+            modal.style.display = 'block';
+            document.querySelector('.overlay').style.display = 'block';
+            
+            // Скрываем основной контент от скринридера
+            document.querySelectorAll('body > *:not(.modal):not(.overlay)')
+                .forEach(el => el.setAttribute('aria-hidden', 'true'));
+            
+            // Фокусируемся на модалке
+            modal.focus();
+            
+            // Добавляем обработчик Escape
+            document.addEventListener('keydown', handleEscape);
+        }
+        
+        function closeModal() {
+            // Скрываем модалку
+            modal.style.display = 'none';
+            document.querySelector('.overlay').style.display = 'none';
+            
+            // Возвращаем видимость основному контенту
+            document.querySelectorAll('[aria-hidden="true"]')
+                .forEach(el => el.removeAttribute('aria-hidden'));
+            
+            // Возвращаем фокус на предыдущий элемент
+            if (previousActiveElement) {
+                previousActiveElement.focus();
+            }
+            
+            // Убираем обработчик Escape
+            document.removeEventListener('keydown', handleEscape);
+        }
+        
+        function handleEscape(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        }
+        
+        // Ловим фокус внутри модалки, чтобы он не уходил наружу
+        modal.addEventListener('keydown', function(event) {
+            if (event.key === 'Tab') {
+                const focusableElements = modal.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                const firstElement = focusableElements[0];
+                const lastElement = focusableElements[focusableElements.length - 1];
+                
+                if (event.shiftKey && document.activeElement === firstElement) {
+                    event.preventDefault();
+                    lastElement.focus();
+                } else if (!event.shiftKey && document.activeElement === lastElement) {
+                    event.preventDefault();
+                    firstElement.focus();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+```
+
+Таким образом, мы получили модальное окно, которое:
+- Захватывает фокус и не позволяет ему уйти за пределы окна
+- Закрывается по клавише Escape
+- Правильно скрывает фоновый контент от ск ринридера
+- Возвращает фокус на предыдущий элемент при закрытии
+- Имеет правильную семантику для вспомогательных технологий
+
+Каждый пример показывает конкретные проблемы и их решения с подробными комментариями о том, почему каждое изменение важно для доступности.
+
 ## Самостоятельная работа
-В рамках самостоятельной работы необходимо реализовать средства адаптивности изображений для страниц проекта (по аналогии с главной страницей).
+В рамках самостоятельной работы необходимо обеспечить доступность и провести её ручное тестирование для страницы Контактов (contacts.html) из проекта.
+
+### Общие требования:
+- **Валидная HTML-разметка** (проверить через validator.w3.org)
+- **Работоспособность с клавиатуры** (полная навигация Tab/Shift+Tab)
+
+#### 1. Семантическая разметка
+- [ ] Использованы правильные HTML5 теги (`<form>`, `<fieldset>`, `<legend>`)
+- [ ] Все интерактивные элементы семантически корректны
+- [ ] Правильная иерархия заголовков (`<h1>`-`<h6>`)
+- [ ] Логическая структура документа
+
+#### 2. Доступность форм
+- [ ] Все поля имеют связанные `<label>` с `for`/`id`
+- [ ] Обязательные поля помечены `aria-required="true"` и `required`
+- [ ] Поля с ошибками имеют `aria-invalid="true"` и `aria-describedby`
+- [ ] Группы полей объединены в `<fieldset>` с `<legend>`
+- [ ] Есть визуальные и текстовые индикаторы обязательных полей
+
+#### 3. Навигация с клавиатуры
+- [ ] Все интерактивные элементы доступны с Tab
+- [ ] Логический порядок фокуса
+- [ ] Видимый и четкий индикатор фокуса
+- [ ] Клавиша Enter/Space работают на всех элементах
+- [ ] Escape закрывает модальные окна (если есть)
+
+#### 4. ARIA-атрибуты
+- [ ] Правильное использование `aria-label`, `aria-labelledby`, `aria-describedby`
+- [ ] Состояния элементов (`aria-expanded`, `aria-pressed`, `aria-current`)
+- [ ] Живые регионы (`aria-live`) для динамического контента
+- [ ] Логические роли (`role="button"`, `role="navigation"`)
+
+#### 5. Цвет и контраст
+- [ ] Соотношение контрастности минимум 4.5:1 для текста
+- [ ] Цвет не используется как единственный способ передачи информации
+- [ ] Состояния элементов различимы без цвета
