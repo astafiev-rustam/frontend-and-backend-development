@@ -81,6 +81,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
 
 1. Контейнер навигации
 
+
     <!-- БЫЛО -->
     <div class="nav">
       <!-- Простой div без семантики -->
@@ -95,6 +96,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
     </nav>
     
 2. Элементы меню
+
 
     <!-- БЫЛО -->
     <div class="nav-item" onclick="showPage('home')">Главная</div>
@@ -118,6 +120,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
     </ul>
     
 3. Стили фокуса
+
 
     /* БЫЛО */
     .nav-item {
@@ -250,6 +253,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
 
 1. Структура кнопки
 
+
     <!-- БЫЛО -->
     <button class="close-btn">x</button>
     <!-- 
@@ -270,6 +274,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
     -->
 
 2. Стили доступности
+
 
     /* БЫЛО */
     .close-btn {
@@ -441,6 +446,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
 
 1. Разметка модального окна
 
+
     <!-- БЫЛО -->
     <div class="modal" id="modal">
       <h2>Важное сообщение</h2>
@@ -472,6 +478,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
 
 2. Управление фокусом
 
+
     // БЫЛО
     function openModal() {
       document.getElementById('modal').style.display = 'block';
@@ -500,6 +507,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
 
 3. Захват фокуса внутри модалки
 
+
     // НОВЫЙ КОД - ловим фокус внутри модалки
     modal.addEventListener('keydown', function(event) {
       if (event.key === 'Tab') {
@@ -521,6 +529,7 @@ https://web-standards.ru/articles/a11y-audit-basics/
     });
 
 4. Закрытие по Escape
+
 
     // НОВЫЙ КОД - обработка клавиши Escape
     function handleEscape(event) {
