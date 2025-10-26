@@ -1,41 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Интернет-магазин</title>
     <style>
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            z-index: 1000;
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-        }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .card { border: 1px solid #ccc; padding: 10px; margin: 10px; }
+        .success { color: green; display: none; }
     </style>
 </head>
 <body>
-    <button onclick="openModal()">Открыть окно</button>
+    <button onclick="openModal()">Добавить в корзину</button>
     
     <div class="overlay" onclick="closeModal()"></div>
     <div class="modal" id="modal">
-        <h2>Важное сообщение</h2>
-        <p>Это тестовое модальное окно</p>
-        <button onclick="closeModal()">×</button>
+        <h2>Товар добавлен</h2>
+        <p>Товар был успешно добавлен в вашу корзину</p>
+        <span onclick="closeModal()">✕</span>
     </div>
+    
+    <div class="card">
+        <img src="product.jpg">
+        <h3>Новый смартфон</h3>
+        <p>Цена: <span style="color: red;">25 000 руб.</span></p>
+    </div>
+    
+    <div class="success" id="success">Успешно!</div>
 
     <script>
         function openModal() {
             document.getElementById('modal').style.display = 'block';
             document.querySelector('.overlay').style.display = 'block';
+            document.getElementById('success').style.display = 'block';
         }
         function closeModal() {
             document.getElementById('modal').style.display = 'none';

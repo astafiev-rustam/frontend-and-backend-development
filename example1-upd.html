@@ -1,64 +1,32 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Сайт</title>
+    <title>Мой сайт - Главная страница</title>
     <style>
-        nav ul { 
-            display: flex; 
-            gap: 20px; 
-            list-style: none;
-            padding: 0;
+        .btn { 
+            background: #0056b3; /* Увеличили контраст */
+            color: white; 
+            padding: 10px;
+            border: none;
+            cursor: pointer;
         }
-        .nav-link { 
-            padding: 10px; 
-            background: #f0f0f0;
-            text-decoration: none;
-            color: #333;
-            border: 2px solid transparent;
-            display: block;
+        .text { 
+            color: #333; /* Увеличили контраст с #888 до #333 */
         }
-        /* Критически важные стили для доступности */
-        .nav-link:focus {
-            outline: none;
-            border-color: #0066cc;
-            background: #e6f3ff;
-        }
-        .nav-link:hover {
-            background: #ddefff;
-        }
-        /* Индикатор текущей страницы */
-        .nav-link[aria-current="page"] {
-            background: #0066cc;
-            color: white;
-        }
+        .image { width: 300px; }
     </style>
 </head>
 <body>
-    <!-- 
-        aria-label описывает назначение навигации для скринридеров
-        Скринридер зачитает: "Основная навигация, список из 3 пунктов"
-    -->
-    <nav aria-label="Основная навигация">
-        <ul>
-            <li>
-                <!-- 
-                    aria-current="page" указывает скринридеру на текущую страницу
-                    При фокусе скринридер зачитает: "Главная, текущая страница, ссылка"
-                -->
-                <a href="#home" 
-                   class="nav-link" 
-                   aria-current="page">
-                   Главная
-                </a>
-            </li>
-            <li>
-                <a href="#about" class="nav-link">О нас</a>
-            </li>
-            <li>
-                <a href="#contact" class="nav-link">Контакты</a>
-            </li>
-        </ul>
-    </nav>
+    <!-- Было: div с onclick -> Стало: семантическая кнопка -->
+    <button class="btn" onclick="alert('Clicked!')">Нажми меня</button>
+    
+    <p class="text">Важная информация</p>
+    
+    <!-- Было: img без alt -> Стало: с описательным alt -->
+    <img src="chart.jpg" class="image" alt="График продаж за 2024 год">
+    
+    <!-- Было: input с placeholder -> Стало: с label -->
+    <label for="username">Имя пользователя</label>
+    <input type="text" id="username" name="username">
 </body>
 </html>

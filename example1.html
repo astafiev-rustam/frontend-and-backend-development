@@ -1,22 +1,17 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Сайт</title>
+    <title>Мой сайт</title>
     <style>
-        .nav { display: flex; gap: 20px; }
-        .nav-item { 
-            padding: 10px; 
-            cursor: pointer;
-            background: #f0f0f0;
-        }
+        .btn { background: blue; color: white; padding: 10px; }
+        .text { color: #888; }
+        .image { width: 300px; }
     </style>
 </head>
 <body>
-    <div class="nav">
-        <div class="nav-item" onclick="showPage('home')">Главная</div>
-        <div class="nav-item" onclick="showPage('about')">О нас</div>
-        <div class="nav-item" onclick="showPage('contact')">Контакты</div>
-    </div>
+    <div onclick="alert('Clicked!')" class="btn">Нажми меня</div>
+    <p class="text">Важная информация</p>
+    <img src="chart.jpg" class="image">
+    <input type="text" placeholder="Введите имя">
 </body>
 </html>

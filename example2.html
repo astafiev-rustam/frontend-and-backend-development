@@ -1,20 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Контакты</title>
     <style>
-        .close-btn {
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-        }
+        .form-group { margin: 10px 0; }
+        .required { color: red; }
+        .error { color: red; font-size: 12px; }
     </style>
 </head>
 <body>
-    <!-- Проблема: скринридер зачитает только "×" без контекста -->
-    <button class="close-btn">×</button>
+    <h1>Свяжитесь с нами</h1>
+    
+    <form>
+        <div class="form-group">
+            <span class="required">*</span>
+            <span>Имя:</span>
+            <input type="text" name="name">
+            <div class="error" id="name-error">Поле обязательно</div>
+        </div>
+        
+        <div class="form-group">
+            <span>Email:</span>
+            <input type="email" name="email">
+        </div>
+        
+        <div class="form-group">
+            <span>Тема:</span>
+            <select name="topic">
+                <option>Вопрос</option>
+                <option>Жалоба</option>
+                <option>Предложение</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <span>Сообщение:</span>
+            <textarea name="message"></textarea>
+        </div>
+        
+        <input type="submit" value="Отправить">
+    </form>
 </body>
 </html>
