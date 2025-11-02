@@ -8,114 +8,71 @@
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
 Ссылка на материал: <br>
-https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-19
+https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-20
 
 ---
 
-# Практическое занятие 19: Базовые элементы работы с React.js и JSX
+# Практическое занятие 20: Менеджер состояний и компонентов
 
-В рамках данного занятия рассмотим процесс установки, использования и запуска приложений на React, а также основы JSX.
+В рамках данного занятия рассмотрим работу с состоянием компонентов с помощью хука useState и управление взаимодействием между компонентами. Подробная информация о нём есть, как в лекциях, так и в ресурсах, например:
 
-Подробная теоретическая информация содержится в лекции, а также можно ознакомиться с официальной документацией по React:
-
-https://react.dev/learn
-
-## Запуск проектов на React
-
-Перед началом практической работы важно понять базовые принципы React. React — это библиотека для создания пользовательских интерфейсов, которая использует компонентный подход. Каждый компонент представляет собой независимую часть интерфейса со своей логикой и внешним видом. 
-
-Основной единицей в React является компонент, который может быть как функцией, так и классом. Мы будем использовать функциональные компоненты, так как это современный и рекомендуемый подход. JSX — это синтаксическое расширение для JavaScript, которое позволяет писать HTML-подобный код внутри JavaScript. Важно помнить, что JSX не является ни строкой, ни HTML, а компилируется в вызовы React.createElement.
-
-Для работы с React потребуется настроенная среда разработки. Мы используем Create React App — официальный инструмент для быстрого создания React-приложений с предварительно настроенной средой разработки.
-
-Для его использования необходимо скачать Node.js со встроенным пакетным менеджером npm, который мы будем использовать далее.
-
-Ссылка для Node.js:
-
-https://nodejs.org/en/download
-
-После установки выполним следующие команды.
-
-1. Проверим версию npm и корректную установку Node.js:
-    ```bash
-    npm --v
-    ```
-    В случае возникновения ошибок необходимо скопировать вывод консоли в поисковик и/или нейросеть для анализа и устранения ошибок.
-
-2. Выполните команду создания проекта:
-    ```bash
-    npx create-react-app test-app
-    ```
-    Помимо проекта эта команда создаст папку test-app, в которую мы переходим и выполняем запуск приложения.
-
-3. Перейдите в папку проекта и выполните запуск приложения:
-   ```bash
-   cd test-app
-   npm start
-   ```
-   Просмотрите результат. Именно по данному результату мы с вами и будем выполнять сегодняшние примеры.
+https://purpleschool.ru/knowledge-base/article/usestate-react-js
 
 ## Теоретическая часть
 
-### Пример 1. Создание простого компонента с JSX
+### Пример 1. Базовое использование useState
 
-Проблема, которую мы решаем: необходимо создать компонент, который отображает приветствие для пользователя. В обычном HTML мы бы просто написали разметку, но в React нам нужно создать компонент, который можно переиспользовать и который содержит логику.
+**Проблема.** Необходимо создать компонент счетчика, где пользователь может увеличивать, уменьшать и сбрасывать значение. Без состояния React не может запоминать изменения между рендерами.
 
-Подход к решению заключается в создании функционального компонента, который возвращает JSX. JSX позволяет нам комбинировать JavaScript и HTML-подобный синтаксис для описания того, что мы хотим видеть на экране.
+**Подход к решению.** Используем хук useState для создания переменной состояния и функции для её обновления.
 
-Исходный код решения в файле `Greeting.jsx`:
-
+**Исходный код в файле `Counter.jsx`:**
 ```jsx
-function Greeting() {
-  const userName = "Айнура";
-  const currentTime = new Date().getHours();
-  let timeOfDay;
-  
-  if (currentTime < 12) {
-    timeOfDay = "Доброе утро";
-  } else if (currentTime < 18) {
-    timeOfDay = "Добрый день";
-  } else {
-    timeOfDay = "Добрый вечер";
-  }
+import { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  const increment = () => {
+    setCount(count + 1);
+  };
+
+  const decrement = () => {
+    setCount(count - 1);
+  };
+
+  const reset = () => {
+    setCount(0);
+  };
 
   return (
-    <div className="greeting-container">
-      <h1>{timeOfDay}, {userName}!</h1>
-      <p>Рады видеть вас в нашем приложении.</p>
+    <div className="counter">
+      <h2>Счетчик: {count}</h2>
+      <div className="counter-buttons">
+        <button onClick={decrement}>-1</button>
+        <button onClick={reset}>Сбросить</button>
+        <button onClick={increment}>+1</button>
+      </div>
+      <p>Текущее значение: <strong>{count}</strong></p>
     </div>
   );
 }
 
-export default Greeting;
+export default Counter;
 ```
 
-Пояснения к решению: мы создаем функциональный компонент Greeting, который содержит логику определения времени суток и возвращает JSX с приветствием. Ключевой особенностью является то, что мы можем встраивать JavaScript-выражения в JSX с помощью фигурных скобок. Для запуска этого кода необходимо импортировать и использовать компонент в основном файле приложения.
+**Пояснения.** Хук useState возвращает массив из двух элементов - текущего значения и функции для его обновления. При вызове функции обновления компонент перерендеривается с новым значением.
 
-Содержимое файла `App.js`:
+Разместим компонент внутри `App.js`:
 ```js
 import logo from './logo.svg';
 import './App.css';
-import Greeting from './Greeting';
+import Counter from './Counter';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-      <Greeting />
+      <Counter />
     </div>
   );
 }
@@ -123,246 +80,287 @@ function App() {
 export default App;
 ```
 
-### Пример 2. Компонент с свойствами (props)
+### Пример 2. Работа с формой и состоянием
 
-Проблема: нам нужен универсальный компонент карточки пользователя, который может отображать информацию о разных пользователях без изменения своего кода.
+**Проблема.** Нужно создать форму регистрации, где данные полей ввода сохраняются и валидируются в реальном времени.
 
-Подход к решению: используем механизм props (свойств) в React для передачи данных в компонент. Это позволяет сделать компонент переиспользуемым и независимым от конкретных данных.
+**Подход к решению.** Для каждого поля ввода создаем отдельное состояние, обрабатываем изменения и добавляем базовую валидацию.
 
-Исходный код решения в файле `UseCard.jsx`:
-
+**Исходный код в файле `RegistrationForm.jsx`:**
 ```jsx
-function UserCard({ name, role, avatarUrl, isOnline }) {
+import { useState } from 'react';
+
+function RegistrationForm() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // Базовая валидация в реальном времени
+    if (name === 'email' && value && !value.includes('@')) {
+      setErrors(prev => ({ ...prev, email: 'Некорректный email' }));
+    } else if (name === 'email') {
+      setErrors(prev => ({ ...prev, email: '' }));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Данные формы:', formData);
+    alert(`Добро пожаловать, ${formData.name}!`);
+  };
+
   return (
-    <div className="user-card">
-      <div className="avatar-section">
-        <img src={avatarUrl} alt={`Аватар ${name}`} />
-        <p>Статус: {isOnline? 'online':'offline'}</p>
+    <form onSubmit={handleSubmit} className="registration-form">
+      <h2>Регистрация</h2>
+      
+      <div className="form-group">
+        <label>Имя:</label>
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
       </div>
-      <div className="user-info">
-        <h3>{name}</h3>
-        <p>{role}</p>
+
+      <div className="form-group">
+        <label>Email:</label>
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        {errors.email && <span className="error">{errors.email}</span>}
       </div>
-    </div>
+
+      <div className="form-group">
+        <label>Пароль:</label>
+        <input
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <button type="submit">Зарегистрироваться</button>
+    </form>
   );
 }
 
-export default UserCard;
+export default RegistrationForm;
 ```
 
-Пояснения к решению: компонент UserCard принимает свойства name, role, avatarUrl и isOnline через объект props. Мы используем деструктуризацию для извлечения этих свойств. Компонент отображает переданные данные в соответствующей разметке. Для использования этого компонента нужно передать ему свойства при вызове.
+**Пояснения.** Используем объект для хранения всех данных формы. При обновлении состояния обязательно создаем новый объект, а не мутируем существующий.
 
-Добавление компонента UseCard в файле `App.js`:
+Добавим полученный компонент в `App.js`:
 ```js
 import logo from './logo.svg';
 import './App.css';
-import Greeting from './Greeting';
-import UserCard from './UseCard';
-import TaskList from './TaskList';
+import Counter from './Counter';
+import RegistrationForm from './RegistrationForm';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-      <Greeting />
-      <UserCard
-      name="Иван Иванов"
-      role="Администратор"
-      avatarUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfVMhpKmVy_-iwfRLAiNiaDslMa-2oEz7KTw&s"
-      isOnline={true}
-      />
+      <Counter />
+      <RegistrationForm />
     </div>
   );
 }
 
 export default App;
-
 ```
 
-### Пример 3. Работа со списками и ключами
+### Пример 3. Подъем состояния (Lifting State Up)
 
-Проблема: необходимо отобразить список элементов, где каждый элемент имеет собственные данные и должен быть уникально идентифицирован.
+**Проблема.** Несколько компонентов должны работать с одними и теми же данными и синхронизировать свои состояния.
 
-Подход к решению: используем метод map для преобразования массива данных в массив JSX-элементов. Каждому элементу списка назначаем уникальный ключ (key), что помогает React эффективно обновлять интерфейс при изменениях.
+**Подход к решению.** Поднимаем состояние до общего родительского компонента и передаем данные и функции обратного вызова через props.
 
-Исходный код решения в файле `TaskList.jsx`:
-
+**Исходный код в файле `ColorPicker.jsx`:**
 ```jsx
-function TaskList() {
-  const tasks = [
-    { id: 1, title: 'Изучить JSX', completed: true },
-    { id: 2, title: 'Разобраться с компонентами', completed: false },
-    { id: 3, title: 'Освоить работу с props', completed: false },
-    { id: 4, title: 'Отклеить этикетки от бананов', completed: false }
-  ];
+import { useState } from 'react';
+
+function ColorDisplay({ color }) {
+  return (
+    <div 
+      className="color-display"
+      style={{ 
+        backgroundColor: color,
+        width: '200px',
+        height: '100px',
+        margin: '10px 0'
+      }}
+    >
+      <p>Выбранный цвет: {color}</p>
+    </div>
+  );
+}
+
+function ColorControls({ color, onColorChange }) {
+  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'];
 
   return (
-    <div className="task-list">
-      <h2>Список задач</h2>
-      <ul>
-        {tasks.map(task => (
-          <li key={task.id} className={task.completed ? 'completed' : 'pending'}>
-            <span>{task.title}</span>
-            {task.completed ? '✅' : '⏳'}
-          </li>
+    <div className="color-controls">
+      <h3>Выберите цвет:</h3>
+      <div className="color-buttons">
+        {colors.map((col) => (
+          <button
+            key={col}
+            style={{ backgroundColor: col }}
+            onClick={() => onColorChange(col)}
+            className={color === col ? 'active' : ''}
+          >
+            {col}
+          </button>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
 
-export default TaskList;
+function ColorPicker() {
+  const [selectedColor, setSelectedColor] = useState('#ff0000');
+
+  return (
+    <div className="color-picker">
+      <h2>Выбор цвета</h2>
+      <ColorDisplay color={selectedColor} />
+      <ColorControls 
+        color={selectedColor} 
+        onColorChange={setSelectedColor} 
+      />
+    </div>
+  );
+}
+
+export default ColorPicker;
 ```
 
-Пояснения к решению: мы создаем массив задач и с помощью метода map преобразуем его в массив JSX-элементов. Ключевой аспект — атрибут key, который должен быть уникальным для каждого элемента списка. Это помогает React определить, какие элементы изменились, добавились или удалились. Условный рендеринг используется для отображения разных иконок в зависимости от статуса задачи.
+**Пояснения.** Состояние хранится в родительском компоненте ColorPicker, а дочерние компоненты получают данные и функции для их изменения через props.
 
-Встраивание в `App.js`:
+Реализуем в `App.js` добавив соответствующий компонент:
 ```js
 import logo from './logo.svg';
 import './App.css';
-import Greeting from './Greeting';
-import UserCard from './UseCard';
-import TaskList from './TaskList';
+import Counter from './Counter';
+import RegistrationForm from './RegistrationForm';
+import ColorPicker from './ColorPicker';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-      <Greeting />
-      <UserCard
-      name="Иван Иванов"
-      role="Администратор"
-      avatarUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfVMhpKmVy_-iwfRLAiNiaDslMa-2oEz7KTw&s"
-      isOnline={true}
-      />
-      <TaskList />
+      <Counter />
+      <RegistrationForm />
+      <ColorPicker />
     </div>
   );
 }
 
 export default App;
-
 ```
 
 ## Практическая часть
 
-*Перед выполнением практической части стоит ознакомиться с содержимым файла `task.pdf` в этом репозитории.*
+### Добавление состояния в карточки технологий
 
-Теперь приступим к созданию нашего основного проекта - трекера изучения технологий. На этом занятии мы заложим фундамент приложения, создав базовые компоненты для дальнейшей разработки.
+**Шаг 1: Обновление компонента TechnologyCard**
+Модифицируйте существующий компонент `TechnologyCard`, чтобы он мог изменять свой статус по клику. Добавьте обработчик клика, который циклически переключает статусы: "not-started" → "in-progress" → "completed" → "not-started".
 
-### Начало работы
+**Шаг 2: Создание состояния для дорожной карты**
+В компоненте App создайте состояние для хранения массива технологий. Изначально используйте тестовые данные, но теперь с возможностью их обновления.
 
-**Шаг 1: Создание проекта**
-Откройте терминал и выполните команду:
-```bash
-npx create-react-app technology-tracker
-cd technology-tracker
-npm start
-```
-Это создаст новый React-проект и запустит сервер разработки. Проверьте, что приложение открывается в браузере по адресу http://localhost:3000
-
-**Шаг 2: Организация структуры проекта**
-Создайте в папке `src` следующую структуру:
-```
-src/
-├── components/
-│   ├── TechnologyCard.js
-│   └── TechnologyCard.css
-├── App.js
-├── App.css
-└── index.js
-```
-Такая организация поможет поддерживать порядок в коде по мере роста приложения.
-
-### Создание компонента карточки технологии
-
-**Шаг 3: Разработка компонента TechnologyCard**
-В файле `TechnologyCard.jsx` создайте компонент, который будет отображать отдельный пункт дорожной карты. Компонент должен принимать следующие свойства:
-- `title` - название технологии
-- `description` - описание для изучения
-- `status` - статус изучения
-
-Используйте подход из второго теоретического примера, адаптировав его под нашу задачу. Не забудьте добавить условное отображение для разных статусов.
-
-**Шаг 4: Стилизация карточки**
-В файле `TechnologyCard.css` создайте базовые стили. Важно предусмотреть визуальное различие для различных статусов изучения:
-- Используйте разные цвета границ или фона
-- Добавьте иконки или индикаторы прогресса
-- Обеспечьте четкое визуальное разделение карточек
-
-### Сборка основного приложения
-
-**Шаг 5: Создание тестовых данных**
-В компоненте `App.js` создайте массив с тестовыми данными для проверки работы. Пример структуры данных:
+**Пример начального состояния:**
 ```javascript
-const technologies = [
-  { id: 1, title: 'React Components', description: 'Изучение базовых компонентов', status: 'completed' },
-  { id: 2, title: 'JSX Syntax', description: 'Освоение синтаксиса JSX', status: 'in-progress' },
-  { id: 3, title: 'State Management', description: 'Работа с состоянием компонентов', status: 'not-started' }
-];
+const [technologies, setTechnologies] = useState([
+  { 
+    id: 1, 
+    title: 'React Components', 
+    description: 'Изучение базовых компонентов', 
+    status: 'not-started' 
+  },
+  { 
+    id: 2, 
+    title: 'JSX Syntax', 
+    description: 'Освоение синтаксиса JSX', 
+    status: 'not-started' 
+  },
+  // ... остальные технологии
+]);
 ```
 
-**Шаг 6: Отображение списка технологий**
-Используя подход из третьего теоретического примера, отобразите массив технологий с помощью компонента `TechnologyCard`. Не забудьте передавать все необходимые свойства и назначить уникальные ключи для каждого элемента списка.
+**Шаг 3: Реализация функции изменения статуса**
+Создайте функцию в компоненте App, которая будет обновлять статус конкретной технологии по id. Передайте эту функцию в каждый компонент TechnologyCard.
 
-### Доработка интерфейса
+**Шаг 4: Добавление интерактивности**
+В компоненте TechnologyCard добавьте обработчик клика, который вызывает переданную функцию для изменения статуса. Убедитесь, что внешний вид карточки меняется в зависимости от статуса.
 
-**Шаг 7: Базовая стилизация приложения**
-В файле `App.css` добавьте стили для основного контейнера приложения:
-- Задайте максимальную ширину контейнера
-- Добавьте отступы для лучшего восприятия
-- Определите основные шрифты и цвета
+### Улучшение пользовательского интерфейса
 
-**Шаг 8: Проверка работы**
-Убедитесь, что приложение корректно отображает все созданные карточки с разными статусами. Проверьте:
-- Отображаются ли все переданные данные
-- Работает ли условное отображение статусов
-- Корректно ли применяются стили
+**Шаг 5: Визуальная обратная связь**
+Добавьте анимации или переходы при изменении статуса карточки. Можно использовать CSS-transition для плавного изменения цвета фона или границы.
+
+**Шаг 6: Статистика в реальном времени**
+Модифицируйте компонент `ProgressHeader` (если он уже создан) или создайте новый компонент `Statistics`, который показывает:
+- Количество технологий в каждом статусе
+- Процент завершения
+- Самую популярную категорию (если добавите категории)
 
 ### Самостоятельная работа
 
-**Задание для самостоятельного выполнения:**
-Создайте компонент `ProgressHeader`, который будет отображать общую статистику по дорожной карте. Компонент должен показывать:
-- Общее количество технологий
-- Количество изученных технологий
-- Процент выполнения в виде прогресс-бара
+**Задание 1:** Создайте компонент "Быстрые действия" (QuickActions) с кнопками:
+- "Отметить все как выполненные"
+- "Сбросить все статусы"
+- "Случайный выбор следующей технологии"
+
+**Задание 2:** Реализуйте систему фильтрации технологий по статусу. Добавьте кнопки/вкладки для отображения:
+- Всех технологий
+- Только не начатых
+- Только в процессе
+- Только выполненных
 
 **Рекомендации по выполнению:**
-- Используйте полученные знания о работе с props
-- Примените подход условного рендеринга для разных состояний прогресса
-- Рассчитайте процент выполнения на основе количества технологий со статусом 'completed'
-- Добавьте визуальный прогресс-бар с помощью CSS
+- Для фильтрации используйте метод filter массива technologies
+- Создайте состояние для активного фильтра
+- Не забывайте про ключи при рендере отфильтрованного списка
 
 **Что проверить перед завершением:**
-- Все компоненты импортируются и экспортируются корректно
-- Приложение запускается без ошибок
-- Карточки отображаются с правильными данными и статусами
-- Стили применяются ко всем элементам
+- Карточки меняют статус по клику
+- Прогресс-бар обновляется в реальном времени
+- Фильтры корректно работают
+- Все изменения состояния происходят без мутаций
 
-По завершении этой работы у вас будет основа для трекера изучения технологий, который мы будем развивать на следующих занятиях. Не стремитесь к идеальному дизайну - сейчас важнее работоспособность и правильная архитектура компонентов.
+**Дополнительные CSS-стили для интерактивности:**
+```css
+.technology-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.technology-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.status-not-started { border-left-color: #ff6b6b; }
+.status-in-progress { border-left-color: #4ecdc4; }
+.status-completed { border-left-color: #45b7d1; }
+```
+
+По завершении этой работы ваше приложение станет полностью интерактивным, а пользователи смогут отслеживать свой прогресс в реальном времени.
