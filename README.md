@@ -63,27 +63,25 @@ https://nodejs.org/en/download
 
 Подход к решению заключается в создании функционального компонента, который возвращает JSX. JSX позволяет нам комбинировать JavaScript и HTML-подобный синтаксис для описания того, что мы хотим видеть на экране.
 
-Исходный код решения в файле `app.jsx`:
+Исходный код решения в файле `Greeting.jsx`:
 
 ```jsx
-import React from 'react';
-
 function Greeting() {
-  const userName = "Анна";
+  const userName = "Айнура";
   const currentTime = new Date().getHours();
   let timeOfDay;
   
   if (currentTime < 12) {
-    timeOfDay = "утро";
+    timeOfDay = "Доброе утро";
   } else if (currentTime < 18) {
-    timeOfDay = "день";
+    timeOfDay = "Добрый день";
   } else {
-    timeOfDay = "вечер";
+    timeOfDay = "Добрый вечер";
   }
 
   return (
     <div className="greeting-container">
-      <h1>Доброе {timeOfDay}, {userName}!</h1>
+      <h1>{timeOfDay}, {userName}!</h1>
       <p>Рады видеть вас в нашем приложении.</p>
     </div>
   );
@@ -93,6 +91,37 @@ export default Greeting;
 ```
 
 Пояснения к решению: мы создаем функциональный компонент Greeting, который содержит логику определения времени суток и возвращает JSX с приветствием. Ключевой особенностью является то, что мы можем встраивать JavaScript-выражения в JSX с помощью фигурных скобок. Для запуска этого кода необходимо импортировать и использовать компонент в основном файле приложения.
+
+Содержимое файла `App.js`:
+```js
+import logo from './logo.svg';
+import './App.css';
+import Greeting from './Greeting';
+
+function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.js</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </header>
+      <Greeting />
+    </div>
+  );
+}
+
+export default App;
+```
 
 ### Пример 2: Компонент с свойствами (props)
 
