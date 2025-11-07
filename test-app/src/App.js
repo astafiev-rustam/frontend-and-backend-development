@@ -1,15 +1,15 @@
 import logo from './logo.svg';
 import './App.css';
-import Counter from './Counter';
-import RegistrationForm from './RegistrationForm';
-import ColorPicker from './ColorPicker';
+import WindowSizeTracker from './WindowSizeTracker';
+import UserProfile from './UserProfile';
+import ContactForm from './ContactForm';
 
 function App() {
   return (
     <div className="App">
-      <Counter />
-      <RegistrationForm />
-      <ColorPicker />
+      <WindowSizeTracker/>
+      <UserProfile/>
+      <ContactForm/>
     </div>
   );
 }
