@@ -1,15 +1,15 @@
 import logo from './logo.svg';
 import './App.css';
-import WindowSizeTracker from './WindowSizeTracker';
-import UserProfile from './UserProfile';
-import ContactForm from './ContactForm';
+import UserSettings from './UserSettings';
+import SimpleModalExample from './SimpleModalExample.jsx';
+import ProgressDashboard from './ProgressDashboard.jsx';
 
 function App() {
   return (
     <div className="App">
-      <WindowSizeTracker/>
-      <UserProfile/>
-      <ContactForm/>
+      <UserSettings/>
+      <SimpleModalExample/>
+      <ProgressDashboard/>
     </div>
   );
 }
