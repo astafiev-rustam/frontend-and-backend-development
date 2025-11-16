@@ -8,660 +8,708 @@
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
 Ссылка на материал: <br>
-https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-23
+https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-24
 
 ---
 
-# Практическое занятие 23: React роутинг: использование маршрутизации и параметров
+# Практическое занятие 24: Извлечение данных из API и их обработка
 
-В рамках данного занятия будут рассмотрены возможности маршрутизации и параметров маршрутизации. Подробную информацию об этом можно найти в материалах лекций, а также в материалах:
+В рамках данного занятия будут рассмотрены возможности работы с API. Подробную информацию об этом можно найти в материалах лекций, а также в материалах:
 
-https://ru.hexlet.io/blog/posts/react-router-v6
+https://purpleschool.ru/knowledge-base/article/react-js-api
 
-https://metanit.com/web/react/4.1.php
+https://habr.com/ru/articles/706802/
 
 ## Теоретическая часть
 
-### Пример 1. Базовая настройка React Router
+### Пример 1. Базовый запрос к API с использованием fetch
 
-**Проблема:** Нужно создать многостраничное приложение с навигацией между разными разделами без перезагрузки страницы.
+**Проблема:** Нужно получить данные с внешнего API и отобразить их в компоненте, обрабатывая состояния загрузки и ошибок.
 
-**Подход к решению:** Используем React Router для настройки маршрутов и компоненты Link для навигации.
+**Подход к решению:** Используем fetch для выполнения HTTP-запроса, useState для хранения данных и useEffect для выполнения запроса при монтировании компонента.
 
-**Исходный код в файле `App.js`:**
-
-```jsx
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Home from './pages/Home';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import './App.css';
-
-function App() {
-  return (
-    <Router>
-      <div className="app">
-        {/* Навигационное меню */}
-        <nav className="main-nav">
-          <div className="nav-brand">
-            <h2>Мое Приложение</h2>
-          </div>
-          <ul className="nav-links">
-            <li>
-              <Link to="/">Главная</Link>
-            </li>
-            <li>
-              <Link to="/about">О нас</Link>
-            </li>
-            <li>
-              <Link to="/contact">Контакты</Link>
-            </li>
-          </ul>
-        </nav>
-
-        {/* Основное содержимое */}
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
-  );
-}
-
-export default App;
-```
-
-**Страница главная в файле `pages/Home.jsx`:**
+**Исходный код в файле `UserList.jsx`:**
 
 ```jsx
-function Home() {
-  return (
-    <div className="page">
-      <h1>Добро пожаловать на главную страницу!</h1>
-      <p>Это стартовая страница нашего приложения.</p>
-      <div className="features">
-        <h2>Наши возможности:</h2>
-        <ul>
-          <li>Навигация между страницами</li>
-          <li>Динамическая загрузка контента</li>
-          <li>Быстрая работа без перезагрузки</li>
-        </ul>
-      </div>
-    </div>
-  );
-}
+import { useState, useEffect } from 'react';
+import 'UserList.css'
 
-export default Home;
-```
+function UserList() {
+  // Состояния для данных, загрузки и ошибок
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-**Страница "О нас" в файле `pages/About.jsx`:**
-
-```jsx
-function About() {
-  return (
-    <div className="page">
-      <h1>О нашем приложении</h1>
-      <p>Это учебное приложение создано для изучения React Router.</p>
-      <div className="about-content">
-        <h2>Наша миссия</h2>
-        <p>Помогать разработчикам изучать современные технологии веб-разработки.</p>
-        
-        <h2>Технологии</h2>
-        <ul>
-          <li>React</li>
-          <li>React Router</li>
-          <li>JavaScript ES6+</li>
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-export default About;
-```
-
-**Страница "Контакты" в файле `pages/Contact.jsx`:**
-
-```jsx
-function Contact() {
-  return (
-    <div className="page">
-      <h1>Наши контакты</h1>
-    </div>
-  );
-}
-
-export default Contact;
-```
-
-### Пример 2. Динамические маршруты с параметрами
-
-**Проблема:** Нужно создавать страницы для разных пользователей, используя один компонент, но с разными данными.
-
-**Подход к решению:** Используем параметры в маршрутах и хук useParams для их получения.
-
-**Обновленный `App.js` с динамическими маршрутами:**
-
-```jsx
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Home from './pages/Home';
-import About from './pages/About';
-import UserProfile from './pages/UserProfile';
-import './App.css';
-
-function App() {
-  // Пример данных пользователей
-  const users = [
-    { id: 1, name: 'Анна' },
-    { id: 2, name: 'Иван' },
-    { id: 3, name: 'Мария' }
-  ];
-
-  return (
-    <Router>
-      <div className="app">
-        <nav className="main-nav">
-          <h2>Трекер технологий</h2>
-          <ul className="nav-links">
-            <li><Link to="/">Главная</Link></li>
-            <li><Link to="/about">О проекте</Link></li>
-            <li>
-             <span>Пользователи:</span>
-             <ul>
-              {users.map(user => (
-                <li><Link key={user.id} to={`/user/${user.id}`} className="user-link">
-                  {user.name}
-                </Link>
-                </li>
-              ))}
-              </ul>
-            </li>
-          </ul>
-        </nav>
-
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            {/* Динамический маршрут для пользователей */}
-            <Route path="/user/:userId" element={<UserProfile />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
-  );
-}
-
-export default App;
-```
-
-**Компонент профиля пользователя в `pages/UserProfile.jsx`:**
-
-```jsx
-import { useParams, Link } from 'react-router-dom';
-
-function UserProfile() {
-  // Получаем параметр userId из URL
-  const { userId } = useParams();
-  
-  // В реальном приложении здесь был бы запрос к API
-  // Сейчас используем mock данные
-  const users = {
-    1: { id: 1, name: 'Анна', role: 'Фронтенд разработчик', progress: 75 },
-    2: { id: 2, name: 'Иван', role: 'Бэкенд разработчик', progress: 60 },
-    3: { id: 3, name: 'Мария', role: 'Fullstack разработчик', progress: 85 }
+  // Функция для загрузки пользователей
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Выполняем GET-запрос к API
+      const response = await fetch('https://jsonplaceholder.typicode.com/users');
+      
+      // Проверяем успешность ответа
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+      
+      // Парсим JSON-ответ
+      const userData = await response.json();
+      setUsers(userData);
+      
+    } catch (err) {
+      // Обрабатываем ошибки
+      setError(err.message);
+      console.error('Ошибка при загрузке пользователей:', err);
+    } finally {
+      // Выключаем индикатор загрузки в любом случае
+      setLoading(false);
+    }
   };
 
-  const user = users[userId];
+  // Выполняем запрос при монтировании компонента
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-  // Если пользователь не найден
-  if (!user) {
+  // Функция для повторной загрузки
+  const handleRetry = () => {
+    fetchUsers();
+  };
+
+  // Показываем индикатор загрузки
+  if (loading) {
     return (
-      <div className="page">
-        <h1>Пользователь не найден</h1>
-        <p>Пользователь с ID {userId} не существует.</p>
-        <Link to="/">Вернуться на главную</Link>
+      <div className="user-list loading">
+        <div className="spinner"></div>
+        <p>Загрузка пользователей...</p>
       </div>
     );
   }
 
-  return (
-    <div className="page">
-      <h1>Профиль пользователя</h1>
-      <div className="user-info">
-        <h2>{user.name}</h2>
-        <p><strong>Должность:</strong> {user.role}</p>
-        <p><strong>Прогресс:</strong> {user.progress}%</p>
+  // Показываем сообщение об ошибке
+  if (error) {
+    return (
+      <div className="user-list error">
+        <h2>Произошла ошибка</h2>
+        <p>{error}</p>
+        <button onClick={handleRetry} className="retry-button">
+          Попробовать снова
+        </button>
       </div>
-      
-      <div className="user-actions">
-        <Link to="/" className="back-link">← Назад к списку</Link>
-      </div>
-    </div>
-  );
-}
-
-export default UserProfile;
-```
-
-### Пример 3. Программная навигация и защищенные маршруты
-
-**Проблема:** Нужно ограничить доступ к некоторым страницам только для авторизованных пользователей и реализовать перенаправления.
-
-**Подход к решению:** Создаем компонент-обертку для защищенных маршрутов и используем хук useNavigate для программной навигации.
-
-**Компонент логина в `pages/Login.jsx`:**
-
-```jsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-function Login({ onLogin }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (username === 'admin' && password === 'password') {
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('username', username);
-      
-      // Вызываем колбэк для обновления состояния в App
-      onLogin(username);
-      
-      // Перенаправляем на главную
-      navigate('/');
-    } else {
-      alert('Неверные данные для входа');
-    }
-  };
-
-  return (
-    <div className="page">
-      <h1>Вход в систему</h1>
-      <form onSubmit={handleSubmit} className="login-form">
-        <div className="form-group">
-          <label>Имя пользователя:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Пароль:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        
-        <button type="submit">Войти</button>
-      </form>
-    </div>
-  );
-}
-
-export default Login;
-```
-
-**Компонент-обертка для защищенных маршрутов в `components/ProtectedRoute.jsx`:**
-
-```jsx
-import { Navigate } from 'react-router-dom';
-
-function ProtectedRoute({ children, isLoggedIn }) {
-  // Используем переданное состояние вместо прямого чтения localStorage
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
+    );
   }
 
-  return children;
-}
-
-export default ProtectedRoute;
-```
-
-**Обновленный `App.js` с защищенными маршрутами:**
-
-```jsx
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react'; // Добавляем useEffect
-import Home from './pages/Home';
-import About from './pages/About';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
-import './App.css';
-
-function App() {
-  // Состояние для отслеживания авторизации
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
-
-  // Проверяем авторизацию при загрузке и при изменении
-  useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const user = localStorage.getItem('username') || '';
-    setIsLoggedIn(loggedIn);
-    setUsername(user);
-  }, []);
-
-  const handleLogin = (user) => {
-    setIsLoggedIn(true);
-    setUsername(user);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('username');
-    setIsLoggedIn(false);
-    setUsername('');
-  };
-
+  // Отображаем список пользователей
   return (
-    <Router>
-      <div className="app">
-        <nav className="main-nav">
-          <h2>Трекер технологий</h2>
-          <ul className="nav-links">
-            <li><Link to="/">Главная</Link></li>
-            <li><Link to="/about">О проекте</Link></li>
-            
-            {isLoggedIn ? (
-              <>
-                <li><Link to="/dashboard">Панель управления</Link></li>
-                <li className="user-info">
-                  <span>Привет, {username}!</span>
-                  <button onClick={handleLogout} className="logout-btn">
-                    Выйти
-                  </button>
-                </li>
-              </>
-            ) : (
-              <li><Link to="/login">Войти</Link></li>
-            )}
-          </ul>
-        </nav>
-
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route 
-              path="/login" 
-              element={<Login onLogin={handleLogin} />} 
-            />
-            
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute isLoggedIn={isLoggedIn}>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-        </main>
-      </div>
-    </Router>
-  );
-}
-
-export default App;
-```
-
-## Практическая часть
-
-### Добавление маршрутизации в трекер технологий
-
-**Шаг 1: Установите React Router**
-```bash
-npm install react-router-dom
-```
-
-**Шаг 2: Создайте структуру папок для страниц**
-```
-src/
-├── pages/
-│   ├── Home.js
-│   ├── TechnologyList.js
-│   ├── TechnologyDetail.js
-│   └── AddTechnology.js
-├── components/
-│   ├── Navigation.js
-│   └── TechnologyCard.js
-└── App.js
-```
-
-**Шаг 3: Создайте компонент навигации**
-
-```jsx
-// components/Navigation.js
-import { Link, useLocation } from 'react-router-dom';
-
-function Navigation() {
-  const location = useLocation();
-
-  return (
-    <nav className="main-navigation">
-      <div className="nav-brand">
-        <Link to="/">
-          <h2>🚀 Трекер технологий</h2>
-        </Link>
-      </div>
+    <div className="user-list">
+      <h2>Список пользователей ({users.length})</h2>
       
-      <ul className="nav-menu">
-        <li>
-          <Link 
-            to="/" 
-            className={location.pathname === '/' ? 'active' : ''}
-          >
-            Главная
-          </Link>
-        </li>
-        <li>
-          <Link 
-            to="/technologies" 
-            className={location.pathname === '/technologies' ? 'active' : ''}
-          >
-            Все технологии
-          </Link>
-        </li>
-        <li>
-          <Link 
-            to="/add-technology" 
-            className={location.pathname === '/add-technology' ? 'active' : ''}
-          >
-            Добавить технологию
-          </Link>
-        </li>
-      </ul>
-    </nav>
-  );
-}
-
-export default Navigation;
-```
-
-**Шаг 4: Создайте страницу со списком технологий**
-
-```jsx
-// pages/TechnologyList.js
-import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-
-function TechnologyList() {
-  const [technologies, setTechnologies] = useState([]);
-
-  // Загружаем технологии из localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('technologies');
-    if (saved) {
-      setTechnologies(JSON.parse(saved));
-    }
-  }, []);
-
-  return (
-    <div className="page">
-      <div className="page-header">
-        <h1>Все технологии</h1>
-        <Link to="/add-technology" className="btn btn-primary">
-          + Добавить технологию
-        </Link>
-      </div>
-
-      <div className="technologies-grid">
-        {technologies.map(tech => (
-          <div key={tech.id} className="technology-item">
-            <h3>{tech.title}</h3>
-            <p>{tech.description}</p>
-            <div className="technology-meta">
-              <span className={`status status-${tech.status}`}>
-                {tech.status}
-              </span>
-              <Link to={`/technology/${tech.id}`} className="btn-link">
-                Подробнее →
-              </Link>
-            </div>
+      <div className="users-grid">
+        {users.map(user => (
+          <div key={user.id} className="user-card">
+            <h3>{user.name}</h3>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Телефон:</strong> {user.phone}</p>
+            <p><strong>Город:</strong> {user.address.city}</p>
+            <p><strong>Компания:</strong> {user.company.name}</p>
           </div>
         ))}
       </div>
-
-      {technologies.length === 0 && (
-        <div className="empty-state">
-          <p>Технологий пока нет.</p>
-          <Link to="/add-technology" className="btn btn-primary">
-            Добавить первую технологию
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
 
-export default TechnologyList;
+export default UserList;
 ```
 
-**Шаг 5: Создайте страницу деталей технологии**
+**Стили для компонента в файле `UserList.css`:**
+
+```css
+.user-list {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error {
+  text-align: center;
+  padding: 40px;
+  color: #e74c3c;
+}
+
+.retry-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.retry-button:hover {
+  background-color: #2980b9;
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.user-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-card h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.user-card p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+```
+Добавим компонент в App.js и посмотрим его работу.
+
+### Пример 2. Поиск с debounce и обработка отмены запросов
+
+**Проблема:** Нужно реализовать поиск по API с задержкой (debounce) и обработать отмену предыдущих запросов при новом поиске.
+
+**Подход к решению:** Используем setTimeout для debounce и AbortController для отмены предыдущих запросов.
+
+**Исходный код в файле `ProductSearch.jsx`:**
 
 ```jsx
-// pages/TechnologyDetail.js
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-function TechnologyDetail() {
-  const { techId } = useParams();
-  const navigate = useNavigate();
-  const [technology, setTechnology] = useState(null);
+function ProductSearch() {
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Используем useRef для хранения таймера и AbortController
+  const searchTimeoutRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('technologies');
-    if (saved) {
-      const technologies = JSON.parse(saved);
-      const tech = technologies.find(t => t.id === parseInt(techId));
-      setTechnology(tech);
+  // Функция для поиска продуктов
+  const searchProducts = async (query) => {
+    // Отменяем предыдущий запрос, если он существует
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
-  }, [techId]);
 
-  const updateStatus = (newStatus) => {
-    const saved = localStorage.getItem('technologies');
-    if (saved) {
-      const technologies = JSON.parse(saved);
-      const updated = technologies.map(tech =>
-        tech.id === parseInt(techId) ? { ...tech, status: newStatus } : tech
+    // Создаем новый AbortController для текущего запроса
+    abortControllerRef.current = new AbortController();
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Если поисковый запрос пустой, очищаем результаты
+      if (!query.trim()) {
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(
+        `https://dummyjson.com/products/search?q=${encodeURIComponent(query)}`,
+        { signal: abortControllerRef.current.signal }
       );
-      localStorage.setItem('technologies', JSON.stringify(updated));
-      setTechnology({ ...technology, status: newStatus });
+
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setProducts(data.products || []);
+
+    } catch (err) {
+      // Игнорируем ошибки отмены запроса
+      if (err.name !== 'AbortError') {
+        setError(err.message);
+        console.error('Ошибка при поиске продуктов:', err);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!technology) {
-    return (
-      <div className="page">
-        <h1>Технология не найдена</h1>
-        <p>Технология с ID {techId} не существует.</p>
-        <Link to="/technologies" className="btn">
-          ← Назад к списку
-        </Link>
-      </div>
-    );
-  }
+  // Обработчик изменения поискового запроса
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Очищаем предыдущий таймер
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Устанавливаем новый таймер для debounce (500ms)
+    searchTimeoutRef.current = setTimeout(() => {
+      searchProducts(value);
+    }, 500);
+  };
+
+  // Очистка при размонтировании компонента
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return (
-    <div className="page">
-      <div className="page-header">
-        <Link to="/technologies" className="back-link">
-          ← Назад к списку
-        </Link>
-        <h1>{technology.title}</h1>
+    <div className="product-search">
+      <h2>Поиск продуктов</h2>
+      
+      <div className="search-box">
+        <input
+          type="text"
+          placeholder="Введите название продукта..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="search-input"
+        />
+        {loading && <span className="search-loading">⌛</span>}
       </div>
 
-      <div className="technology-detail">
-        <div className="detail-section">
-          <h3>Описание</h3>
-          <p>{technology.description}</p>
+      {error && (
+        <div className="error-message">
+          Ошибка: {error}
         </div>
+      )}
 
-        <div className="detail-section">
-          <h3>Статус изучения</h3>
-          <div className="status-buttons">
-            <button
-              onClick={() => updateStatus('not-started')}
-              className={technology.status === 'not-started' ? 'active' : ''}
-            >
-              Не начато
-            </button>
-            <button
-              onClick={() => updateStatus('in-progress')}
-              className={technology.status === 'in-progress' ? 'active' : ''}
-            >
-              В процессе
-            </button>
-            <button
-              onClick={() => updateStatus('completed')}
-              className={technology.status === 'completed' ? 'active' : ''}
-            >
-              Завершено
-            </button>
-          </div>
-        </div>
-
-        {technology.notes && (
-          <div className="detail-section">
-            <h3>Мои заметки</h3>
-            <p>{technology.notes}</p>
-          </div>
+      <div className="search-results">
+        {products.length > 0 ? (
+          <>
+            <h3>Найдено продуктов: {products.length}</h3>
+            <div className="products-grid">
+              {products.map(product => (
+                <div key={product.id} className="product-card">
+                  <img 
+                    src={product.thumbnail} 
+                    alt={product.title}
+                    className="product-image"
+                  />
+                  <div className="product-info">
+                    <h4>{product.title}</h4>
+                    <p className="product-price">${product.price}</p>
+                    <p className="product-category">{product.category}</p>
+                    <p className="product-description">{product.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          searchTerm.trim() && !loading && (
+            <p className="no-results">Продукты не найдены</p>
+          )
         )}
       </div>
     </div>
   );
 }
 
-export default TechnologyDetail;
+export default ProductSearch;
+```
+
+Добавим в App.js и просмотрим работу. Товары из API примера на странице `https://dummyjson.com/products`, например: `Essence Mascara Lash Princess`
+
+### Пример 3. Кастомный хук для работы с API
+
+**Проблема:** Нужно создать переиспользуемую логику для работы с API, чтобы избежать дублирования кода в разных компонентах.
+
+**Подход к решению:** Создаем кастомный хук useApi, который инкапсулирует логику запросов, состояний загрузки и ошибок.
+
+**Исходный код в файле `useApi.jsx`:**
+
+```jsx
+import { useState, useEffect, useCallback } from 'react';
+
+// Кастомный хук для работы с API
+function useApi(url, options = {}) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Функция для выполнения запроса
+  const fetchData = useCallback(async (abortController) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(url, {
+        ...options,
+        signal: abortController?.signal
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      setData(result);
+
+    } catch (err) {
+      // Игнорируем ошибки отмены запроса
+      if (err.name !== 'AbortError') {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [url]); // Только url как зависимость
+
+  // Выполняем запрос при изменении URL
+  useEffect(() => {
+    const abortController = new AbortController();
+    
+    // Выполняем запрос только если URL существует
+    if (url) {
+      fetchData(abortController);
+    }
+
+    // Функция очистки - отменяем запрос при размонтировании
+    return () => {
+      abortController.abort();
+    };
+  }, [url, fetchData]); // fetchData стабильна благодаря useCallback
+
+  // Функция для повторного выполнения запроса
+  const refetch = useCallback(() => {
+    const abortController = new AbortController();
+    fetchData(abortController);
+    return () => abortController.abort();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch };
+}
+
+export default useApi;
+```
+
+**Использование кастомного хука в компоненте `PostList.jsx`:**
+
+```jsx
+// PostList.js - компонент для отображения списка постов
+import useApi from './useApi';
+
+function PostList() {
+  // Используем наш кастомный хук
+  const { data: posts, loading, error, refetch } = useApi(
+    'https://jsonplaceholder.typicode.com/posts'
+  );
+
+  if (loading) {
+    return (
+      <div className="post-list loading">
+        <p>Загрузка постов...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="post-list error">
+        <h2>Ошибка при загрузке постов</h2>
+        <p>{error}</p>
+        <button onClick={refetch}>Попробовать снова</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="post-list">
+      <div className="post-list-header">
+        <h2>Список постов ({posts?.length || 0})</h2>
+        <button onClick={refetch} className="refresh-button">
+          Обновить
+        </button>
+      </div>
+
+      <div className="posts-container">
+        {posts?.map(post => (
+          <article key={post.id} className="post-card">
+            <h3>{post.title}</h3>
+            <p>{post.body}</p>
+            <div className="post-meta">
+              <span>ID: {post.id}</span>
+              <span>User: {post.userId}</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default PostList;
+```
+
+## Практическая часть
+
+### Интеграция API в трекер технологий
+
+**ВАЖНО! Шаг 0: Найдите для себя API для своего стека технологий и/или для конкретного набора для загрузки карточек и/или описаний технологий на внешнем ресурсе, так как `roadmap.sh` не содержит публичных API**
+
+В качестве примеров:
+https://github.com/public-api-lists/public-api-lists
+
+Если найти удачный для практической работы пример не удаётся, то можно применить API к другой проблеме в вашем проекте (творческое задание), а загрузка-выгрузка карточек технологий будет происходить исключительно механизмами экспорта-импорта.
+
+**Шаг 1: Создайте кастомный хук для работы с технологиями**
+
+```jsx
+// hooks/useTechnologiesApi.js
+import { useState, useEffect } from 'react';
+
+function useTechnologiesApi() {
+  const [technologies, setTechnologies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Загрузка технологий из API
+  const fetchTechnologies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // В реальном приложении здесь будет запрос к вашему API
+      // Сейчас имитируем загрузку с задержкой
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock данные - в реальном приложении замените на реальный API
+      const mockTechnologies = [
+        {
+          id: 1,
+          title: 'React',
+          description: 'Библиотека для создания пользовательских интерфейсов',
+          category: 'frontend',
+          difficulty: 'beginner',
+          resources: ['https://react.dev', 'https://ru.reactjs.org']
+        },
+        {
+          id: 2,
+          title: 'Node.js',
+          description: 'Среда выполнения JavaScript на сервере',
+          category: 'backend',
+          difficulty: 'intermediate',
+          resources: ['https://nodejs.org', 'https://nodejs.org/ru/docs/']
+        },
+        {
+          id: 3,
+          title: 'TypeScript',
+          description: 'Типизированное надмножество JavaScript',
+          category: 'language',
+          difficulty: 'intermediate',
+          resources: ['https://www.typescriptlang.org']
+        }
+      ];
+      
+      setTechnologies(mockTechnologies);
+      
+    } catch (err) {
+      setError('Не удалось загрузить технологии');
+      console.error('Ошибка загрузки:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Добавление новой технологии
+  const addTechnology = async (techData) => {
+    try {
+      // Имитация API запроса
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const newTech = {
+        id: Date.now(), // В реальном приложении ID генерируется на сервере
+        ...techData,
+        createdAt: new Date().toISOString()
+      };
+      
+      setTechnologies(prev => [...prev, newTech]);
+      return newTech;
+      
+    } catch (err) {
+      throw new Error('Не удалось добавить технологию');
+    }
+  };
+
+  // Загружаем технологии при монтировании
+  useEffect(() => {
+    fetchTechnologies();
+  }, []);
+
+  return {
+    technologies,
+    loading,
+    error,
+    refetch: fetchTechnologies,
+    addTechnology
+  };
+}
+
+export default useTechnologiesApi;
+```
+
+**Шаг 2: Создайте компонент для загрузки дорожных карт из API**
+
+```jsx
+// components/RoadmapImporter.js
+import { useState } from 'react';
+import useTechnologiesApi from '../hooks/useTechnologiesApi';
+
+function RoadmapImporter() {
+  const { technologies, loading, error, addTechnology } = useTechnologiesApi();
+  const [importing, setImporting] = useState(false);
+
+  const handleImportRoadmap = async (roadmapUrl) => {
+    try {
+      setImporting(true);
+      
+      // Имитация загрузки дорожной карты из API
+      const response = await fetch(roadmapUrl);
+      if (!response.ok) throw new Error('Не удалось загрузить дорожную карту');
+      
+      const roadmapData = await response.json();
+      
+      // Добавляем каждую технологию из дорожной карты
+      for (const tech of roadmapData.technologies) {
+        await addTechnology(tech);
+      }
+      
+      alert(`Успешно импортировано ${roadmapData.technologies.length} технологий`);
+      
+    } catch (err) {
+      alert(`Ошибка импорта: ${err.message}`);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleExampleImport = () => {
+    // Пример импорта из фиктивного API
+    handleImportRoadmap('https://api.example.com/roadmaps/frontend');
+  };
+
+  return (
+    <div className="roadmap-importer">
+      <h3>Импорт дорожной карты</h3>
+      
+      <div className="import-actions">
+        <button 
+          onClick={handleExampleImport}
+          disabled={importing}
+          className="import-button"
+        >
+          {importing ? 'Импорт...' : 'Импорт пример дорожной карты'}
+        </button>
+      </div>
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default RoadmapImporter;
+```
+
+**Шаг 3: Обновите главный компонент для использования API**
+
+```jsx
+// App.js
+import useTechnologiesApi from './hooks/useTechnologiesApi';
+import RoadmapImporter from './components/RoadmapImporter';
+import TechnologyList from './components/TechnologyList';
+
+function App() {
+  const { technologies, loading, error, refetch } = useTechnologiesApi();
+
+  if (loading) {
+    return (
+      <div className="app-loading">
+        <div className="spinner"></div>
+        <p>Загрузка технологий...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      <header className="app-header">
+        <h1>🚀 Трекер изучения технологий</h1>
+        <button onClick={refetch} className="refresh-btn">
+          Обновить
+        </button>
+      </header>
+
+      {error && (
+        <div className="app-error">
+          <p>{error}</p>
+          <button onClick={refetch}>Попробовать снова</button>
+        </div>
+      )}
+
+      <main className="app-main">
+        <RoadmapImporter />
+        <TechnologyList technologies={technologies} />
+      </main>
+    </div>
+  );
+}
+
+export default App;
 ```
 
 ### Самостоятельная работа
 
-**Задание 1:** Создайте страницу "Статистика" с графиком прогресса
+**Задание 1:** Создайте компонент для поиска технологий с использованием debounce
 
-**Задание 2:** Добавьте страницу "Настройки" для управления приложением
+**Задание 2:** Добавьте возможность загрузки дополнительных ресурсов для каждой технологии из API
 
 **Что проверить перед завершением:**
-- Навигация между страницами работает без перезагрузки
-- Параметры в URL правильно обрабатываются
-- Защищенные маршруты перенаправляют неавторизованных пользователей
-- Данные сохраняются между переходами по страницам
-
-Теперь ваше приложение стало полноценным SPA с навигацией и разными страницами!
+- Данные загружаются из API при запуске приложения
+- Состояния загрузки и ошибок обрабатываются корректно
+- Поиск работает с задержкой и отменой предыдущих запросов
+- Импорт дорожных карт добавляет новые технологии
