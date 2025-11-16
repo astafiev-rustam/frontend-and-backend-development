@@ -8,644 +8,660 @@
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
 Ссылка на материал: <br>
-https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-22
+https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-23
 
 ---
 
-# Практическое занятие 22: Использование локального хранилища и переиспользование компонентов
+# Практическое занятие 23: React роутинг: использование маршрутизации и параметров
 
-В рамках данного занятия будут рассмотрены возможности переиспользования компонентов. Подробную информацию об этом можно найти в материалах лекций, а также в материалах:
+В рамках данного занятия будут рассмотрены возможности маршрутизации и параметров маршрутизации. Подробную информацию об этом можно найти в материалах лекций, а также в материалах:
 
-https://habr.com/ru/companies/docsvision/articles/694774/
-https://habr.com/ru/companies/yandex/articles/560194/
+https://ru.hexlet.io/blog/posts/react-router-v6
+
+https://metanit.com/web/react/4.1.php
 
 ## Теоретическая часть
 
-### Пример 1. Создание кастомного хука для localStorage
+### Пример 1. Базовая настройка React Router
 
-**Проблема:** Нужно создать переиспользуемую логику для работы с localStorage, чтобы избежать повторения кода в разных компонентах.
+**Проблема:** Нужно создать многостраничное приложение с навигацией между разными разделами без перезагрузки страницы.
 
-**Подход к решению:** Создаем кастомный хук useLocalStorage, который инкапсулирует логику чтения/записи в localStorage.
+**Подход к решению:** Используем React Router для настройки маршрутов и компоненты Link для навигации.
 
-**Исходный код в файле `useLocalStorage.js`:**
+**Исходный код в файле `App.js`:**
 
 ```jsx
-import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import './App.css';
 
-// Кастомный хук для работы с localStorage
-function useLocalStorage(key, initialValue) {
-  // Инициализируем состояние, пытаясь получить значение из localStorage
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      // Пытаемся получить значение по ключу из localStorage
-      const item = window.localStorage.getItem(key);
-      // Если значение найдено, парсим его из JSON, иначе используем initialValue
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      // В случае ошибки (например, недоступный localStorage) используем initialValue
-      console.error(`Ошибка чтения из localStorage ключа "${key}":`, error);
-      return initialValue;
-    }
-  });
+function App() {
+  return (
+    <Router>
+      <div className="app">
+        {/* Навигационное меню */}
+        <nav className="main-nav">
+          <div className="nav-brand">
+            <h2>Мое Приложение</h2>
+          </div>
+          <ul className="nav-links">
+            <li>
+              <Link to="/">Главная</Link>
+            </li>
+            <li>
+              <Link to="/about">О нас</Link>
+            </li>
+            <li>
+              <Link to="/contact">Контакты</Link>
+            </li>
+          </ul>
+        </nav>
 
-  // Функция для обновления значения в состоянии и localStorage
-  const setValue = (value) => {
-    try {
-      // Разрешаем value быть функцией, как в useState
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
-      // Сохраняем в состояние
-      setStoredValue(valueToStore);
-      
-      // Сохраняем в localStorage
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Ошибка записи в localStorage ключа "${key}":`, error);
-    }
-  };
-
-  return [storedValue, setValue];
+        {/* Основное содержимое */}
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+  );
 }
 
-export default useLocalStorage;
+export default App;
 ```
 
-**Пример использования кастомного хука:**
+**Страница главная в файле `pages/Home.jsx`:**
 
 ```jsx
-// UserSettings.jsx - компонент настроек пользователя
-import useLocalStorage from './useLocalStorage';
-
-function UserSettings() {
-  // Используем наш кастомный хук для разных настроек
-  const [username, setUsername] = useLocalStorage('username', 'Гость');
-  const [theme, setTheme] = useLocalStorage('theme', 'light');
-  const [notifications, setNotifications] = useLocalStorage('notifications', true);
-
+function Home() {
   return (
-    <div className="user-settings">
-      <h2>Настройки пользователя</h2>
-      
-      <div className="setting-group">
-        <label>Имя пользователя:</label>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Введите ваше имя"
-        />
-      </div>
-
-      <div className="setting-group">
-        <label>Тема оформления:</label>
-        <select value={theme} onChange={(e) => setTheme(e.target.value)}>
-          <option value="light">Светлая</option>
-          <option value="dark">Темная</option>
-          <option value="auto">Авто</option>
-        </select>
-      </div>
-
-      <div className="setting-group">
-        <label>
-          <input
-            type="checkbox"
-            checked={notifications}
-            onChange={(e) => setNotifications(e.target.checked)}
-          />
-          Включить уведомления
-        </label>
-      </div>
-
-      <div className="current-settings">
-        <h3>Текущие настройки:</h3>
-        <p>Имя: {username}</p>
-        <p>Тема: {theme}</p>
-        <p>Уведомления: {notifications ? 'Включены' : 'Выключены'}</p>
+    <div className="page">
+      <h1>Добро пожаловать на главную страницу!</h1>
+      <p>Это стартовая страница нашего приложения.</p>
+      <div className="features">
+        <h2>Наши возможности:</h2>
+        <ul>
+          <li>Навигация между страницами</li>
+          <li>Динамическая загрузка контента</li>
+          <li>Быстрая работа без перезагрузки</li>
+        </ul>
       </div>
     </div>
   );
 }
 
-export default UserSettings;
+export default Home;
 ```
 
-После добавления в компонент App проверяем через средства разработчика LocalStorage и проверяем корректность работы.
-
-### Пример 2. Создание переиспользуемого компонента модального окна
-
-**Проблема:** Нужно создать универсальный компонент модального окна, который можно использовать в разных частях приложения с разным содержимым.
-
-**Подход к решению:** Создаем компонент Modal, который принимает содержимое через children и props для управления видимостью.
-
-**Исходный код в файле `Modal.jsx`:**
+**Страница "О нас" в файле `pages/About.jsx`:**
 
 ```jsx
-import './Modal.css';
+function About() {
+  return (
+    <div className="page">
+      <h1>О нашем приложении</h1>
+      <p>Это учебное приложение создано для изучения React Router.</p>
+      <div className="about-content">
+        <h2>Наша миссия</h2>
+        <p>Помогать разработчикам изучать современные технологии веб-разработки.</p>
+        
+        <h2>Технологии</h2>
+        <ul>
+          <li>React</li>
+          <li>React Router</li>
+          <li>JavaScript ES6+</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
 
-// Простой переиспользуемый компонент модального окна
-function Modal({ isOpen, onClose, title, children }) {
-  // Если модалка закрыта - не показываем ничего
-  if (!isOpen) {
-    return null;
+export default About;
+```
+
+**Страница "Контакты" в файле `pages/Contact.jsx`:**
+
+```jsx
+function Contact() {
+  return (
+    <div className="page">
+      <h1>Наши контакты</h1>
+    </div>
+  );
+}
+
+export default Contact;
+```
+
+### Пример 2. Динамические маршруты с параметрами
+
+**Проблема:** Нужно создавать страницы для разных пользователей, используя один компонент, но с разными данными.
+
+**Подход к решению:** Используем параметры в маршрутах и хук useParams для их получения.
+
+**Обновленный `App.js` с динамическими маршрутами:**
+
+```jsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+import UserProfile from './pages/UserProfile';
+import './App.css';
+
+function App() {
+  // Пример данных пользователей
+  const users = [
+    { id: 1, name: 'Анна' },
+    { id: 2, name: 'Иван' },
+    { id: 3, name: 'Мария' }
+  ];
+
+  return (
+    <Router>
+      <div className="app">
+        <nav className="main-nav">
+          <h2>Трекер технологий</h2>
+          <ul className="nav-links">
+            <li><Link to="/">Главная</Link></li>
+            <li><Link to="/about">О проекте</Link></li>
+            <li>
+             <span>Пользователи:</span>
+             <ul>
+              {users.map(user => (
+                <li><Link key={user.id} to={`/user/${user.id}`} className="user-link">
+                  {user.name}
+                </Link>
+                </li>
+              ))}
+              </ul>
+            </li>
+          </ul>
+        </nav>
+
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            {/* Динамический маршрут для пользователей */}
+            <Route path="/user/:userId" element={<UserProfile />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+**Компонент профиля пользователя в `pages/UserProfile.jsx`:**
+
+```jsx
+import { useParams, Link } from 'react-router-dom';
+
+function UserProfile() {
+  // Получаем параметр userId из URL
+  const { userId } = useParams();
+  
+  // В реальном приложении здесь был бы запрос к API
+  // Сейчас используем mock данные
+  const users = {
+    1: { id: 1, name: 'Анна', role: 'Фронтенд разработчик', progress: 75 },
+    2: { id: 2, name: 'Иван', role: 'Бэкенд разработчик', progress: 60 },
+    3: { id: 3, name: 'Мария', role: 'Fullstack разработчик', progress: 85 }
+  };
+
+  const user = users[userId];
+
+  // Если пользователь не найден
+  if (!user) {
+    return (
+      <div className="page">
+        <h1>Пользователь не найден</h1>
+        <p>Пользователь с ID {userId} не существует.</p>
+        <Link to="/">Вернуться на главную</Link>
+      </div>
+    );
   }
 
-  // Функция для закрытия модалки при клике на фон
-  const handleBackgroundClick = (event) => {
-    if (event.target === event.currentTarget) {
-      onClose();
+  return (
+    <div className="page">
+      <h1>Профиль пользователя</h1>
+      <div className="user-info">
+        <h2>{user.name}</h2>
+        <p><strong>Должность:</strong> {user.role}</p>
+        <p><strong>Прогресс:</strong> {user.progress}%</p>
+      </div>
+      
+      <div className="user-actions">
+        <Link to="/" className="back-link">← Назад к списку</Link>
+      </div>
+    </div>
+  );
+}
+
+export default UserProfile;
+```
+
+### Пример 3. Программная навигация и защищенные маршруты
+
+**Проблема:** Нужно ограничить доступ к некоторым страницам только для авторизованных пользователей и реализовать перенаправления.
+
+**Подход к решению:** Создаем компонент-обертку для защищенных маршрутов и используем хук useNavigate для программной навигации.
+
+**Компонент логина в `pages/Login.jsx`:**
+
+```jsx
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+function Login({ onLogin }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (username === 'admin' && password === 'password') {
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', username);
+      
+      // Вызываем колбэк для обновления состояния в App
+      onLogin(username);
+      
+      // Перенаправляем на главную
+      navigate('/');
+    } else {
+      alert('Неверные данные для входа');
     }
   };
 
   return (
-    <div className="modal-background" onClick={handleBackgroundClick}>
-      <div className="modal-window">
-        {/* Шапка модалки с заголовком и кнопкой закрытия */}
-        <div className="modal-header">
-          <h2>{title}</h2>
-          <button className="close-button" onClick={onClose}>
-            ×
-          </button>
+    <div className="page">
+      <h1>Вход в систему</h1>
+      <form onSubmit={handleSubmit} className="login-form">
+        <div className="form-group">
+          <label>Имя пользователя:</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
         </div>
         
-        {/* Основное содержимое модалки */}
-        <div className="modal-content">
-          {children}
+        <div className="form-group">
+          <label>Пароль:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
-      </div>
+        
+        <button type="submit">Войти</button>
+      </form>
     </div>
   );
 }
 
-export default Modal;
+export default Login;
 ```
 
-**Стили для модального окна (Modal.css):**
-
-```css
-.modal-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-window {
-  background: white;
-  border-radius: 8px;
-  padding: 0;
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.3rem;
-  color: #333;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #666;
-  padding: 5px 10px;
-}
-
-.close-button:hover {
-  color: #333;
-}
-
-.modal-content {
-  padding: 20px;
-}
-```
-
-**Пример использования модального окна:**
+**Компонент-обертка для защищенных маршрутов в `components/ProtectedRoute.jsx`:**
 
 ```jsx
-// SimpleModalExample.jsx
-import { useState } from 'react';
-import Modal from './Modal';
+import { Navigate } from 'react-router-dom';
 
-function SimpleModalExample() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+function ProtectedRoute({ children, isLoggedIn }) {
+  // Используем переданное состояние вместо прямого чтения localStorage
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
 
-  return (
-    <div>
-      <button onClick={() => setIsModalOpen(true)}>
-        Открыть модальное окно
-      </button>
-
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Пример модального окна"
-      >
-        <div>
-          <p>Это содержимое модального окна.</p>
-          <p>Здесь может быть любой React-компонент.</p>
-          <button onClick={() => setIsModalOpen(false)}>
-            Закрыть
-          </button>
-        </div>
-      </Modal>
-    </div>
-  );
+  return children;
 }
 
-export default SimpleModalExample;
+export default ProtectedRoute;
 ```
 
-### Пример 3. Компонент прогресс-бара с разными вариантами использования
-
-**Проблема:** Нужно создать универсальный компонент прогресс-бара, который можно использовать для отображения прогресса разного типа с разными стилями.
-
-**Подход к решению:** Создаем компонент ProgressBar, который принимает различные props для кастомизации внешнего вида и поведения.
-
-**Исходный код в файле `ProgressBar.jsx`:**
+**Обновленный `App.js` с защищенными маршрутами:**
 
 ```jsx
-// Универсальный компонент прогресс-бара
-function ProgressBar({ 
-  progress,           // Текущее значение прогресса (от 0 до 100)
-  label = '',         // Подпись к прогресс-бару
-  color = '#4CAF50',  // Цвет заполнения
-  height = 20,        // Высота прогресс-бара
-  showPercentage = true, // Показывать ли процент
-  animated = false    // Анимировать ли заполнение
-}) {
-  // Обеспечиваем, чтобы прогресс был в пределах 0-100
-  const normalizedProgress = Math.min(100, Math.max(0, progress));
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react'; // Добавляем useEffect
+import Home from './pages/Home';
+import About from './pages/About';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import './App.css';
+
+function App() {
+  // Состояние для отслеживания авторизации
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+
+  // Проверяем авторизацию при загрузке и при изменении
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const user = localStorage.getItem('username') || '';
+    setIsLoggedIn(loggedIn);
+    setUsername(user);
+  }, []);
+
+  const handleLogin = (user) => {
+    setIsLoggedIn(true);
+    setUsername(user);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    setIsLoggedIn(false);
+    setUsername('');
+  };
 
   return (
-    <div className="progress-bar-container">
-      {/* Заголовок с лейблом и процентом */}
-      {(label || showPercentage) && (
-        <div className="progress-bar-header">
-          {label && <span className="progress-label">{label}</span>}
-          {showPercentage && (
-            <span className="progress-percentage">{normalizedProgress}%</span>
-          )}
-        </div>
-      )}
-      
-      {/* Внешняя оболочка прогресс-бара */}
-      <div 
-        className="progress-bar-outer"
-        style={{ 
-          height: `${height}px`,
-          backgroundColor: '#f0f0f0',
-          borderRadius: '10px',
-          overflow: 'hidden'
-        }}
-      >
-        {/* Заполняемая часть прогресс-бара */}
-        <div
-          className={`progress-bar-inner ${animated ? 'animated' : ''}`}
-          style={{
-            width: `${normalizedProgress}%`,
-            backgroundColor: color,
-            height: '100%',
-            transition: animated ? 'width 0.5s ease-in-out' : 'none',
-            borderRadius: '10px'
-          }}
-        />
+    <Router>
+      <div className="app">
+        <nav className="main-nav">
+          <h2>Трекер технологий</h2>
+          <ul className="nav-links">
+            <li><Link to="/">Главная</Link></li>
+            <li><Link to="/about">О проекте</Link></li>
+            
+            {isLoggedIn ? (
+              <>
+                <li><Link to="/dashboard">Панель управления</Link></li>
+                <li className="user-info">
+                  <span>Привет, {username}!</span>
+                  <button onClick={handleLogout} className="logout-btn">
+                    Выйти
+                  </button>
+                </li>
+              </>
+            ) : (
+              <li><Link to="/login">Войти</Link></li>
+            )}
+          </ul>
+        </nav>
+
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route 
+              path="/login" 
+              element={<Login onLogin={handleLogin} />} 
+            />
+            
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+        </main>
       </div>
-    </div>
+    </Router>
   );
 }
 
-export default ProgressBar;
-```
-
-**Примеры использования прогресс-бара в разных сценариях:**
-
-```jsx
-// ProgressDashboard.jsx - демонстрация разных вариантов прогресс-бара
-import ProgressBar from './ProgressBar';
-import './ProgressDashboard.css'; // Добавим файл со стилями
-
-function ProgressDashboard() {
-  const overallProgress = 65;
-  const frontendProgress = 80;
-  const backendProgress = 50;
-  const databaseProgress = 30;
-  
-  // Прогресс по неделям
-  const weeklyProgress = [90, 75, 60, 45, 30, 15];
-
-  return (
-    <div className="progress-dashboard">
-      <h2>Мой прогресс в изучении</h2>
-      
-      {/* Основной прогресс-бар */}
-      <ProgressBar 
-        progress={overallProgress}
-        label="Общий прогресс"
-        color="#2196F3"
-        height={25}
-      />
-
-      {/* Прогресс-бар для фронтенда */}
-      <ProgressBar 
-        progress={frontendProgress}
-        label="Фронтенд разработка"
-        color="#4CAF50"
-        showPercentage={true}
-      />
-
-      {/* Прогресс-бар для бэкенда */}
-      <ProgressBar 
-        progress={backendProgress}
-        label="Бэкенд разработка"
-        color="#FF9800"
-        showPercentage={true}
-      />
-
-      {/* Прогресс-бар для баз данных */}
-      <ProgressBar 
-        progress={databaseProgress}
-        label="Базы данных"
-        color="#F44336"
-        height={15}
-        showPercentage={false}
-      />
-
-      {/* Прогресс по неделям - исправленная версия */}
-      <div className="weekly-progress">
-        <h3>Прогресс по неделям:</h3>
-        <div className="weekly-bars">
-          {weeklyProgress.map((progress, index) => (
-            <div key={index} className="week-item">
-              <span className="week-label">Неделя {index + 1}</span>
-              <ProgressBar 
-                progress={progress} 
-                height={12} 
-                showPercentage={false} 
-                color="#9C27B0"
-              />
-              <span className="week-percentage">{progress}%</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default ProgressDashboard;
-```
-
-Файл `ProgressDashboard.css`:
-```css
-.progress-dashboard {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.progress-dashboard h2 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 30px;
-}
-
-.weekly-progress {
-  margin-top: 30px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.weekly-progress h3 {
-  margin-top: 0;
-  color: #555;
-}
-
-.weekly-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.week-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.week-label {
-  min-width: 80px;
-  font-size: 14px;
-  color: #666;
-}
-
-.week-percentage {
-  min-width: 40px;
-  font-size: 14px;
-  color: #333;
-  font-weight: bold;
-}
+export default App;
 ```
 
 ## Практическая часть
 
-### Интеграция переиспользуемых компонентов в трекер технологий
+### Добавление маршрутизации в трекер технологий
 
-**Шаг 1: Создайте кастомный хук для работы с технологиями**
-
-Создайте файл `useTechnologies.js`:
-
-```jsx
-import useLocalStorage from './useLocalStorage';
-
-// Начальные данные для технологий
-const initialTechnologies = [
-  { 
-    id: 1, 
-    title: 'React Components', 
-    description: 'Изучение базовых компонентов', 
-    status: 'not-started',
-    notes: '',
-    category: 'frontend'
-  },
-  { 
-    id: 2, 
-    title: 'Node.js Basics', 
-    description: 'Основы серверного JavaScript', 
-    status: 'not-started',
-    notes: '',
-    category: 'backend'
-  },
-  // ... добавьте еще технологии
-];
-
-function useTechnologies() {
-  const [technologies, setTechnologies] = useLocalStorage('technologies', initialTechnologies);
-
-  // Функция для обновления статуса технологии
-  const updateStatus = (techId, newStatus) => {
-    setTechnologies(prev => 
-      prev.map(tech => 
-        tech.id === techId ? { ...tech, status: newStatus } : tech
-      )
-    );
-  };
-
-  // Функция для обновления заметок
-  const updateNotes = (techId, newNotes) => {
-    setTechnologies(prev => 
-      prev.map(tech => 
-        tech.id === techId ? { ...tech, notes: newNotes } : tech
-      )
-    );
-  };
-
-  // Функция для расчета общего прогресса
-  const calculateProgress = () => {
-    if (technologies.length === 0) return 0;
-    const completed = technologies.filter(tech => tech.status === 'completed').length;
-    return Math.round((completed / technologies.length) * 100);
-  };
-
-  return {
-    technologies,
-    updateStatus,
-    updateNotes,
-    progress: calculateProgress()
-  };
-}
-
-export default useTechnologies;
+**Шаг 1: Установите React Router**
+```bash
+npm install react-router-dom
 ```
 
-**Шаг 2: Обновите главный компонент App.js**
+**Шаг 2: Создайте структуру папок для страниц**
+```
+src/
+├── pages/
+│   ├── Home.js
+│   ├── TechnologyList.js
+│   ├── TechnologyDetail.js
+│   └── AddTechnology.js
+├── components/
+│   ├── Navigation.js
+│   └── TechnologyCard.js
+└── App.js
+```
+
+**Шаг 3: Создайте компонент навигации**
 
 ```jsx
-import useTechnologies from './useTechnologies';
-import ProgressBar from './ProgressBar';
-import TechnologyCard from './TechnologyCard';
-import TechnologyModal from './TechnologyModal';
+// components/Navigation.js
+import { Link, useLocation } from 'react-router-dom';
 
-function App() {
-  const { technologies, updateStatus, updateNotes, progress } = useTechnologies();
+function Navigation() {
+  const location = useLocation();
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>Трекер изучения технологий</h1>
-        <ProgressBar 
-          progress={progress}
-          label="Общий прогресс"
-          color="#4CAF50"
-          animated={true}
-          height={20}
-        />
-      </header>
+    <nav className="main-navigation">
+      <div className="nav-brand">
+        <Link to="/">
+          <h2>🚀 Трекер технологий</h2>
+        </Link>
+      </div>
+      
+      <ul className="nav-menu">
+        <li>
+          <Link 
+            to="/" 
+            className={location.pathname === '/' ? 'active' : ''}
+          >
+            Главная
+          </Link>
+        </li>
+        <li>
+          <Link 
+            to="/technologies" 
+            className={location.pathname === '/technologies' ? 'active' : ''}
+          >
+            Все технологии
+          </Link>
+        </li>
+        <li>
+          <Link 
+            to="/add-technology" 
+            className={location.pathname === '/add-technology' ? 'active' : ''}
+          >
+            Добавить технологию
+          </Link>
+        </li>
+      </ul>
+    </nav>
+  );
+}
 
-      <main className="app-main">
-        <div className="technologies-grid">
-          {technologies.map(tech => (
-            <TechnologyCard
-              key={tech.id}
-              technology={tech}
-              onStatusChange={updateStatus}
-              onNotesChange={updateNotes}
-            />
-          ))}
+export default Navigation;
+```
+
+**Шаг 4: Создайте страницу со списком технологий**
+
+```jsx
+// pages/TechnologyList.js
+import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+function TechnologyList() {
+  const [technologies, setTechnologies] = useState([]);
+
+  // Загружаем технологии из localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('technologies');
+    if (saved) {
+      setTechnologies(JSON.parse(saved));
+    }
+  }, []);
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <h1>Все технологии</h1>
+        <Link to="/add-technology" className="btn btn-primary">
+          + Добавить технологию
+        </Link>
+      </div>
+
+      <div className="technologies-grid">
+        {technologies.map(tech => (
+          <div key={tech.id} className="technology-item">
+            <h3>{tech.title}</h3>
+            <p>{tech.description}</p>
+            <div className="technology-meta">
+              <span className={`status status-${tech.status}`}>
+                {tech.status}
+              </span>
+              <Link to={`/technology/${tech.id}`} className="btn-link">
+                Подробнее →
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {technologies.length === 0 && (
+        <div className="empty-state">
+          <p>Технологий пока нет.</p>
+          <Link to="/add-technology" className="btn btn-primary">
+            Добавить первую технологию
+          </Link>
         </div>
-      </main>
+      )}
     </div>
   );
 }
+
+export default TechnologyList;
+```
+
+**Шаг 5: Создайте страницу деталей технологии**
+
+```jsx
+// pages/TechnologyDetail.js
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+function TechnologyDetail() {
+  const { techId } = useParams();
+  const navigate = useNavigate();
+  const [technology, setTechnology] = useState(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('technologies');
+    if (saved) {
+      const technologies = JSON.parse(saved);
+      const tech = technologies.find(t => t.id === parseInt(techId));
+      setTechnology(tech);
+    }
+  }, [techId]);
+
+  const updateStatus = (newStatus) => {
+    const saved = localStorage.getItem('technologies');
+    if (saved) {
+      const technologies = JSON.parse(saved);
+      const updated = technologies.map(tech =>
+        tech.id === parseInt(techId) ? { ...tech, status: newStatus } : tech
+      );
+      localStorage.setItem('technologies', JSON.stringify(updated));
+      setTechnology({ ...technology, status: newStatus });
+    }
+  };
+
+  if (!technology) {
+    return (
+      <div className="page">
+        <h1>Технология не найдена</h1>
+        <p>Технология с ID {techId} не существует.</p>
+        <Link to="/technologies" className="btn">
+          ← Назад к списку
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <Link to="/technologies" className="back-link">
+          ← Назад к списку
+        </Link>
+        <h1>{technology.title}</h1>
+      </div>
+
+      <div className="technology-detail">
+        <div className="detail-section">
+          <h3>Описание</h3>
+          <p>{technology.description}</p>
+        </div>
+
+        <div className="detail-section">
+          <h3>Статус изучения</h3>
+          <div className="status-buttons">
+            <button
+              onClick={() => updateStatus('not-started')}
+              className={technology.status === 'not-started' ? 'active' : ''}
+            >
+              Не начато
+            </button>
+            <button
+              onClick={() => updateStatus('in-progress')}
+              className={technology.status === 'in-progress' ? 'active' : ''}
+            >
+              В процессе
+            </button>
+            <button
+              onClick={() => updateStatus('completed')}
+              className={technology.status === 'completed' ? 'active' : ''}
+            >
+              Завершено
+            </button>
+          </div>
+        </div>
+
+        {technology.notes && (
+          <div className="detail-section">
+            <h3>Мои заметки</h3>
+            <p>{technology.notes}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default TechnologyDetail;
 ```
 
 ### Самостоятельная работа
 
-**Задание:** Создайте компонент "Быстрые действия" (QuickActions)
+**Задание 1:** Создайте страницу "Статистика" с графиком прогресса
 
-1. Создайте компонент, который показывает кнопки для массовых действий
-2. Добавьте кнопки:
-   - "Отметить все как выполненные"
-   - "Сбросить все статусы"
-   - "Экспорт данных"
-3. Используйте переиспользуемые компоненты там, где это возможно
-
-**Пример реализации:**
-
-```jsx
-// QuickActions.jsx
-import { useState } from 'react';
-import Modal from './Modal';
-
-function QuickActions({ onMarkAllCompleted, onResetAll, technologies }) {
-  const [showExportModal, setShowExportModal] = useState(false);
-
-  const handleExport = () => {
-    const data = {
-      exportedAt: new Date().toISOString(),
-      technologies: technologies
-    };
-    const dataStr = JSON.stringify(data, null, 2);
-    // Здесь можно добавить логику для скачивания файла
-    console.log('Данные для экспорта:', dataStr);
-    setShowExportModal(true);
-  };
-
-  return (
-    <div className="quick-actions">
-      <h3>Быстрые действия</h3>
-      <div className="action-buttons">
-        <button onClick={onMarkAllCompleted} className="btn btn-success">
-          ✅ Отметить все как выполненные
-        </button>
-        <button onClick={onResetAll} className="btn btn-warning">
-          🔄 Сбросить все статусы
-        </button>
-        <button onClick={handleExport} className="btn btn-info">
-          📤 Экспорт данных
-        </button>
-      </div>
-
-      <Modal
-        isOpen={showExportModal}
-        onClose={() => setShowExportModal(false)}
-        title="Экспорт данных"
-      >
-        <p>Данные успешно подготовлены для экспорта!</p>
-        <p>Проверьте консоль разработчика для просмотра данных.</p>
-        <button onClick={() => setShowExportModal(false)}>
-          Закрыть
-        </button>
-      </Modal>
-    </div>
-  );
-}
-
-export default QuickActions;
-```
+**Задание 2:** Добавьте страницу "Настройки" для управления приложением
 
 **Что проверить перед завершением:**
-- Кастомный хук useTechnologies корректно сохраняет данные в localStorage
-- Прогресс-бар отображает актуальный прогресс
-- Модальные окна открываются и закрываются корректно
-- Быстрые действия работают и влияют на все технологии
-- Приложение остается отзывчивым и без ошибок
+- Навигация между страницами работает без перезагрузки
+- Параметры в URL правильно обрабатываются
+- Защищенные маршруты перенаправляют неавторизованных пользователей
+- Данные сохраняются между переходами по страницам
+
+Теперь ваше приложение стало полноценным SPA с навигацией и разными страницами!
