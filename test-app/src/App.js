@@ -1,15 +1,14 @@
 import React from 'react';
-import UserList from './UserList.jsx';
-import ProductSearch from './ProductSearch.jsx';
-import PostList from './PostList.jsx';
 import './App.css';
+import TechnologyManager from './TechnologyManager.jsx';
+import WorkingAccessibleForm from './WorkingAccessibleForm.jsx';
+import DataImportExport from './DataImportExport.jsx';
 
 function App() {
   return (
     <div>
-      <UserList />
-      <ProductSearch />
-      <PostList />
+      <WorkingAccessibleForm />
+      <DataImportExport />
     </div>
   );
 }
