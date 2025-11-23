@@ -8,1260 +8,964 @@
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
 Ссылка на материал: <br>
-https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-25
+https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-26
 
 ---
 
-# Практическое занятие 25: Формы React: валидация, сообщения об ошибках и элементы доступности
+# Практическое занятие 26: Использование UI-кит
 
-В рамках данного занятия будут рассмотрены возможности работы с формами в React и обеспечением доступности. Материалы занятия соответствуют представлениям о формировании ввода и доступности страниц из предыдущих практик и лекций.
+В рамках данного занятия будут рассмотрены возможности работы с готовыми наборами компонентов и библиотек в приложениях React.
 
 ## Теоретическая часть
 
-### Пример 1. Форма с валидацией в реальном времени
+### Пример 1. Интеграция Material-UI (MUI)
 
-**Проблема:** Нужно создать форму добавления технологии с валидацией полей в реальном времени и понятными сообщениями об ошибках.
+**Проблема:** Нужно быстро создать профессиональный интерфейс без написания CSS с нуля.
 
-**Подход к решению:** Используем состояние для хранения ошибок, проверяем валидность при каждом изменении и блокируем отправку при ошибках.
+**Подход к решению:** Используем Material-UI - популярную React UI-библиотеку с готовыми компонентами.
 
-**Исходный код в файле `TechnologyForm.jsx`:**
+**Установка и настройка:**
+```bash
+npm install @mui/material @emotion/react @emotion/styled
+npm install @mui/icons-material  # Иконки
+```
+
+**Исходный код в файле `SimpleTechCard.jsx`:**
 
 ```jsx
-import { useState, useEffect } from 'react';
+import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  Chip,
+  Box
+} from '@mui/material';
 
-function TechnologyForm({ onSave, onCancel, initialData = {} }) {
-  // Состояние формы
-  const [formData, setFormData] = useState({
-    title: initialData.title || '',
-    description: initialData.description || '',
-    category: initialData.category || 'frontend',
-    difficulty: initialData.difficulty || 'beginner',
-    deadline: initialData.deadline || '',
-    resources: initialData.resources || ['']
-  });
-
-  // Состояние ошибок
-  const [errors, setErrors] = useState({});
-  const [isFormValid, setIsFormValid] = useState(false);
-
-  // Валидация формы
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Валидация названия
-    if (!formData.title.trim()) {
-      newErrors.title = 'Название технологии обязательно';
-    } else if (formData.title.trim().length < 2) {
-      newErrors.title = 'Название должно содержать минимум 2 символа';
-    } else if (formData.title.trim().length > 50) {
-      newErrors.title = 'Название не должно превышать 50 символов';
-    }
-
-    // Валидация описания
-    if (!formData.description.trim()) {
-      newErrors.description = 'Описание технологии обязательно';
-    } else if (formData.description.trim().length < 10) {
-      newErrors.description = 'Описание должно содержать минимум 10 символов';
-    }
-
-    // Валидация дедлайна
-    if (formData.deadline) {
-      const deadlineDate = new Date(formData.deadline);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      if (deadlineDate < today) {
-        newErrors.deadline = 'Дедлайн не может быть в прошлом';
-      }
-    }
-
-    // Валидация ресурсов
-    formData.resources.forEach((resource, index) => {
-      if (resource && !isValidUrl(resource)) {
-        newErrors[`resource_${index}`] = 'Введите корректный URL';
-      }
-    });
-
-    setErrors(newErrors);
-    setIsFormValid(Object.keys(newErrors).length === 0);
-  };
-
-  // Проверка URL
-  const isValidUrl = (string) => {
-    try {
-      new URL(string);
-      return true;
-    } catch (_) {
-      return false;
+function SimpleTechCard({ technology, onStatusChange }) {
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed': return 'success';
+      case 'in-progress': return 'warning';
+      default: return 'default';
     }
   };
 
-  // Валидация при каждом изменении формы
-  useEffect(() => {
-    validateForm();
-  }, [formData]);
-
-  // Обработчик изменения полей
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Обработчик изменения ресурсов
-  const handleResourceChange = (index, value) => {
-    const newResources = [...formData.resources];
-    newResources[index] = value;
-    setFormData(prev => ({
-      ...prev,
-      resources: newResources
-    }));
-  };
-
-  // Добавление нового поля ресурса
-  const addResourceField = () => {
-    setFormData(prev => ({
-      ...prev,
-      resources: [...prev.resources, '']
-    }));
-  };
-
-  // Удаление поля ресурса
-  const removeResourceField = (index) => {
-    if (formData.resources.length > 1) {
-      const newResources = formData.resources.filter((_, i) => i !== index);
-      setFormData(prev => ({
-        ...prev,
-        resources: newResources
-      }));
-    }
-  };
-
-  // Обработчик отправки формы
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (isFormValid) {
-      // Очищаем пустые ресурсы перед сохранением
-      const cleanedData = {
-        ...formData,
-        resources: formData.resources.filter(resource => resource.trim() !== '')
-      };
-      
-      onSave(cleanedData);
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'completed': return 'Завершено';
+      case 'in-progress': return 'В процессе';
+      default: return 'Не начато';
     }
   };
 
   return (
-<form onSubmit={handleSubmit} className="technology-form" noValidate>
-      <h2>{initialData.title ? 'Редактирование технологии' : 'Добавление новой технологии'}</h2>
-
-      {/* Поле названия */}
-      <div className="form-group">
-        <label htmlFor="title" className="required">
-          Название технологии
-        </label>
-        <input
-          id="title"
-          name="title"
-          type="text"
-          value={formData.title}
-          onChange={handleChange}
-          className={errors.title ? 'error' : ''}
-          placeholder="Например: React, Node.js, TypeScript"
-          aria-describedby={errors.title ? 'title-error' : undefined}
-          required
-        />
-        {errors.title && (
-          <span id="title-error" className="error-message" role="alert">
-            {errors.title}
-          </span>
-        )}
-      </div>
-
-      {/* Поле описания */}
-      <div className="form-group">
-        <label htmlFor="description" className="required">
-          Описание
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          rows="4"
-          className={errors.description ? 'error' : ''}
-          placeholder="Опишите, что это за технология и зачем её изучать..."
-          aria-describedby={errors.description ? 'description-error' : undefined}
-          required
-        />
-        {errors.description && (
-          <span id="description-error" className="error-message" role="alert">
-            {errors.description}
-          </span>
-        )}
-      </div>
-
-      {/* Выбор категории */}
-      <div className="form-group">
-        <label htmlFor="category">Категория</label>
-        <select
-          id="category"
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-        >
-          <option value="frontend">Frontend</option>
-          <option value="backend">Backend</option>
-          <option value="mobile">Mobile</option>
-          <option value="devops">DevOps</option>
-          <option value="database">Базы данных</option>
-          <option value="tools">Инструменты</option>
-        </select>
-      </div>
-
-      {/* Выбор сложности */}
-      <div className="form-group">
-        <label htmlFor="difficulty">Уровень сложности</label>
-        <select
-          id="difficulty"
-          name="difficulty"
-          value={formData.difficulty}
-          onChange={handleChange}
-        >
-          <option value="beginner">Начинающий</option>
-          <option value="intermediate">Средний</option>
-          <option value="advanced">Продвинутый</option>
-        </select>
-      </div>
-
-      {/* Поле дедлайна */}
-      <div className="form-group">
-        <label htmlFor="deadline">
-          Планируемая дата освоения
-        </label>
-        <input
-          id="deadline"
-          name="deadline"
-          type="date"
-          value={formData.deadline}
-          onChange={handleChange}
-          className={errors.deadline ? 'error' : ''}
-          aria-describedby={errors.deadline ? 'deadline-error' : undefined}
-        />
-        {errors.deadline && (
-          <span id="deadline-error" className="error-message" role="alert">
-            {errors.deadline}
-          </span>
-        )}
-      </div>
-
-      {/* Поля ресурсов */}
-      <div className="form-group">
-        <label>Ресурсы для изучения</label>
-        {formData.resources.map((resource, index) => (
-          <div key={index} className="resource-field">
-            <input
-              type="url"
-              value={resource}
-              onChange={(e) => handleResourceChange(index, e.target.value)}
-              placeholder="https://example.com"
-              className={errors[`resource_${index}`] ? 'error' : ''}
-              aria-describedby={errors[`resource_${index}`] ? `resource-${index}-error` : undefined}
-            />
-            {formData.resources.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeResourceField(index)}
-                className="remove-resource"
-                aria-label="Удалить ресурс"
-              >
-                ×
-              </button>
-            )}
-            {errors[`resource_${index}`] && (
-              <span 
-                id={`resource-${index}-error`} 
-                className="error-message" 
-                role="alert"
-              >
-                {errors[`resource_${index}`]}
-              </span>
-            )}
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={addResourceField}
-          className="add-resource"
-        >
-          + Добавить ещё ресурс
-        </button>
-      </div>
-
-      {/* Кнопки формы */}
-      <div className="form-actions">
-        <button
-          type="submit"
-          disabled={!isFormValid}
-          className="btn-primary"
-        >
-          {initialData.title ? 'Обновить технологию' : 'Добавить технологию'}
-        </button>
+    <Card sx={{ maxWidth: 345, margin: 2 }}>
+      <CardContent>
+        <Typography variant="h5" component="h2" gutterBottom>
+          {technology.title}
+        </Typography>
         
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn-secondary"
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {technology.description}
+        </Typography>
+        
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          <Chip 
+            label={technology.category} 
+            variant="outlined" 
+            size="small" 
+          />
+          <Chip 
+            label={getStatusText(technology.status)}
+            color={getStatusColor(technology.status)}
+            size="small"
+          />
+        </Box>
+      </CardContent>
+      
+      <CardActions>
+        {technology.status !== 'completed' && (
+          <Button 
+            size="small" 
+            variant="contained"
+            onClick={() => onStatusChange(technology.id, 'completed')}
+          >
+            Завершить
+          </Button>
+        )}
+        
+        <Button 
+          size="small" 
+          variant="outlined"
+          onClick={() => onStatusChange(technology.id, 
+            technology.status === 'in-progress' ? 'not-started' : 'in-progress')}
         >
-          Отмена
-        </button>
-      </div>
-
-      {/* Информация о валидности формы */}
-      {!isFormValid && (
-        <div className="form-validation-info" role="status">
-          ⚠️ Заполните все обязательные поля корректно
-        </div>
-      )}
-    </form>
+          {technology.status === 'in-progress' ? 'Приостановить' : 'Начать'}
+        </Button>
+      </CardActions>
+    </Card>
   );
 }
 
-export default TechnologyForm;
+export default SimpleTechCard;
 ```
 
-Также организуем компонент `TechnologyManager.jsx` для внешнего контроля элемента формы:
+Изменим файл `App.js` для работы приложения:
 
-```jsx
-// В компоненте, где используется TechnologyForm (например, App.js или TechnologyManager.js)
-import { useState } from 'react';
-import TechnologyForm from './TechnologyForm';
+```js
+import React, { useState } from 'react';
+import { 
+  ThemeProvider,
+  createTheme,
+  Container, 
+  Typography, 
+  Button, 
+  Grid, 
+  Box,
+  CssBaseline 
+} from '@mui/material';
+import { Add } from '@mui/icons-material';
+import SimpleTechCard from './SimpleTechCard';
 
-function TechnologyManager() {
-  const [technologies, setTechnologies] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingTech, setEditingTech] = useState(null);
+// Создаем тему
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
 
-  // Обработчик сохранения технологии
-  const handleSaveTechnology = (techData) => {
-    if (editingTech) {
-      // Редактирование существующей технологии
-      setTechnologies(prev => 
-        prev.map(tech => 
-          tech.id === editingTech.id 
-            ? { ...tech, ...techData, updatedAt: new Date().toISOString() }
-            : tech
-        )
-      );
-    } else {
-      // Добавление новой технологии
-      const newTechnology = {
-        id: Date.now(), // В реальном приложении ID генерируется на сервере
-        ...techData,
-        status: 'not-started',
-        createdAt: new Date().toISOString(),
-        notes: '',
-        progress: 0
-      };
-      setTechnologies(prev => [...prev, newTechnology]);
-    }
-    
-    // Закрываем форму после сохранения
-    setShowForm(false);
-    setEditingTech(null);
-  };
-
-  // Обработчик редактирования
-  const handleEdit = (technology) => {
-    setEditingTech(technology);
-    setShowForm(true);
-  };
-
-  // Обработчик отмены
-  const handleCancel = () => {
-    setShowForm(false);
-    setEditingTech(null);
-  };
-
-  return (
-    <div className="technology-manager">
-      <div className="manager-header">
-        <h2>Управление технологиями</h2>
-        <button 
-          onClick={() => setShowForm(true)}
-          className="btn-primary"
-        >
-          + Добавить технологию
-        </button>
-      </div>
-
-      {/* Список технологий */}
-      <div className="technologies-list">
-        {technologies.map(tech => (
-          <div key={tech.id} className="technology-item">
-            <h3>{tech.title}</h3>
-            <p>{tech.description}</p>
-            <div className="tech-actions">
-              <button onClick={() => handleEdit(tech)}>
-                Редактировать
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Форма добавления/редактирования */}
-      {showForm && (
-        <div className="form-modal">
-          <div className="modal-content">
-            <TechnologyForm
-              onSave={handleSaveTechnology}
-              onCancel={handleCancel}
-              initialData={editingTech || {}}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default TechnologyManager;
-```
-
-Добавим компонент менеджера в App.js и запустим приложение.
-
-### Пример 2. Форма с доступностью (Accessibility)
-
-**Проблема:** Нужно сделать форму доступной для пользователей с ограниченными возможностями.
-
-**Подход к решению:** Добавляем ARIA-атрибуты, правильную семантику и управление фокусом.
-
-**Исходный код в файле `WorkingAccessibleForm.jsx`:**
-
-```jsx
-import { useState, useRef, useEffect } from 'react';
-
-function WorkingAccessibleForm() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [errors, setErrors] = useState({});
-  
-  const statusRef = useRef(null);
-  const nameRef = useRef(null);
-
-  // Валидация при изменении полей
-  useEffect(() => {
-    const newErrors = {};
-    
-    if (name && name.length < 2) {
-      newErrors.name = 'Имя должно быть не короче 2 символов';
-    }
-    
-    if (email && !email.includes('@')) {
-      newErrors.email = 'Email должен содержать @';
-    }
-    
-    if (message && message.length < 5) {
-      newErrors.message = 'Сообщение должно быть не короче 5 символов';
-    }
-    
-    setErrors(newErrors);
-  }, [name, email, message]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    const newErrors = {};
-    
-    if (!name) newErrors.name = 'Введите имя';
-    if (!email) newErrors.email = 'Введите email';
-    if (!message) newErrors.message = 'Введите сообщение';
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      if (statusRef.current) {
-        statusRef.current.textContent = 'Заполните все обязательные поля';
-      }
-      // Фокусируемся на первом поле с ошибкой
-      if (nameRef.current) {
-        nameRef.current.focus();
-      }
-      return;
-    }
-    
-    // Если есть другие ошибки валидации
-    if (Object.keys(errors).length > 0) {
-      if (statusRef.current) {
-        statusRef.current.textContent = 'Исправьте ошибки в форме';
-      }
-      return;
-    }
-    
-    // Успешная отправка
-    if (statusRef.current) {
-      statusRef.current.textContent = 'Форма успешно отправлена!';
-    }
-    console.log('Отправлены данные:', { name, email, message });
-  };
-
-  return (
-    <div style={{ maxWidth: '500px', margin: '20px', padding: '20px', border: '1px solid #ccc' }}>
-      <h1>Контактная форма</h1>
-      
-      {/* Область для скринридера */}
-      <div
-        ref={statusRef}
-        aria-live="assertive"
-        style={{
-          position: 'absolute',
-          left: '-10000px',
-          width: '1px',
-          height: '1px',
-          overflow: 'hidden'
-        }}
-      />
-      
-      <form onSubmit={handleSubmit} noValidate>
-        {/* Поле имени */}
-        <div style={{ marginBottom: '20px' }}>
-          <label htmlFor="name" style={{ display: 'block', marginBottom: '5px' }}>
-            Ваше имя *
-          </label>
-          <input
-            ref={nameRef}
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            aria-required="true"
-            aria-invalid={!!errors.name}
-            aria-describedby={errors.name ? "name-error" : undefined}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: errors.name ? '2px solid red' : '1px solid #ccc',
-              fontSize: '16px'
-            }}
-          />
-          {errors.name && (
-            <div id="name-error" style={{ color: 'red', fontSize: '14px', marginTop: '5px' }}>
-              {errors.name}
-            </div>
-          )}
-        </div>
-
-        {/* Поле email */}
-        <div style={{ marginBottom: '20px' }}>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>
-            Email адрес *
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-required="true"
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? "email-error" : undefined}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: errors.email ? '2px solid red' : '1px solid #ccc',
-              fontSize: '16px'
-            }}
-          />
-          {errors.email && (
-            <div id="email-error" style={{ color: 'red', fontSize: '14px', marginTop: '5px' }}>
-              {errors.email}
-            </div>
-          )}
-        </div>
-
-        {/* Поле сообщения */}
-        <div style={{ marginBottom: '20px' }}>
-          <label htmlFor="message" style={{ display: 'block', marginBottom: '5px' }}>
-            Ваше сообщение *
-          </label>
-          <textarea
-            id="message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows="4"
-            aria-required="true"
-            aria-invalid={!!errors.message}
-            aria-describedby={errors.message ? "message-error" : undefined}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: errors.message ? '2px solid red' : '1px solid #ccc',
-              fontSize: '16px',
-              fontFamily: 'inherit'
-            }}
-          />
-          {errors.message && (
-            <div id="message-error" style={{ color: 'red', fontSize: '14px', marginTop: '5px' }}>
-              {errors.message}
-            </div>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
-        >
-          Отправить сообщение
-        </button>
-      </form>
-      
-      {/* Визуальный статус */}
-      <div 
-        aria-live="polite"
-        style={{ 
-          marginTop: '15px',
-          padding: '10px',
-          border: '1px solid #ddd',
-          backgroundColor: '#f9f9f9',
-          display: 'none' // Скрыт визуально, но доступен для скринридеров
-        }}
-      >
-        Статус формы будет отображаться здесь для скринридеров
-      </div>
-    </div>
-  );
-}
-
-export default WorkingAccessibleForm;
-```
-
-### Пример 3. Экспорт и импорт данных в приложениях
-
-Рассмотрим пример по загрузке/выгрузке данных приложения в компоненте `DataImportExport.jsx`:
-
-```jsx
-import { useState, useEffect } from 'react';
-
-function DataImportExport() {
-  const [technologies, setTechnologies] = useState([]);
-  const [status, setStatus] = useState('');
-
-  // Загрузка данных из localStorage при старте
-  useEffect(() => {
-    const savedData = localStorage.getItem('techTrackerData');
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        setTechnologies(parsedData);
-        setStatus(`Загружено ${parsedData.length} технологий из памяти`);
-      } catch (error) {
-        setStatus('Ошибка загрузки данных из памяти');
-      }
-    }
-  }, []);
-
-  // Автосохранение при изменении technologies
-  useEffect(() => {
-    if (technologies.length > 0) {
-      localStorage.setItem('techTrackerData', JSON.stringify(technologies));
-    }
-  }, [technologies]);
-
-  // Экспорт данных в JSON файл
-  const handleExport = () => {
-    const exportData = {
-      version: '1.0',
-      exportedAt: new Date().toISOString(),
-      technologies: technologies,
-      stats: {
-        total: technologies.length,
-        completed: technologies.filter(t => t.status === 'completed').length,
-        inProgress: technologies.filter(t => t.status === 'in-progress').length
-      }
-    };
-
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `tech-tracker-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    setStatus(`Экспортировано ${technologies.length} технологий`);
-  };
-
-  // Импорт данных из JSON файла
-  const handleImport = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const fileContent = e.target.result;
-        const importedData = JSON.parse(fileContent);
-        
-        // Проверяем структуру файла
-        if (!importedData.technologies || !Array.isArray(importedData.technologies)) {
-          throw new Error('Неверный формат файла');
-        }
-
-        // Валидация каждой технологии
-        const validTechnologies = importedData.technologies.filter(tech => 
-          tech && tech.id && tech.title && tech.description
-        );
-
-        if (validTechnologies.length === 0) {
-          throw new Error('В файле нет валидных технологий');
-        }
-
-        // Добавляем импортированные технологии
-        setTechnologies(prev => {
-          const newTech = validTechnologies.filter(newTech => 
-            !prev.some(existingTech => existingTech.id === newTech.id)
-          );
-          return [...prev, ...newTech];
-        });
-
-        setStatus(`Импортировано ${validTechnologies.length} технологий`);
-        
-      } catch (error) {
-        setStatus(`Ошибка импорта: ${error.message}`);
-      }
-    };
-
-    reader.onerror = () => {
-      setStatus('Ошибка чтения файла');
-    };
-
-    reader.readAsText(file);
-    
-    // Сбрасываем input чтобы можно было выбрать тот же файл снова
-    event.target.value = '';
-  };
-
-  // Добавление тестовой технологии
-  const addSampleTechnology = () => {
-    const newTech = {
-      id: Date.now(),
-      title: `Технология ${technologies.length + 1}`,
-      description: 'Описание технологии для демонстрации',
-      status: 'not-started',
+function App() {
+  const [technologies, setTechnologies] = useState([
+    {
+      id: 1,
+      title: 'React Components',
+      description: 'Изучение функциональных и классовых компонентов',
       category: 'frontend',
-      createdAt: new Date().toISOString()
-    };
-    
-    setTechnologies(prev => [...prev, newTech]);
-    setStatus('Добавлена тестовая технология');
-  };
+      status: 'in-progress'
+    },
+    {
+      id: 2,
+      title: 'Material-UI',
+      description: 'Освоение Material Design для React',
+      category: 'ui-library',
+      status: 'not-started'
+    },
+    {
+      id: 3,
+      title: 'React Hooks',
+      description: 'Использование useState, useEffect и других хуков',
+      category: 'frontend',
+      status: 'completed'
+    }
+  ]);
 
-  // Очистка всех данных
-  const clearAllData = () => {
-    setTechnologies([]);
-    localStorage.removeItem('techTrackerData');
-    setStatus('Все данные очищены');
-  };
-
-  // Изменение статуса технологии
-  const toggleStatus = (techId) => {
+  const handleStatusChange = (techId, newStatus) => {
     setTechnologies(prev => 
-      prev.map(tech => {
-        if (tech.id === techId) {
-          const statuses = ['not-started', 'in-progress', 'completed'];
-          const currentIndex = statuses.indexOf(tech.status);
-          const nextStatus = statuses[(currentIndex + 1) % statuses.length];
-          
-          return { ...tech, status: nextStatus };
-        }
-        return tech;
-      })
+      prev.map(tech => 
+        tech.id === techId ? { ...tech, status: newStatus } : tech
+      )
     );
   };
 
+  const addNewTechnology = () => {
+    const newTech = {
+      id: Date.now(),
+      title: `Новая технология ${technologies.length + 1}`,
+      description: 'Описание новой технологии для изучения',
+      category: 'other',
+      status: 'not-started'
+    };
+    setTechnologies(prev => [...prev, newTech]);
+  };
+
   return (
-    <div style={{ 
-      maxWidth: '800px', 
-      margin: '20px auto', 
-      padding: '20px',
-      fontFamily: 'Arial, sans-serif'
-    }}>
-      <h1>Импорт/Экспорт данных</h1>
-      
-      {/* Статус */}
-      {status && (
-        <div style={{
-          padding: '10px',
-          margin: '10px 0',
-          backgroundColor: status.includes('Ошибка') ? '#ffebee' : '#e8f5e8',
-          border: `1px solid ${status.includes('Ошибка') ? '#f44336' : '#4caf50'}`,
-          borderRadius: '4px'
-        }}>
-          {status}
-        </div>
-      )}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* Заголовок */}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            🚀 Трекер технологий
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
+            Отслеживайте прогресс изучения технологий
+          </Typography>
+        </Box>
 
-      {/* Управление данными */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '10px', 
-        flexWrap: 'wrap',
-        marginBottom: '20px'
-      }}>
-        <button
-          onClick={addSampleTechnology}
-          style={{
-            padding: '10px 15px',
-            backgroundColor: '#2196f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          + Добавить тестовую технологию
-        </button>
+        {/* Кнопка добавления */}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={addNewTechnology}
+            size="large"
+          >
+            Добавить технологию
+          </Button>
+        </Box>
 
-        <button
-          onClick={handleExport}
-          disabled={technologies.length === 0}
-          style={{
-            padding: '10px 15px',
-            backgroundColor: technologies.length === 0 ? '#ccc' : '#4caf50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: technologies.length === 0 ? 'not-allowed' : 'pointer'
-          }}
-        >
-          📥 Экспорт в JSON ({technologies.length})
-        </button>
+        {/* Сетка карточек */}
+        <Grid container spacing={3}>
+          {technologies.map(technology => (
+            <Grid item xs={12} sm={6} md={4} key={technology.id}>
+              <SimpleTechCard
+                technology={technology}
+                onStatusChange={handleStatusChange}
+              />
+            </Grid>
+          ))}
+        </Grid>
 
-        <label style={{
-          padding: '10px 15px',
-          backgroundColor: '#ff9800',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          display: 'inline-block'
-        }}>
-          📤 Импорт из JSON
-          <input
-            type="file"
-            accept=".json"
-            onChange={handleImport}
-            style={{ display: 'none' }}
-          />
-        </label>
+        {/* Статистика */}
+        <Box sx={{ mt: 4, p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Статистика:
+          </Typography>
+          <Typography>
+            Всего: {technologies.length} | 
+            Завершено: {technologies.filter(t => t.status === 'completed').length} | 
+            В процессе: {technologies.filter(t => t.status === 'in-progress').length}
+          </Typography>
+        </Box>
+      </Container>
+    </ThemeProvider>
+  );
+}
 
-        <button
-          onClick={clearAllData}
-          disabled={technologies.length === 0}
-          style={{
-            padding: '10px 15px',
-            backgroundColor: technologies.length === 0 ? '#ccc' : '#f44336',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: technologies.length === 0 ? 'not-allowed' : 'pointer'
-          }}
-        >
-          🗑️ Очистить все
-        </button>
-      </div>
+export default App;
+```
 
-      {/* Список технологий */}
-      <div>
-        <h2>Технологии ({technologies.length})</h2>
-        
-        {technologies.length === 0 ? (
-          <p style={{ color: '#666', fontStyle: 'italic' }}>
-            Технологий пока нет. Добавьте первую или импортируйте данные.
-          </p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {technologies.map(tech => (
-              <div
-                key={tech.id}
-                style={{
-                  padding: '15px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  backgroundColor: '#f9f9f9'
-                }}
-              >
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start'
-                }}>
-                  <div>
-                    <h3 style={{ margin: '0 0 5px 0' }}>{tech.title}</h3>
-                    <p style={{ margin: '0 0 10px 0', color: '#666' }}>
-                      {tech.description}
-                    </p>
-                    <div style={{ fontSize: '14px', color: '#888' }}>
-                      Категория: {tech.category} • ID: {tech.id}
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => toggleStatus(tech.id)}
-                    style={{
-                      padding: '5px 10px',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      backgroundColor: 
-                        tech.status === 'completed' ? '#4caf50' :
-                        tech.status === 'in-progress' ? '#ff9800' : '#f44336',
-                      color: 'white',
-                      fontSize: '12px'
-                    }}
-                  >
-                    {tech.status === 'completed' ? '✅ Завершено' :
-                     tech.status === 'in-progress' ? '🔄 В процессе' : '⏳ Не начато'}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+### Пример 2. Dashboard с различными UI-компонентами
 
-      {/* Статистика */}
-      {technologies.length > 0 && (
-        <div style={{
-          marginTop: '20px',
-          padding: '15px',
-          backgroundColor: '#e3f2fd',
-          borderRadius: '4px'
-        }}>
-          <h3>Статистика:</h3>
-          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-            <div>Всего: <strong>{technologies.length}</strong></div>
-            <div>Завершено: <strong>{technologies.filter(t => t.status === 'completed').length}</strong></div>
-            <div>В процессе: <strong>{technologies.filter(t => t.status === 'in-progress').length}</strong></div>
-            <div>Не начато: <strong>{technologies.filter(t => t.status === 'not-started').length}</strong></div>
-          </div>
-        </div>
-      )}
+**Исходный код в файле `Dashboard.jsx`:**
+
+```jsx
+import React from 'react';
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  LinearProgress,
+  Chip,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Badge,
+  Tabs,
+  Tab
+} from '@mui/material';
+import {
+  Notifications as NotificationsIcon,
+  AccountCircle as AccountCircleIcon,
+  CheckCircle as CheckCircleIcon,
+  Schedule as ScheduleIcon,
+  RadioButtonUnchecked as RadioButtonUncheckedIcon
+} from '@mui/icons-material';
+
+function TabPanel({ children, value, index, ...other }) {
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`dashboard-tabpanel-${index}`}
+      aria-labelledby={`dashboard-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
 
-export default DataImportExport;
+function Dashboard({ technologies }) {
+  const [tabValue, setTabValue] = React.useState(0);
+  const [notificationCount] = React.useState(3);
+
+  // Статистика
+  const stats = {
+    total: technologies.length,
+    completed: technologies.filter(t => t.status === 'completed').length,
+    inProgress: technologies.filter(t => t.status === 'in-progress').length,
+    notStarted: technologies.filter(t => t.status === 'not-started').length,
+    progress: technologies.length > 0 ? 
+      Math.round((technologies.filter(t => t.status === 'completed').length / technologies.length) * 100) : 0
+  };
+
+  // Предстоящие дедлайны (если бы они были)
+  const upcomingDeadlines = technologies
+    .filter(t => t.deadline && t.status !== 'completed')
+    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+    .slice(0, 5);
+
+  // Недавно добавленные
+  const recentTechnologies = technologies
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .slice(0, 5);
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      {/* Шапка */}
+      <AppBar position="static" color="default" elevation={1}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            📊 Панель управления
+          </Typography>
+          
+          <IconButton color="inherit">
+            <Badge badgeContent={notificationCount} color="error">
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
+          
+          <IconButton color="inherit">
+            <AccountCircleIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      {/* Табы */}
+      <Paper sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={tabValue} onChange={handleTabChange} aria-label="dashboard tabs">
+          <Tab label="Обзор" />
+          <Tab label="Статистика" />
+          <Tab label="Активность" />
+        </Tabs>
+      </Paper>
+
+      {/* Вкладка обзора */}
+      <TabPanel value={tabValue} index={0}>
+        <Grid container spacing={3}>
+          {/* Статистические карточки */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="text.secondary" gutterBottom>
+                  Всего технологий
+                </Typography>
+                <Typography variant="h4" component="div">
+                  {stats.total}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="text.secondary" gutterBottom>
+                  Завершено
+                </Typography>
+                <Typography variant="h4" component="div" color="success.main">
+                  {stats.completed}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="text.secondary" gutterBottom>
+                  В процессе
+                </Typography>
+                <Typography variant="h4" component="div" color="warning.main">
+                  {stats.inProgress}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="text.secondary" gutterBottom>
+                  Не начато
+                </Typography>
+                <Typography variant="h4" component="div" color="text.secondary">
+                  {stats.notStarted}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Прогресс */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Общий прогресс
+                </Typography>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Box flex={1}>
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={stats.progress} 
+                      sx={{ height: 10, borderRadius: 5 }}
+                    />
+                  </Box>
+                  <Typography variant="h6" color="primary">
+                    {stats.progress}%
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Предстоящие дедлайны */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  ⏰ Активные технологии
+                </Typography>
+                <List>
+                  {technologies.filter(t => t.status === 'in-progress').map((tech, index) => (
+                    <React.Fragment key={tech.id}>
+                      <ListItem>
+                        <ListItemIcon>
+                          <ScheduleIcon color="warning" />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={tech.title}
+                          secondary={tech.category}
+                        />
+                        <Chip 
+                          label="В процессе"
+                          size="small"
+                          color="warning"
+                        />
+                      </ListItem>
+                      {index < technologies.filter(t => t.status === 'in-progress').length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                  
+                  {technologies.filter(t => t.status === 'in-progress').length === 0 && (
+                    <ListItem>
+                      <ListItemText 
+                        primary="Нет активных технологий"
+                        secondary="Начните изучение новой технологии"
+                      />
+                    </ListItem>
+                  )}
+                </List>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Недавно добавленные */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  🆕 Недавно добавленные
+                </Typography>
+                <List>
+                  {recentTechnologies.map((tech, index) => (
+                    <React.Fragment key={tech.id}>
+                      <ListItem>
+                        <ListItemIcon>
+                          {tech.status === 'completed' ? (
+                            <CheckCircleIcon color="success" />
+                          ) : tech.status === 'in-progress' ? (
+                            <ScheduleIcon color="warning" />
+                          ) : (
+                            <RadioButtonUncheckedIcon color="disabled" />
+                          )}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={tech.title}
+                          secondary={tech.category}
+                        />
+                        <Chip 
+                          label={tech.status === 'completed' ? 'Завершено' : 
+                                tech.status === 'in-progress' ? 'В процессе' : 'Не начато'}
+                          size="small"
+                          variant="outlined"
+                        />
+                      </ListItem>
+                      {index < recentTechnologies.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </TabPanel>
+
+      {/* Вкладка статистики */}
+      <TabPanel value={tabValue} index={1}>
+        <Typography variant="h4" gutterBottom>
+          Детальная статистика
+        </Typography>
+        
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Распределение по статусам
+                </Typography>
+                <Box sx={{ mt: 2 }}>
+                  <Box display="flex" justifyContent="space-between" mb={1}>
+                    <Typography>Завершено</Typography>
+                    <Typography>{stats.completed} ({stats.progress}%)</Typography>
+                  </Box>
+                  <LinearProgress variant="determinate" value={stats.progress} color="success" />
+                  
+                  <Box display="flex" justifyContent="space-between" mt={2} mb={1}>
+                    <Typography>В процессе</Typography>
+                    <Typography>{stats.inProgress}</Typography>
+                  </Box>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={(stats.inProgress / stats.total) * 100} 
+                    color="warning" 
+                  />
+                  
+                  <Box display="flex" justifyContent="space-between" mt={2} mb={1}>
+                    <Typography>Не начато</Typography>
+                    <Typography>{stats.notStarted}</Typography>
+                  </Box>
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={(stats.notStarted / stats.total) * 100} 
+                    color="inherit" 
+                  />
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </TabPanel>
+
+      {/* Вкладка активности */}
+      <TabPanel value={tabValue} index={2}>
+        <Typography variant="h4" gutterBottom>
+          История активности
+        </Typography>
+        <Typography color="text.secondary">
+          Здесь будет отображаться история изменений статусов...
+        </Typography>
+      </TabPanel>
+    </Box>
+  );
+}
+
+export default Dashboard;
 ```
 
-Протестируйте приложение. Пример для загрузки сразу трёх технологий и импорта:
+Обновим `App.js`:
 
-```json
-{
-  "version": "1.0",
-  "exportedAt": "2025-11-23T15:33:40.532Z",
-  "technologies": [
-    {
-      "id": 1763912015622,
-      "title": "Технология 1",
-      "description": "Описание технологии для демонстрации",
-      "status": "not-started",
-      "category": "frontend",
-      "createdAt": "2025-11-23T15:33:35.622Z"
+```js
+import React, { useState } from 'react';
+import { 
+  ThemeProvider,
+  createTheme,
+  Container, 
+  Typography, 
+  Button, 
+  Grid, 
+  Box,
+  CssBaseline,
+  AppBar,
+  Toolbar,
+  Tabs,
+  Tab
+} from '@mui/material';
+import { Add, Dashboard as DashboardIcon, List as ListIcon } from '@mui/icons-material';
+import SimpleTechCard from './SimpleTechCard';
+import Dashboard from './Dashboard';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
     },
-    {
-      "id": 1763912015623,
-      "title": "Технология 2",
-      "description": "Описание второй технологии",
-      "status": "in-progress",
-      "category": "backend",
-      "createdAt": "2025-11-23T15:33:36.123Z"
+    secondary: {
+      main: '#dc004e',
     },
-    {
-      "id": 1763912015624,
-      "title": "Технология 3",
-      "description": "Описание третьей технологии",
-      "status": "completed",
-      "category": "fullstack",
-      "createdAt": "2025-11-23T15:33:36.624Z"
-    }
-  ],
-  "stats": {
-    "total": 1,
-    "completed": 0,
-    "inProgress": 0
-  }
+  },
+});
+
+function TabPanel({ children, value, index, ...other }) {
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`app-tabpanel-${index}`}
+      aria-labelledby={`app-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
 }
+
+function App() {
+  const [tabValue, setTabValue] = useState(0);
+  const [technologies, setTechnologies] = useState([
+    {
+      id: 1,
+      title: 'React Components',
+      description: 'Изучение функциональных и классовых компонентов',
+      category: 'frontend',
+      status: 'in-progress',
+      createdAt: new Date('2024-01-15').toISOString()
+    },
+    {
+      id: 2,
+      title: 'Material-UI',
+      description: 'Освоение Material Design для React',
+      category: 'ui-library',
+      status: 'not-started',
+      createdAt: new Date('2024-01-10').toISOString()
+    },
+    {
+      id: 3,
+      title: 'React Hooks',
+      description: 'Использование useState, useEffect и других хуков',
+      category: 'frontend',
+      status: 'completed',
+      createdAt: new Date('2024-01-05').toISOString()
+    }
+  ]);
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  const handleStatusChange = (techId, newStatus) => {
+    setTechnologies(prev => 
+      prev.map(tech => 
+        tech.id === techId ? { ...tech, status: newStatus } : tech
+      )
+    );
+  };
+
+  const addNewTechnology = () => {
+    const newTech = {
+      id: Date.now(),
+      title: `Новая технология ${technologies.length + 1}`,
+      description: 'Описание новой технологии для изучения',
+      category: 'other',
+      status: 'not-started',
+      createdAt: new Date().toISOString()
+    };
+    setTechnologies(prev => [...prev, newTech]);
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            🚀 Трекер технологий
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* Навигация табами */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={tabValue} onChange={handleTabChange} aria-label="app tabs">
+          <Tab icon={<ListIcon />} label="Список технологий" />
+          <Tab icon={<DashboardIcon />} label="Дашборд" />
+        </Tabs>
+      </Box>
+
+      {/* Вкладка списка технологий */}
+      <TabPanel value={tabValue} index={0}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Мои технологии
+            </Typography>
+            
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={addNewTechnology}
+              size="large"
+              sx={{ mb: 3 }}
+            >
+              Добавить технологию
+            </Button>
+          </Box>
+
+          <Grid container spacing={3}>
+            {technologies.map(technology => (
+              <Grid item xs={12} sm={6} md={4} key={technology.id}>
+                <SimpleTechCard
+                  technology={technology}
+                  onStatusChange={handleStatusChange}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </TabPanel>
+
+      {/* Вкладка дашборда */}
+      <TabPanel value={tabValue} index={1}>
+        <Dashboard technologies={technologies} />
+      </TabPanel>
+    </ThemeProvider>
+  );
+}
+
+export default App;
 ```
 
 ## Практическая часть
 
-### Реализация функциональности экспорта данных
+### Интеграция UI-кит в основное приложение
 
-**Шаг 1: Создайте компонент для экспорта данных**
+**Шаг 1: Создайте Theme провайдер**
 
 ```jsx
-// components/DataExporter.js
-import { useState } from 'react';
+// styles/theme.js
+import { createTheme } from '@mui/material/styles';
 
-function DataExporter({ technologies }) {
-  const [exportFormat, setExportFormat] = useState('json');
-  const [includeUserData, setIncludeUserData] = useState(true);
+export const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+      light: '#42a5f5',
+      dark: '#1565c0',
+    },
+    secondary: {
+      main: '#9c27b0',
+    },
+    background: {
+      default: '#f5f5f5',
+      paper: '#ffffff',
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h4: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 8,
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontWeight: 600,
+        },
+      },
+    },
+  },
+});
 
-  // Функция для экспорта данных
-  const exportData = () => {
-    const exportData = {
-      version: '1.0',
-      exportedAt: new Date().toISOString(),
-      technologies: includeUserData 
-        ? technologies.map(tech => ({
-            ...tech,
-            userNotes: tech.notes || '',
-            userStatus: tech.status || 'not-started',
-            userDeadline: tech.deadline || ''
-          }))
-        : technologies.map(({ notes, status, deadline, ...tech }) => tech) // Исключаем пользовательские данные
-    };
-
-    let dataStr, fileType, fileName;
-
-    if (exportFormat === 'json') {
-      dataStr = JSON.stringify(exportData, null, 2);
-      fileType = 'application/json';
-      fileName = `technology-roadmap-${new Date().toISOString().split('T')[0]}.json`;
-    }
-
-    // Создаем и скачиваем файл
-    const blob = new Blob([dataStr], { type: fileType });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  // Валидация перед экспортом
-  const canExport = technologies.length > 0;
-
-  return (
-    <div className="data-exporter">
-      <h3>Экспорт данных</h3>
-      
-      <div className="export-options">
-        <div className="form-group">
-          <label htmlFor="export-format">Формат экспорта</label>
-          <select
-            id="export-format"
-            value={exportFormat}
-            onChange={(e) => setExportFormat(e.target.value)}
-          >
-            <option value="json">JSON</option>
-            <option value="csv" disabled>CSV (скоро)</option>
-          </select>
-        </div>
-
-        <div className="form-group checkbox-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={includeUserData}
-              onChange={(e) => setIncludeUserData(e.target.checked)}
-            />
-            Включить мои заметки и прогресс
-          </label>
-          <span className="help-text">
-            При включении будут экспортированы ваши личные заметки и статусы изучения
-          </span>
-        </div>
-      </div>
-
-      {!canExport && (
-        <div className="export-warning" role="alert">
-          ⚠️ Нет данных для экспорта. Добавьте технологии в трекер.
-        </div>
-      )}
-
-      <button
-        onClick={exportData}
-        disabled={!canExport}
-        className="btn-primary"
-        aria-describedby={canExport ? 'export-help' : 'export-warning'}
-      >
-        📥 Экспортировать данные
-      </button>
-
-      <div id="export-help" className="help-text">
-        Данные будут сохранены в выбранном формате на вашем устройстве
-      </div>
-    </div>
-  );
-}
-
-export default DataExporter;
+export const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#90caf9',
+    },
+    secondary: {
+      main: '#ce93d8',
+    },
+  },
+  // ... остальные настройки
+});
 ```
 
-**Шаг 2: Добавьте обработку ошибок импорта**
+**Шаг 2: Обновите главный App.js**
 
 ```jsx
-// components/DataImporter.js
-import { useState } from 'react';
+// App.js
+import React, { useState } from 'react';
+import { ThemeProvider, CssBaseline, Box, Container } from '@mui/material';
+import { theme } from './styles/theme';
+import MuiDashboard from './components/MuiDashboard';
+import MuiTechnologyCard from './components/MuiTechnologyCard';
+import MuiTechnologyModal from './components/MuiTechnologyModal';
+import { AppBar, Toolbar, Typography, Button, Grid } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 
-function DataImporter({ onImport }) {
-  const [importError, setImportError] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
+function App() {
+  const [technologies, setTechnologies] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTech, setEditingTech] = useState(null);
 
-  // Валидация импортируемых данных
-  const validateImportData = (data) => {
-    if (!data.technologies || !Array.isArray(data.technologies)) {
-      throw new Error('Неверный формат файла: отсутствует массив technologies');
-    }
-
-    data.technologies.forEach((tech, index) => {
-      if (!tech.title || !tech.description) {
-        throw new Error(`Технология #${index + 1}: отсутствует название или описание`);
-      }
-
-      if (tech.title.length > 50) {
-        throw new Error(`Технология "${tech.title}": название слишком длинное`);
-      }
-    });
-
-    return true;
-  };
-
-  // Обработка загруженного файла
-  const handleFileUpload = (file) => {
-    setImportError('');
-    
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const fileContent = e.target.result;
-        const importedData = JSON.parse(fileContent);
-        
-        validateImportData(importedData);
-        onImport(importedData.technologies);
-        
-      } catch (error) {
-        setImportError(`Ошибка импорта: ${error.message}`);
-      }
+  const handleAddTechnology = (techData) => {
+    const newTech = {
+      id: Date.now(),
+      ...techData,
+      status: 'not-started',
+      createdAt: new Date().toISOString()
     };
-
-    reader.onerror = () => {
-      setImportError('Ошибка чтения файла');
-    };
-
-    reader.readAsText(file);
+    setTechnologies(prev => [...prev, newTech]);
   };
 
-  // Обработчик выбора файла
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.type === 'application/json') {
-        handleFileUpload(file);
-      } else {
-        setImportError('Поддерживаются только JSON файлы');
-      }
+  const handleEditTechnology = (techData) => {
+    setTechnologies(prev => 
+      prev.map(tech => tech.id === editingTech.id ? { ...tech, ...techData } : tech)
+    );
+    setEditingTech(null);
+  };
+
+  const handleSaveTechnology = (techData) => {
+    if (editingTech) {
+      handleEditTechnology(techData);
+    } else {
+      handleAddTechnology(techData);
     }
   };
 
-  // Обработчики drag & drop
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
+  const handleEdit = (technology) => {
+    setEditingTech(technology);
+    setIsModalOpen(true);
   };
 
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
+  const handleDelete = (techId) => {
+    setTechnologies(prev => prev.filter(tech => tech.id !== techId));
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFileUpload(file);
-    }
+  const handleStatusChange = (techId, newStatus) => {
+    setTechnologies(prev => 
+      prev.map(tech => tech.id === techId ? { ...tech, status: newStatus } : tech)
+    );
   };
 
   return (
-    <div className="data-importer">
-      <h3>Импорт дорожной карты</h3>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      
+      <Box sx={{ flexGrow: 1, minHeight: '100vh', backgroundColor: 'background.default' }}>
+        {/* Шапка приложения */}
+        <AppBar position="static" elevation={2}>
+          <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              🚀 Трекер изучения технологий
+            </Typography>
+            <Button 
+              color="inherit" 
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setEditingTech(null);
+                setIsModalOpen(true);
+              }}
+            >
+              Добавить технологию
+            </Button>
+          </Toolbar>
+        </AppBar>
 
-      <div
-        className={`drop-zone ${isDragging ? 'dragging' : ''} ${importError ? 'error' : ''}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <div className="drop-zone-content">
-          <p>📁 Перетащите JSON файл сюда или</p>
-          <input
-            type="file"
-            accept=".json,application/json"
-            onChange={handleFileSelect}
-            id="file-input"
-            className="file-input"
-          />
-          <label htmlFor="file-input" className="btn-secondary">
-            Выберите файл
-          </label>
-        </div>
-      </div>
+        <Container maxWidth="xl" sx={{ py: 3 }}>
+          {/* Дашборд */}
+          <MuiDashboard technologies={technologies} />
 
-      {importError && (
-        <div className="import-error" role="alert">
-          ❌ {importError}
-        </div>
-      )}
+          {/* Сетка технологий */}
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h5" gutterBottom>
+              Мои технологии ({technologies.length})
+            </Typography>
+            
+            <Grid container spacing={3}>
+              {technologies.map(technology => (
+                <Grid item xs={12} sm={6} md={4} key={technology.id}>
+                  <MuiTechnologyCard
+                    technology={technology}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onStatusChange={handleStatusChange}
+                  />
+                </Grid>
+              ))}
+            </Grid>
 
-      <div className="import-help">
-        <h4>Требования к файлу:</h4>
-        <ul>
-          <li>Формат: JSON</li>
-          <li>Обязательные поля: title, description</li>
-          <li>Максимальная длина названия: 50 символов</li>
-        </ul>
-      </div>
-    </div>
+            {technologies.length === 0 && (
+              <Box 
+                textAlign="center" 
+                py={8} 
+                color="text.secondary"
+              >
+                <Typography variant="h6" gutterBottom>
+                  Технологий пока нет
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  Добавьте первую технологию для отслеживания прогресса
+                </Typography>
+                <Button 
+                  variant="contained" 
+                  startIcon={<AddIcon />}
+                  onClick={() => setIsModalOpen(true)}
+                  sx={{ mt: 2 }}
+                >
+                  Добавить технологию
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Container>
+
+        {/* Модальное окно */}
+        <MuiTechnologyModal
+          open={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingTech(null);
+          }}
+          technology={editingTech}
+          onSave={handleSaveTechnology}
+        />
+      </Box>
+    </ThemeProvider>
   );
 }
 
-export default DataImporter;
+export default App;
 ```
 
 ### Самостоятельная работа
 
-**Задание 1:** Создайте форму для установки сроков изучения с валидацией
+**Задание 1:** Создайте компонент уведомлений с использованием Snackbar из MUI
 
-**Задание 2:** Добавьте компонент для массового редактирования статусов технологий
+**Задание 2:** Добавьте переключение темы (светлая/тёмная)
 
 **Что проверить перед завершением:**
-- Валидация форм работает в реальном времени
-- Сообщения об ошибках понятны и доступны
-- Экспорт данных создает корректный JSON файл
-- Импорт данных обрабатывает ошибки формата
-- Формы доступны для пользователей с ограниченными возможностями
+- Все компоненты MUI корректно отображаются
+- Тема применяется ко всему приложению
+- Модальные окна работают правильно
+- Адаптивный дизайн работает на разных размерах экрана
+- Иконки и интерактивные элементы понятны
+
+Обратите внимание, что данная практика - последняя в блоке по React и последняя для выполнения соответствующей контрольной работы №4.
