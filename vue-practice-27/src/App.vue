@@ -28,6 +28,27 @@
       >
         Пример 3: События
       </button>
+      <button 
+        @click="currentDemo = 'usercards'" 
+        :class="{ active: currentDemo === 'usercards' }"
+        class="nav-button"
+      >
+        Пример 4: Компоненты и пропсы
+      </button>
+      <button 
+        @click="currentDemo = 'searchexample'" 
+        :class="{ active: currentDemo === 'searchexample' }"
+        class="nav-button"
+      >
+        Пример 5: Поиск и кастомные элементы
+      </button>
+      <button 
+        @click="currentDemo = 'example6'" 
+        :class="{ active: currentDemo === 'example6' }"
+        class="nav-button"
+      >
+        Пример 6
+      </button>
     </nav>
 
     <!-- Отображаем выбранный компонент -->
@@ -41,6 +62,15 @@
       <!-- Компонент EventComputedDemo -->
       <EventComputedDemo v-else-if="currentDemo === 'events'" />
       
+      <!-- Компонент UserCards -->
+      <UserCards v-else-if="currentDemo === 'usercards'" />
+
+      <!-- Компонент SearchExample -->
+      <SearchExample v-else-if="currentDemo === 'searchexample'" />
+
+      <!-- Компонент EventComputedDemo -->
+      <EventComputedDemo v-else-if="currentDemo === 'events'" />
+
       <!-- Сообщение если ничего не выбрано -->
       <div v-else class="welcome-message">
         <h2>Добро пожаловать!</h2>
@@ -59,6 +89,8 @@
 import ReactiveDemo from './components/ReactiveDemo.vue'
 import ConditionalListDemo from './components/ConditionalListDemo.vue'
 import EventComputedDemo from './components/EventComputedDemo.vue'
+import UserCards from './components/UserCards.vue'
+import SearchExample from './components/SearchExample.vue'
 
 import { ref } from 'vue'
 
@@ -69,7 +101,9 @@ export default {
   components: {
     ReactiveDemo,
     ConditionalListDemo,
-    EventComputedDemo
+    EventComputedDemo,
+    UserCards,
+    SearchExample
   },
 
   setup() {

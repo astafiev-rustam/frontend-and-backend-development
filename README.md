@@ -8,44 +8,15 @@
 |СЕМЕСТР|1 семестр, 2025/2026 уч. год|
 
 Ссылка на материал: <br>
-https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-27
+https://github.com/astafiev-rustam/frontend-and-backend-development/tree/practice-1-28
 
 ---
 
-# Практическое занятие 27: Vue 3 + Vite: основы реактивности, шаблоны и директивы
+# Практическое занятие 28: Компоненты, пропсы, v-model и Vue Router
 
-## Введение
+## Теоретическая часть
 
-Сегодня мы начинаем изучение Vue.js - современного фреймворка для создания пользовательских интерфейсов. Vue сочетает в себе простоту изучения и мощные возможности. Мы познакомимся с основными концепциями: реактивностью, директивами и компонентами. Основная информация по фреймворку содержится в материалах лекции, а также в официальной документации:
-
-https://ru.vuejs.org/
-
-## Подготовка проекта
-
-Первым делом создадим новый проект Vue. Откройте терминал и выполните команду:
-
-```bash
-npm create vue@latest vue-practice-27
-```
-
-Когда система спросит о дополнительных возможностях, просто нажимайте Enter для выбора значений по умолчанию. После создания проекта перейдите в его папку и установите зависимости:
-
-```bash
-cd vue-practice-27
-npm install
-```
-
-Теперь можно запустить сервер разработки:
-
-```bash
-npm run dev
-```
-
-Проект будет доступен по адресу http://localhost:5173
-
-## Подключение компонентов в Vue
-
-Сначала обновим основной файл `src/App.vue`:
+Как и всегда, предварительно необходимо подключить компоненты в `App.vue`. Теоретически, можно дополнить правильным образом импорты и массив компонентов в файле, либо заменить названия, например:
 
 ```vue
 <template>
@@ -78,6 +49,27 @@ npm run dev
       >
         Пример 3: События
       </button>
+      <button 
+        @click="currentDemo = 'usercards'" 
+        :class="{ active: currentDemo === 'usercards' }"
+        class="nav-button"
+      >
+        Пример 4: Компоненты и пропсы
+      </button>
+      <button 
+        @click="currentDemo = 'searchexample'" 
+        :class="{ active: currentDemo === 'searchexample' }"
+        class="nav-button"
+      >
+        Пример 5: Поиск и кастомные элементы
+      </button>
+      <button 
+        @click="currentDemo = 'example6'" 
+        :class="{ active: currentDemo === 'example6' }"
+        class="nav-button"
+      >
+        Пример 6
+      </button>
     </nav>
 
     <!-- Отображаем выбранный компонент -->
@@ -91,6 +83,15 @@ npm run dev
       <!-- Компонент EventComputedDemo -->
       <EventComputedDemo v-else-if="currentDemo === 'events'" />
       
+      <!-- Компонент UserCards -->
+      <UserCards v-else-if="currentDemo === 'usercards'" />
+
+      <!-- Компонент SearchExample -->
+      <SearchExample v-else-if="currentDemo === 'searchexample'" />
+
+      <!-- Компонент EventComputedDemo -->
+      <EventComputedDemo v-else-if="currentDemo === 'events'" />
+
       <!-- Сообщение если ничего не выбрано -->
       <div v-else class="welcome-message">
         <h2>Добро пожаловать!</h2>
@@ -106,10 +107,11 @@ npm run dev
 
 <script>
 // Импортируем наши компоненты, пока файлов нет - должно быть закомментировано
-/*import ReactiveDemo from './components/ReactiveDemo.vue'
+import ReactiveDemo from './components/ReactiveDemo.vue'
 import ConditionalListDemo from './components/ConditionalListDemo.vue'
 import EventComputedDemo from './components/EventComputedDemo.vue'
-*/
+import UserCards from './components/UserCards.vue'
+import SearchExample from './components/SearchExample.vue'
 
 import { ref } from 'vue'
 
@@ -118,9 +120,11 @@ export default {
   
   // Регистрируем компоненты чтобы использовать их в шаблоне
   components: {
-//    ReactiveDemo,
-//    ConditionalListDemo,
-//    EventComputedDemo
+    ReactiveDemo,
+    ConditionalListDemo,
+    EventComputedDemo,
+    UserCards,
+    SearchExample
   },
 
   setup() {
@@ -237,978 +241,829 @@ body {
 </style>
 ```
 
-Пока код с подключением компонент закомментирован, но по мере добавления открываем комментарии.
+### Пример 1: Компоненты и пропсы
 
-## Пример 1: Реактивность и двустороннее связывание
-
-Давайте создадим простой компонент, который демонстрирует основы реактивности Vue. Реактивность - это способность Vue автоматически обновлять интерфейс при изменении данных.
-
-Создайте файл `src/components/ReactiveDemo.vue`:
+**Файл: `src/components/UserCard.vue`**
 
 ```vue
 <template>
-  <div class="demo-container">
-    <h2>Пример 1: Реактивность и v-model</h2>
+  <div class="user-card" :class="user.role">
+    <h3>{{ user.name }}</h3>
+    <p>Email: {{ user.email }}</p>
+    <p>Роль: {{ user.role }}</p>
+    <p>Статус: {{ isActive ? 'Активен' : 'Неактивен' }}</p>
     
-    <p>Директива v-model создает двустороннее связывание между элементом формы и данными компонента.</p>
+    <!-- Слот для дополнительного контента -->
+    <slot name="actions"></slot>
     
-    <!-- Простое текстовое поле с v-model -->
-    <div class="input-group">
-      <label>Введите ваше имя:</label>
-      <input 
-        v-model="userName" 
-        placeholder="Например: Иван"
-        class="text-input"
-      >
-      <p>Привет, <strong>{{ userName }}</strong>!</p>
-    </div>
-
-    <!-- Textarea с v-model -->
-    <div class="input-group">
-      <label>Опишите ваши интересы:</label>
-      <textarea 
-        v-model="userBio" 
-        placeholder="Расскажите о себе..."
-        class="text-area"
-        rows="3"
-      ></textarea>
-      <p>Длина текста: {{ userBio.length }} символов</p>
-    </div>
-
-    <!-- Select с v-model -->
-    <div class="input-group">
-      <label>Выберите технологию:</label>
-      <select v-model="selectedTech" class="select-input">
-        <option value="vue">Vue.js</option>
-        <option value="react">React</option>
-        <option value="angular">Angular</option>
-      </select>
-      <p>Вы выбрали: {{ getTechName(selectedTech) }}</p>
-    </div>
-
-    <!-- Чекбокс с v-model -->
-    <div class="input-group">
-      <label>
-        <input type="checkbox" v-model="isSubscribed">
-        Получать уведомления
-      </label>
-      <p v-if="isSubscribed">Вы подписаны на уведомления ✓</p>
-      <p v-else>Вы не подписаны на уведомления</p>
-    </div>
-
-    <!-- Группа радио-кнопок -->
-    <div class="input-group">
-      <label>Уровень опыта:</label>
-      <div>
-        <label>
-          <input type="radio" v-model="experienceLevel" value="beginner">
-          Начинающий
-        </label>
-        <label>
-          <input type="radio" v-model="experienceLevel" value="intermediate">
-          Средний
-        </label>
-        <label>
-          <input type="radio" v-model="experienceLevel" value="advanced">
-          Продвинутый
-        </label>
-      </div>
-      <p>Ваш уровень: {{ getExperienceText(experienceLevel) }}</p>
-    </div>
-
-    <!-- Отладочная информация -->
-    <div class="debug-info">
-      <h3>Текущее состояние данных:</h3>
-      <pre>{{ JSON.stringify({
-        userName,
-        userBio,
-        selectedTech,
-        isSubscribed,
-        experienceLevel
-      }, null, 2) }}</pre>
-    </div>
+    <!-- Слот по умолчанию -->
+    <slot>
+      <p>Нет дополнительной информации</p>
+    </slot>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue'
-
 export default {
-  name: 'ReactiveDemo',
+  name: 'UserCard',
   
-  setup() {
-    // ref создает реактивную переменную
-    // Когда значение меняется, Vue автоматически обновляет шаблон
-    const userName = ref('')
-    const userBio = ref('')
-    const selectedTech = ref('vue')
-    const isSubscribed = ref(false)
-    const experienceLevel = ref('beginner')
-
-    // Методы для форматирования данных
-    const getTechName = (tech) => {
-      const techMap = {
-        'vue': 'Vue.js',
-        'react': 'React',
-        'angular': 'Angular'
+  // Определяем пропсы, которые компонент принимает
+  props: {
+    user: {
+      type: Object,
+      required: true,
+      // Валидация объекта
+      validator: (value) => {
+        return value.name && value.email
       }
-      return techMap[tech] || tech
+    },
+    isActive: {
+      type: Boolean,
+      default: false
     }
-
-    const getExperienceText = (level) => {
-      const levelMap = {
-        'beginner': 'Начинающий разработчик',
-        'intermediate': 'Разработчик со средним опытом',
-        'advanced': 'Опытный разработчик'
-      }
-      return levelMap[level] || level
-    }
-
-    // Возвращаем все переменные и методы, чтобы они были доступны в шаблоне
+  },
+  
+  // Локальное состояние компонента
+  data() {
     return {
-      userName,
-      userBio,
-      selectedTech,
-      isSubscribed,
-      experienceLevel,
-      getTechName,
-      getExperienceText
+      localClicks: 0
+    }
+  },
+  
+  methods: {
+    handleClick() {
+      this.localClicks++
+      // Отправляем событие родителю
+      this.$emit('user-clicked', this.user)
     }
   }
 }
 </script>
 
 <style scoped>
-.demo-container {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 20px;
+.user-card {
   border: 1px solid #ddd;
+  padding: 16px;
+  margin: 10px;
   border-radius: 8px;
-  background-color: #f9f9f9;
 }
 
-.input-group {
-  margin-bottom: 20px;
+.user-card.admin {
+  border-color: #ff6b6b;
+  background-color: #fff5f5;
 }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+.user-card.user {
+  border-color: #4ecdc4;
+  background-color: #f0fff4;
+}
+</style>
+```
+
+**Использование в родительском компоненте (например, `UserCards.vue`):**
+
+```vue
+<template>
+  <div>
+    <h2>Список пользователей</h2>
+    
+    <!-- Передаем данные через пропсы -->
+    <UserCard 
+      :user="adminUser" 
+      :is-active="true"
+      @user-clicked="handleUserClick"
+    >
+      <!-- Именованный слот -->
+      <template #actions>
+        <button @click="editUser(adminUser)">Редактировать</button>
+      </template>
+      
+      <!-- Слот по умолчанию -->
+      <p>Администратор системы</p>
+    </UserCard>
+    
+    <UserCard 
+      v-for="user in users" 
+      :key="user.id"
+      :user="user"
+      @user-clicked="handleUserClick"
+    />
+  </div>
+</template>
+
+<script>
+import UserCard from './UserCard.vue'
+
+export default {
+  components: {
+    UserCard
+  },
+  
+  data() {
+    return {
+      adminUser: {
+        id: 1,
+        name: 'Анна Иванова',
+        email: 'anna@example.com',
+        role: 'admin'
+      },
+      users: [
+        {
+          id: 2,
+          name: 'Петр Сидоров',
+          email: 'petr@example.com',
+          role: 'user'
+        }
+      ]
+    }
+  },
+  
+  methods: {
+    handleUserClick(user) {
+      console.log('Клик по пользователю:', user)
+    },
+    
+    editUser(user) {
+      console.log('Редактирование:', user)
+    }
+  }
+}
+</script>
+```
+
+### Пример 2: Кастомный v-model
+
+**Файл: `src/components/SearchInput.vue`**
+
+```vue
+<template>
+  <div class="search-container">
+    <label v-if="label">{{ label }}</label>
+    <input
+      :value="modelValue"
+      @input="$emit('update:modelValue', $event.target.value)"
+      :placeholder="placeholder"
+      class="search-input"
+      type="text"
+    />
+    <button 
+      v-if="modelValue" 
+      @click="$emit('update:modelValue', '')"
+      class="clear-btn"
+    >
+      ×
+    </button>
+    
+    <!-- Дополнительные события -->
+    <div class="search-actions">
+      <button @click="$emit('search')">Найти</button>
+      <button @click="$emit('reset')">Сбросить</button>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'SearchInput',
+  
+  // Специальные пропсы для v-model
+  props: {
+    modelValue: {
+      type: String,
+      default: ''
+    },
+    label: {
+      type: String,
+      default: ''
+    },
+    placeholder: {
+      type: String,
+      default: 'Поиск...'
+    }
+  },
+  
+  // Можно определить эмитируемые события
+  emits: ['update:modelValue', 'search', 'reset']
+}
+</script>
+
+<style scoped>
+.search-container {
+  position: relative;
+  margin: 20px 0;
 }
 
-.text-input, .text-area, .select-input {
+.search-input {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 10px 40px 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.search-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+</style>
+```
+
+**Использование кастомного v-model, например, `SearchExample.vue`:**
+
+```vue
+<template>
+  <div>
+    <h2>Поиск пользователей</h2>
+    
+    <!-- Используем кастомный v-model -->
+    <SearchInput 
+      v-model="searchQuery"
+      label="Поиск по имени:"
+      placeholder="Введите имя пользователя..."
+      @search="performSearch"
+      @reset="resetSearch"
+    />
+    
+    <p>Текущий запрос: "{{ searchQuery }}"</p>
+    
+    <div v-if="searchResults.length">
+      <h3>Результаты поиска:</h3>
+      <ul>
+        <li v-for="user in searchResults" :key="user.id">
+          {{ user.name }} - {{ user.email }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script>
+import SearchInput from './SearchInput.vue'
+import { ref, computed } from 'vue'
+
+export default {
+  components: {
+    SearchInput
+  },
+  
+  setup() {
+    const searchQuery = ref('')
+    const users = ref([
+      { id: 1, name: 'Анна', email: 'anna@test.com' },
+      { id: 2, name: 'Борис', email: 'boris@test.com' },
+      { id: 3, name: 'Виктор', email: 'victor@test.com' }
+    ])
+    
+    const searchResults = computed(() => {
+      if (!searchQuery.value) return []
+      return users.value.filter(user => 
+        user.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )
+    })
+    
+    const performSearch = () => {
+      console.log('Выполняем поиск:', searchQuery.value)
+    }
+    
+    const resetSearch = () => {
+      searchQuery.value = ''
+    }
+    
+    return {
+      searchQuery,
+      searchResults,
+      performSearch,
+      resetSearch
+    }
+  }
+}
+</script>
+```
+
+### Пример 3: Vue Router - маршрутизация
+
+Для этого примера создадим новое приложение и реализуем функционал в нём.
+
+Понял! Давай исправим третий пример с Vue Router. Проблема в том, что нужно правильно настроить структуру и добавить все необходимые компоненты.
+
+## Пример 3: Работа с Vue Router
+
+**Шаг 1: Устанавливаем Vue Router**
+```bash
+npm install vue-router@4
+```
+
+**Шаг 2: Создаем структуру папок**
+```
+src/
+├── views/
+│   ├── HomePage.vue
+│   ├── UserProfile.vue
+│   ├── UserSettings.vue
+│   └── NotFound.vue
+├── router/
+│   └── index.js
+└── main.js
+```
+
+**Шаг 3: Создаем компоненты страниц**
+
+**`src/views/HomePage.vue`**
+```vue
+<template>
+  <div class="home-page">
+    <h1>🏠 Главная страница</h1>
+    <p>Добро пожаловать в наше приложение!</p>
+    
+    <div class="quick-actions">
+      <button @click="goToProfile" class="btn">Перейти в профиль</button>
+      <button @click="goToSettings" class="btn">Настройки</button>
+    </div>
+
+    <div class="user-list">
+      <h3>Список пользователей:</h3>
+      <ul>
+        <li 
+          v-for="user in users" 
+          :key="user.id"
+          @click="viewUser(user.id)"
+          class="user-item"
+        >
+          {{ user.name }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script>
+import { useRouter } from 'vue-router'
+
+export default {
+  name: 'HomePage',
+  
+  setup() {
+    const router = useRouter()
+    
+    const users = [
+      { id: 1, name: 'Анна Иванова' },
+      { id: 2, name: 'Петр Сидоров' },
+      { id: 3, name: 'Мария Петрова' }
+    ]
+
+    const goToProfile = () => {
+      router.push('/profile')
+    }
+
+    const goToSettings = () => {
+      router.push('/settings')
+    }
+
+    const viewUser = (userId) => {
+      router.push(`/profile/${userId}`)
+    }
+
+    return {
+      users,
+      goToProfile,
+      goToSettings,
+      viewUser
+    }
+  }
+}
+</script>
+
+<style scoped>
+.home-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.quick-actions {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.user-list {
+  margin-top: 30px;
+}
+
+.user-item {
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin: 5px 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.user-item:hover {
+  background-color: #f5f5f5;
+}
+</style>
+```
+
+**`src/views/UserProfile.vue`**
+```vue
+<template>
+  <div class="user-profile">
+    <h1>👤 Профиль пользователя</h1>
+    
+    <!-- Показываем ID пользователя из параметров маршрута -->
+    <div v-if="$route.params.id" class="user-info">
+      <h2>Профиль пользователя #{{ $route.params.id }}</h2>
+      <p>Это страница конкретного пользователя</p>
+    </div>
+    
+    <div v-else class="current-user">
+      <h2>Ваш профиль</h2>
+      <p>Email: user@example.com</p>
+      <p>Дата регистрации: 2024-01-01</p>
+    </div>
+
+    <!-- Навигация между разделами профиля -->
+    <nav class="profile-tabs">
+      <router-link to="/profile/info" class="tab">Информация</router-link>
+      <router-link to="/profile/posts" class="tab">Посты</router-link>
+      <router-link to="/profile/friends" class="tab">Друзья</router-link>
+    </nav>
+
+    <!-- Отображаем вложенные маршруты -->
+    <div class="tab-content">
+      <router-view></router-view>
+    </div>
+
+    <!-- Кнопки навигации -->
+    <div class="navigation-buttons">
+      <button @click="goBack" class="btn">Назад</button>
+      <button @click="goHome" class="btn">На главную</button>
+      <button @click="goToSettings" class="btn">Настройки</button>
+    </div>
+  </div>
+</template>
+
+<script>
+import { useRouter } from 'vue-router'
+
+export default {
+  name: 'UserProfile',
+  
+  setup() {
+    const router = useRouter()
+
+    const goBack = () => {
+      router.back()
+    }
+
+    const goHome = () => {
+      router.push('/')
+    }
+
+    const goToSettings = () => {
+      router.push('/settings')
+    }
+
+    return {
+      goBack,
+      goHome,
+      goToSettings
+    }
+  },
+
+  // Хуки навигации
+  beforeRouteEnter(to, from, next) {
+    console.log('Заходим в профиль пользователя')
+    next()
+  },
+
+  beforeRouteUpdate(to, from, next) {
+    console.log('Обновляем параметры маршрута профиля')
+    next()
+  }
+}
+</script>
+
+<style scoped>
+.user-profile {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  border-bottom: 2px solid #eee;
+}
+
+.tab {
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 3px solid transparent;
+}
+
+.tab.router-link-active {
+  border-bottom-color: #007bff;
+  color: #007bff;
+}
+
+.tab-content {
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  min-height: 200px;
+}
+
+.navigation-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+</style>
+```
+
+**`src/views/UserSettings.vue`**
+```vue
+<template>
+  <div class="user-settings">
+    <h1>⚙️ Настройки</h1>
+    
+    <div class="settings-tabs">
+      <router-link to="/settings/general" class="tab">Основные</router-link>
+      <router-link to="/settings/security" class="tab">Безопасность</router-link>
+      <router-link to="/settings/notifications" class="tab">Уведомления</router-link>
+    </div>
+
+    <div class="settings-content">
+      <!-- Параметры маршрута передаются как пропсы -->
+      <p>Активная вкладка: {{ currentTab }}</p>
+      
+      <router-view :current-tab="currentTab"></router-view>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'UserSettings',
+  
+  // Получаем параметр маршрута как пропс
+  props: {
+    tab: {
+      type: String,
+      default: 'general'
+    }
+  },
+  
+  computed: {
+    currentTab() {
+      return this.tab || 'general'
+    }
+  }
+}
+</script>
+
+<style scoped>
+.settings-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.tab {
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.tab.router-link-active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.settings-content {
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+</style>
+```
+
+**`src/views/NotFound.vue`**
+```vue
+<template>
+  <div class="not-found">
+    <h1>404 - Страница не найдена</h1>
+    <p>Запрошенная страница не существует.</p>
+    <button @click="goHome" class="btn">Вернуться на главную</button>
+    
+    <div class="debug-info">
+      <p>Путь: {{ $route.path }}</p>
+      <p>Параметры: {{ $route.params }}</p>
+    </div>
+  </div>
+</template>
+
+<script>
+import { useRouter } from 'vue-router'
+
+export default {
+  name: 'NotFound',
+  
+  setup() {
+    const router = useRouter()
+    
+    const goHome = () => {
+      router.push('/')
+    }
+
+    return {
+      goHome
+    }
+  }
+}
+</script>
+
+<style scoped>
+.not-found {
+  text-align: center;
+  padding: 50px 20px;
 }
 
 .debug-info {
   margin-top: 30px;
   padding: 15px;
-  background-color: #e9ecef;
-  border-radius: 4px;
-}
-
-pre {
-  background-color: white;
-  padding: 10px;
-  border-radius: 4px;
-  overflow-x: auto;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  font-family: monospace;
 }
 </style>
 ```
 
-## Пример 2: Условный рендеринг и списки
+**Шаг 4: Настраиваем роутер**
 
-Теперь рассмотрим директивы v-if, v-for и v-show для управления отображением элементов.
+**`src/router/index.js`**
+```javascript
+import { createRouter, createWebHistory } from 'vue-router'
+import HomePage from '../views/HomePage.vue'
+import UserProfile from '../views/UserProfile.vue'
+import UserSettings from '../views/UserSettings.vue'
+import NotFound from '../views/NotFound.vue'
 
-Создайте файл `src/components/ConditionalListDemo.vue`:
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: HomePage
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: UserProfile
+  },
+  {
+    // Динамический маршрут с параметром
+    path: '/profile/:id',
+    name: 'UserDetail',
+    component: UserProfile,
+    props: true
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: UserSettings,
+    // Перенаправляем на вложенный маршрут
+    redirect: '/settings/general'
+  },
+  {
+    path: '/settings/:tab',
+    name: 'SettingsTab',
+    component: UserSettings,
+    props: true
+  },
+  {
+    // Обработка 404
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
+  }
+]
 
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+export default router
+```
+
+**Шаг 5: Обновляем main.js**
+
+**`src/main.js`**
+```javascript
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
+```
+
+**Шаг 6: Обновляем App.vue**
+
+**`src/App.vue`**
 ```vue
 <template>
-  <div class="demo-container">
-    <h2>Пример 2: Условный рендеринг и списки</h2>
-
-    <!-- Форма для добавления технологий -->
-    <div class="add-form">
-      <input 
-        v-model="newTechName" 
-        placeholder="Введите название технологии"
-        class="text-input"
-        @keyup.enter="addTechnology"
-      >
-      <button @click="addTechnology" class="add-button">
-        Добавить
-      </button>
-    </div>
-
-    <!-- Переключение видимости с v-show -->
-    <div class="controls">
-      <button @click="showCompleted = !showCompleted" class="toggle-button">
-        {{ showCompleted ? 'Скрыть' : 'Показать' }} завершенные
-      </button>
-      <button @click="sortBy = sortBy === 'name' ? 'date' : 'name'" class="toggle-button">
-        Сортировать по: {{ sortBy === 'name' ? 'названию' : 'дате' }}
-      </button>
-    </div>
-
-    <!-- Условный рендеринг с v-if -->
-    <div v-if="technologies.length === 0" class="empty-state">
-      <p>Список технологий пуст. Добавьте первую технологию!</p>
-    </div>
-
-    <!-- Отображение списка с v-for -->
-    <div v-else class="tech-list">
-      <div 
-        v-for="tech in sortedTechnologies" 
-        :key="tech.id"
-        class="tech-item"
-        :class="{ completed: tech.completed }"
-      >
-        <div class="tech-info">
-          <h3>{{ tech.name }}</h3>
-          <span class="tech-date">Добавлено: {{ formatDate(tech.createdAt) }}</span>
-        </div>
-        
-        <div class="tech-actions">
-          <!-- v-show для переключения видимости -->
-          <button 
-            v-show="!tech.completed"
-            @click="completeTechnology(tech.id)"
-            class="complete-button"
-          >
-            Завершить
-          </button>
-          
-          <button 
-            @click="removeTechnology(tech.id)"
-            class="remove-button"
-          >
-            Удалить
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Статистика -->
-    <div class="stats">
-      <h3>Статистика:</h3>
-      <p>Всего технологий: {{ technologies.length }}</p>
-      <p>Активных: {{ activeCount }}</p>
-      <p>Завершенных: {{ completedCount }}</p>
-      
-      <!-- Условный рендеринг с v-if/v-else -->
-      <div v-if="completedCount > 0" class="progress-section">
-        <p>Прогресс: {{ progressPercentage }}%</p>
-        <div class="progress-bar">
-          <div 
-            class="progress-fill" 
-            :style="{ width: progressPercentage + '%' }"
-          ></div>
-        </div>
-      </div>
-      <div v-else>
-        <p>Начните изучать технологии чтобы увидеть прогресс!</p>
-      </div>
-    </div>
+  <div id="app">
+    <nav class="main-nav">
+      <router-link to="/" class="nav-link">Главная</router-link>
+      <router-link to="/profile" class="nav-link">Профиль</router-link>
+      <router-link to="/settings" class="nav-link">Настройки</router-link>
+    </nav>
+    
+    <main class="main-content">
+      <router-view></router-view>
+    </main>
   </div>
 </template>
 
 <script>
-import { ref, computed } from 'vue'
-
 export default {
-  name: 'ConditionalListDemo',
-  
-  setup() {
-    // Реактивные данные
-    const newTechName = ref('')
-    const technologies = ref([])
-    const showCompleted = ref(true)
-    const sortBy = ref('date')
-
-    // Вычисляемые свойства
-    const activeCount = computed(() => 
-      technologies.value.filter(tech => !tech.completed).length
-    )
-
-    const completedCount = computed(() => 
-      technologies.value.filter(tech => tech.completed).length
-    )
-
-    const progressPercentage = computed(() => {
-      if (technologies.value.length === 0) return 0
-      return Math.round((completedCount.value / technologies.value.length) * 100)
-    })
-
-    const sortedTechnologies = computed(() => {
-      const techsToShow = showCompleted.value 
-        ? technologies.value 
-        : technologies.value.filter(tech => !tech.completed)
-      
-      return [...techsToShow].sort((a, b) => {
-        if (sortBy.value === 'name') {
-          return a.name.localeCompare(b.name)
-        } else {
-          return new Date(b.createdAt) - new Date(a.createdAt)
-        }
-      })
-    })
-
-    // Методы
-    const addTechnology = () => {
-      if (!newTechName.value.trim()) return
-      
-      technologies.value.push({
-        id: Date.now(),
-        name: newTechName.value.trim(),
-        completed: false,
-        createdAt: new Date().toISOString()
-      })
-      
-      newTechName.value = ''
-    }
-
-    const removeTechnology = (id) => {
-      technologies.value = technologies.value.filter(tech => tech.id !== id)
-    }
-
-    const completeTechnology = (id) => {
-      const tech = technologies.value.find(tech => tech.id === id)
-      if (tech) {
-        tech.completed = true
-      }
-    }
-
-    const formatDate = (dateString) => {
-      return new Date(dateString).toLocaleDateString('ru-RU')
-    }
-
-    return {
-      newTechName,
-      technologies,
-      showCompleted,
-      sortBy,
-      activeCount,
-      completedCount,
-      progressPercentage,
-      sortedTechnologies,
-      addTechnology,
-      removeTechnology,
-      completeTechnology,
-      formatDate
-    }
-  }
+  name: 'App'
 }
 </script>
 
-<style scoped>
-.demo-container {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 20px;
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.add-form {
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.main-nav {
+  background-color: #2c3e50;
+  padding: 1rem 2rem;
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 2rem;
 }
 
-.text-input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.add-button, .toggle-button {
-  padding: 8px 16px;
-  background-color: #007bff;
+.nav-link {
   color: white;
-  border: none;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
   border-radius: 4px;
-  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+.nav-link:hover {
+  background-color: #34495e;
 }
 
-.tech-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.nav-link.router-link-active {
+  background-color: #42b883;
 }
 
-.tech-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: white;
-}
-
-.tech-item.completed {
-  background-color: #d4edda;
-  border-color: #c3e6cb;
-}
-
-.tech-info h3 {
-  margin: 0 0 5px 0;
-}
-
-.tech-date {
-  font-size: 12px;
-  color: #666;
-}
-
-.tech-actions {
-  display: flex;
-  gap: 5px;
-}
-
-.complete-button {
-  padding: 5px 10px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.remove-button {
-  padding: 5px 10px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-}
-
-.stats {
-  margin-top: 30px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 20px;
-  background-color: #e9ecef;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background-color: #28a745;
-  transition: width 0.3s ease;
+.main-content {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 </style>
 ```
 
-## Пример 3: Работа с событиями и вычисляемыми свойствами
-
-В третьем примере рассмотрим обработку событий и мощные вычисляемые свойства.
-
-Создайте файл `src/components/EventComputedDemo.vue`:
-
-```vue
-<template>
-  <div class="demo-container">
-    <h2>Пример 3: События и вычисляемые свойства</h2>
-
-    <!-- Таймер изучения -->
-    <div class="timer-section">
-      <h3>Таймер изучения</h3>
-      <div class="timer-display">
-        {{ formatTime(elapsedTime) }}
-      </div>
-      <div class="timer-controls">
-        <button @click="startTimer" :disabled="isRunning" class="timer-button start">
-          Старт
-        </button>
-        <button @click="pauseTimer" :disabled="!isRunning" class="timer-button pause">
-          Пауза
-        </button>
-        <button @click="resetTimer" class="timer-button reset">
-          Сброс
-        </button>
-      </div>
-    </div>
-
-    <!-- Список сессий изучения -->
-    <div class="sessions-section">
-      <h3>Сессии изучения</h3>
-      
-      <div v-if="studySessions.length === 0" class="no-sessions">
-        <p>Сессий пока нет. Запустите таймер!</p>
-      </div>
-
-      <div v-else class="sessions-list">
-        <div 
-          v-for="session in sortedSessions" 
-          :key="session.id"
-          class="session-item"
-        >
-          <div class="session-info">
-            <span class="session-date">{{ formatDate(session.date) }}</span>
-            <span class="session-duration">{{ formatTime(session.duration) }}</span>
-          </div>
-          <button @click="removeSession(session.id)" class="delete-session">
-            ×
-          </button>
-        </div>
-      </div>
-
-      <!-- Статистика сессий -->
-      <div class="sessions-stats">
-        <p>Всего сессий: {{ totalSessions }}</p>
-        <p>Общее время: {{ formatTime(totalStudyTime) }}</p>
-        <p>Средняя продолжительность: {{ formatTime(averageSessionTime) }}</p>
-      </div>
-    </div>
-
-    <!-- Быстрые действия с модификаторами событий -->
-    <div class="quick-actions">
-      <h3>Быстрые действия</h3>
-      <div class="action-buttons">
-        <!-- Модификатор .prevent предотвращает действие по умолчанию -->
-        <button @click.prevent="addQuickSession(30)" class="action-button">
-          +30 мин
-        </button>
-        <button @click.prevent="addQuickSession(60)" class="action-button">
-          +1 час
-        </button>
-        <!-- Модификатор .once срабатывает только один раз -->
-        <button @click.once="addOneTimeSession" class="action-button special">
-          Одноразовая сессия
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script>
-import { ref, computed, onUnmounted } from 'vue'
-
-export default {
-  name: 'EventComputedDemo',
-  
-  setup() {
-    // Таймер
-    const elapsedTime = ref(0)
-    const isRunning = ref(false)
-    let timerInterval = null
-
-    // Сессии изучения
-    const studySessions = ref([])
-
-    // Вычисляемые свойства для статистики
-    const totalSessions = computed(() => studySessions.value.length)
-
-    const totalStudyTime = computed(() => 
-      studySessions.value.reduce((total, session) => total + session.duration, 0)
-    )
-
-    const averageSessionTime = computed(() => {
-      if (totalSessions.value === 0) return 0
-      return Math.round(totalStudyTime.value / totalSessions.value)
-    })
-
-    const sortedSessions = computed(() => 
-      [...studySessions.value].sort((a, b) => new Date(b.date) - new Date(a.date))
-    )
-
-    // Методы таймера
-    const startTimer = () => {
-      isRunning.value = true
-      timerInterval = setInterval(() => {
-        elapsedTime.value += 1
-      }, 1000)
-    }
-
-    const pauseTimer = () => {
-      isRunning.value = false
-      if (timerInterval) {
-        clearInterval(timerInterval)
-        timerInterval = null
-      }
-    }
-
-    const resetTimer = () => {
-      pauseTimer()
-      
-      // Сохраняем сессию если прошло больше 30 секунд
-      if (elapsedTime.value >= 30) {
-        studySessions.value.push({
-          id: Date.now(),
-          date: new Date().toISOString(),
-          duration: elapsedTime.value
-        })
-      }
-      
-      elapsedTime.value = 0
-    }
-
-    // Методы для сессий
-    const removeSession = (sessionId) => {
-      studySessions.value = studySessions.value.filter(session => session.id !== sessionId)
-    }
-
-    const addQuickSession = (minutes) => {
-      const duration = minutes * 60 // переводим в секунды
-      studySessions.value.push({
-        id: Date.now(),
-        date: new Date().toISOString(),
-        duration: duration
-      })
-    }
-
-    const addOneTimeSession = () => {
-      addQuickSession(45)
-      alert('Одноразовая сессия добавлена! Эта кнопка больше не сработает.')
-    }
-
-    // Вспомогательные методы
-    const formatTime = (seconds) => {
-      const mins = Math.floor(seconds / 60)
-      const secs = seconds % 60
-      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-    }
-
-    const formatDate = (dateString) => {
-      return new Date(dateString).toLocaleString('ru-RU')
-    }
-
-    // Очистка при размонтировании компонента
-    onUnmounted(() => {
-      if (timerInterval) {
-        clearInterval(timerInterval)
-      }
-    })
-
-    return {
-      elapsedTime,
-      isRunning,
-      studySessions,
-      totalSessions,
-      totalStudyTime,
-      averageSessionTime,
-      sortedSessions,
-      startTimer,
-      pauseTimer,
-      resetTimer,
-      removeSession,
-      addQuickSession,
-      addOneTimeSession,
-      formatTime,
-      formatDate
-    }
-  }
-}
-</script>
-
-<style scoped>
-.demo-container {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 20px;
-}
-
-.timer-section {
-  text-align: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 10px;
-}
-
-.timer-display {
-  font-size: 3rem;
-  font-weight: bold;
-  margin: 20px 0;
-  color: #007bff;
-}
-
-.timer-controls {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-.timer-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.timer-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.timer-button.start {
-  background-color: #28a745;
-  color: white;
-}
-
-.timer-button.pause {
-  background-color: #ffc107;
-  color: black;
-}
-
-.timer-button.reset {
-  background-color: #dc3545;
-  color: white;
-}
-
-.sessions-section {
-  margin-bottom: 30px;
-}
-
-.sessions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.session-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-.session-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.session-date {
-  font-size: 14px;
-  color: #666;
-}
-
-.session-duration {
-  font-weight: bold;
-  color: #007bff;
-}
-
-.delete-session {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #dc3545;
-}
-
-.no-sessions {
-  text-align: center;
-  padding: 20px;
-  color: #666;
-  font-style: italic;
-}
-
-.sessions-stats {
-  padding: 15px;
-  background-color: #e9ecef;
-  border-radius: 5px;
-}
-
-.quick-actions {
-  text-align: center;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.action-button {
-  padding: 10px 20px;
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.action-button.special {
-  background-color: #17a2b8;
-}
-</style>
-```
-
-## Контрольная работа №5
-Задание для контрольной работы №5 разбито на несколько составляющих:
-4 балла ставится за выполнения задания по практикам 27-28
-4 балла ставится дополнительно за выполнение каждой из 4 контрольных работ (по 1 баллу за каждую работу).
-
-# Задание для практик 27-28: "Генератор цветовых палитр"
-
-## Общая концепция
-Разработайте интерактивное веб-приложение на Vue.js для создания, управления и экспорта цветовых палитр. Приложение должно стать полезным инструментом для дизайнеров, разработчиков и всех, кто работает с визуальным контентом.
-
-## Общее описание проекта
-Создайте генератор цветовых палитр, который позволяет пользователям:
-
-Генерировать гармоничные цветовые схемы
-
-Настраивать и редактировать палитры
-
-Анализировать цвета на соответствие стандартам доступности
-
-Сохранять и организовывать коллекции палитр
-
-Экспортировать цвета в различные форматы для использования в проектах
-
-Проект реализуется в течение двух практических занятий с постепенным наращиванием функциональности.
-
----
-
-## Практика 27: Базовый функционал
-
-**Цель:** Создать работающий прототип генератора с основными возможностями.
-
-### Обязательные функции:
-
-**1. Система генерации палитр**
-
-Кнопка "Случайная палитра" - генерирует 5 гармоничных цветов
-
-Отображение палитры в виде горизонтальной полосы цветовых карточек
-
-Для каждого цвета показывать HEX-значение (например, #FF6B6B)
-
-**2. Управление отдельными цветами**
-
-Клик по цветовой карточке копирует HEX-значение в буфер обмена
-
-Индикация успешного копирования (всплывающее уведомление)
-
-Возможность "закрепить" понравившийся цвет при генерации новой палитры
-
-**3. Базовые инструменты настройки**
-
-Выбор количества цветов в палитре (3, 5, 7)
-
-Переключение между форматами отображения (HEX, RGB)
-
-Локальное сохранение текущей палитры в localStorage
-
-**4. Простой просмотрщик**
-
-Превью палитры в mockup интерфейса (кнопка, карточка, заголовок)
-
-Переключение светлого/тёмного фона для тестирования контраста
-
-### Технические требования:
-- Использование Vue 3 Composition API
-- Реактивное управление состоянием цветов
-- Применение директив v-for, v-if, v-model
-- Вычисляемые свойства для преобразования цветов
-- Обработка событий кликов и ввода
-
-### Критерии успеха практики 27:
-
-✅ Приложение генерирует случайные палитры
-
-✅ Цвета отображаются с HEX-значениями
-
-✅ Работает копирование в буфер обмена
-
-✅ Палитра сохраняется между перезагрузками
-
-✅ Интерфейс интуитивно понятен
-
----
-
-## Практика 28: Продвинутый функционал (Advanced Features)
-
-**Цель:** Превратить прототип в полнофункциональный инструмент.
-
-### Дополнительные функции:
-
-**1. Продвинутая генерация**
-
-Генерация на основе базового цвета (пользователь выбирает основной цвет)
-
-Различные типы палитр: аналогичная, монохромная, триада, комплементарная
-
-Генерация по "настроению": спокойные, энергичные, профессиональные палитры
-
-**2. Инструменты анализа и доступности**
-
-Проверка контрастности между цветами по стандарту WCAG
-
-Показ уровня доступности (AA, AAA, недостаточно)
-
-Подбор акцентных цветов для выбранной палитры
-
-Графическое представление цветового круга
-
-**3. Управление библиотекой палитр**
-
-Сохранение палитр в именованные коллекции
-
-Поиск и фильтрация по названиям и тегам
-
-Возможность редактирования сохранённых палитр
-
-Создание избранных коллекций
-
-**4. Экспорт и интеграция**
-
-Экспорт в форматы: CSS variables, SCSS variables, Tailwind config
-
-Генерация готового CSS кода с цветами
-
-Превью палитры в различных UI-компонентах
-
-Создание шаринговых ссылок на палитры
-
-### Технические требования:
-- Использование Vue Router для навигации
-- Компонентный подход с передачей props
-- Работа с v-model в кастомных компонентах
-- Использование watchers для реактивных изменений
-- Интеграция с внешними API для цветовых преобразований
-
-### Критерии успеха практики 28:
-
-✅ Реализована генерация по типу палитры
-
-✅ Работает проверка контрастности и доступности
-
-✅ Пользователь может сохранять и организовывать палитры
-
-✅ Доступен экспорт в несколько форматов
-
-✅ Приложение имеет полноценную навигацию
-
----
+Данная практика является в последней по блоку контрольной работы №5. Завершаем и сдаем семестровые практики.
