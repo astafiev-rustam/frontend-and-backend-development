@@ -28,23 +28,23 @@
 |1|||10|[Разработка форм и модальных окон](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-10)|
 |1|||11|[БЭМ, переменные и состояния в CSS](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-11)|
 |1|||12|[Bootstrap](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-12)|
-|1|4||13|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-13)|
-|1|||14|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-14)|
-|1|||15|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-15)|
-|1|||16|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-16)|
-|1|5||17|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-17)|
-|1|||18|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-18)|
-|1|||19|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-19)|
-|1|||20|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-20)|
-|1|6||21|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-21)|
-|1|||22|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-22)|
-|1|||23|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-23)|
-|1|||24|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-24)|
-|1|7||25|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-25)|
-|1|||26|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-26)|
-|1|||27|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-27)|
-|1|||28|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-28)|
-|1|8||29|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-29)|
-|1|||30|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-30)|
-|1|||31|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-31)|
-|1|||32|[](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-32)|
+|1|4||13|[Подготовка проектов](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-13)|
+|1|||14|[Сдача и подготовка контрольной работы](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-14)|
+|1|||15|[Комбинирование методов адаптивной вёрстки](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-15)|
+|1|||16|[Отзывчивое использование изображений. Адаптивность форм, тиблиц и масштабирование элементов](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-16)|
+|1|5||17|[A11y-аудит и обеспечение доступности](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-17)|
+|1|||18|[Использование Lighthouse и анализ проблем доступности](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-18)|
+|1|||19|[Базовые элементы работы с React.js и JSX](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-19)|
+|1|||20|[Менеджер состояний и компонентов](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-20)|
+|1|6||21|[Менеджер эффектов и контролируемые поля](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-21)|
+|1|||22|[Использование локального хранилища и переиспользование компонентов](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-22)|
+|1|||23|[React роутинг: использование маршрутизации и параметров](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-23)|
+|1|||24|[Извлечение данных из API и их обработка](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-24)|
+|1|7||25|[Формы React: валидация, сообщения об ошибках и элементы доступности](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-25)|
+|1|||26|[Использование UI-кит](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-26)|
+|1|||27|[Vue 3 + Vite: основы реактивности, шаблоны и директивы](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-27)|
+|1|||28|[Компоненты, пропсы, v-model и Vue Router](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-28)|
+|1|8||29|[Практики Vue.js. Часть 1.](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-29)|
+|1|||30|[Практики Vue.js. Часть 2.](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-30)|
+|1|||31|[Сдача семестровых проектов](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-31)|
+|1|||32|[Подведение итогов](https://github.com/astafiev-rustam/frontend-and-backend-development/tree/Practice-1-32)|
